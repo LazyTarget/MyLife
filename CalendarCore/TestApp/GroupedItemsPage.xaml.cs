@@ -73,6 +73,9 @@ namespace TestApp
                 var list = calendars.ToList();
 
                 System.Diagnostics.Debug.WriteLine("Calendars (count): " + list.Count);
+                
+                var cal = await _calendarServer.GetCalendar(list.Select(x => x.ID).FirstOrDefault());
+                System.Diagnostics.Debug.WriteLine("Calendar, name: " + cal.Name);
             }
 
             // TODO: Create an appropriate data model for your problem domain to replace the sample data

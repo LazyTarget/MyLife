@@ -50,6 +50,7 @@ namespace CalendarCore.Http
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(request.Url);
             httpWebRequest.Method = request.Method ?? "GET";
+            httpWebRequest.ContentType = request.ContentType;
             //httpWebRequest.Timeout = Timeout;
             if (request.Headers != null && request.Headers.Count > 0)
             {

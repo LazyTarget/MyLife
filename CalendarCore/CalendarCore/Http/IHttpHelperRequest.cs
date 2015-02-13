@@ -8,6 +8,8 @@ namespace CalendarCore.Http
 
         string Method { get; set; }
 
+        string ContentType { get; set; }
+
         object Data { get; set; }
 
         WebHeaderCollection Headers { get; set; }

@@ -45,6 +45,7 @@
     <Compile Include="Http\IHttpHelper.cs" />
     <Compile Include="Http\IHttpHelperRequest.cs" />
     <Compile Include="Http\IHttpHelperResponse.cs" />
+    <Compile Include="Http\JsonExtensions.cs" />
     <Compile Include="Http\JsonHttpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Http\HttpHelperBase.cs" />

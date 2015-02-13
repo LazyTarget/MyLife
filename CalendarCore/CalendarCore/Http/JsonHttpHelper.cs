@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -25,7 +26,8 @@ namespace CalendarCore.Http
         {
             var httpWebRequest = await base.BuildRequest(request);
             httpWebRequest.Accept = null;
-            httpWebRequest.ContentType = "application/json; charset=UTF-8";
+            if (request.ContentType == null)
+                httpWebRequest.ContentType = "application/json; charset=UTF-8";
             httpWebRequest.Headers["X-Accept"] = "application/json";
             return httpWebRequest;
         }
@@ -52,15 +54,27 @@ namespace CalendarCore.Http
         protected override T Deserialize<T>(object data)
         {
             T result;
-            if (data is string)
+            try
             {
-                var json = (string)data;
-                result = JsonConvert.DeserializeObject<T>(json, Settings);
+                if (data is string)
+                {
+                    if (typeof (T) == typeof (string))
+                        result = (T) data;
+                    else
+                    {
+                        var json = (string)data;
+                        result = JsonConvert.DeserializeObject<T>(json, Settings);
+                    }
+                }
+                else
+                {
+                    var json = JsonConvert.SerializeObject(data, Settings);
+                    result = JsonConvert.DeserializeObject<T>(json, Settings);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var json = JsonConvert.SerializeObject(data, Settings);
-                result = JsonConvert.DeserializeObject<T>(json, Settings);
+                throw;
             }
             return result;
         }

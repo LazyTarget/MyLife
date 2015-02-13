@@ -23,12 +23,14 @@ namespace CalendarCore.Outlook
         
         private string auth_code;
         private string access_token;
-        private JToken _authData;
+        private JObject _authData;
         
         private readonly HttpHelperBase httpHelper = new JsonHttpHelper();
+        //private HttpHelperBase httpHelper = new HttpHelper();
         public Dictionary<string, string> tokenData = new Dictionary<string, string>();
 
         public event EventHandler<AuthorizationNeededEventArgs> OnAuthorizationNeeded;
+        public event EventHandler OnAuthorized;
 
 
         public OutlookClient()
@@ -60,10 +62,12 @@ namespace CalendarCore.Outlook
         {
             if (OnAuthorizationNeeded == null)
                 throw new InvalidOperationException("Supply a function to OnAuthorizationNeeded");
+            if (OnAuthorized == null)
+                throw new InvalidOperationException("Supply a function to OnAuthorized");
 
             InitAuth(force);
-            await Yield(this);
-
+            
+            //await Yield(this);
             //await InitAccess(force);
         }
 
@@ -146,9 +150,12 @@ namespace CalendarCore.Outlook
                     Url = url,
                     Method = "GET",
                 };
-                var response = await MakeWebRequest<JToken>(request);
+                var response = await MakeWebRequest<JObject>(request);
                 _authData = response.Result;
-                access_token = _authData.SelectToken("access_token").Value<string>();
+                access_token = _authData.GetPropertyValue<string>("access_token");
+
+                if (!string.IsNullOrEmpty(access_token))
+                    OnAuthorized(this, EventArgs.Empty);
                 return access_token;
             }
             return null;
@@ -163,7 +170,6 @@ namespace CalendarCore.Outlook
             {
                 auth_code = System.Text.RegularExpressions.Regex.Split(uri.AbsoluteUri, "code=")[1];
                 e.Authorized = true;
-
 
                 await InitAccess(false);
             }
@@ -268,12 +274,8 @@ namespace CalendarCore.Outlook
 
         public async Task<Calendar> GetCalendar(string id)
         {
-            await Authenticate();
-            await InitAccess(false);
-
-
-            if (id == null)
-                id = "3ae2a03e43b87c56.b3eab7507ea5429d9015a169b8dfcd19";
+            //await Authenticate();
+            //await InitAccess(false);
 
             var url = Path.Combine(apiUrl, string.Format("{0}?access_token={1}", id, access_token));
 
@@ -281,18 +283,18 @@ namespace CalendarCore.Outlook
             {
                 Url = url,
                 Method = "GET",
+                ContentType = "",
             };
-            var response = await MakeWebRequest<string>(request);
-            var json = response.Result;
-            var calendar = JsonDtoConverter.ToCalendar(json);
+            var response = await MakeWebRequest<JObject>(request);
+            var calendar = JsonDtoConverter.ToCalendar(response.Result);
             return calendar;
         }
 
 
         public async Task<IEnumerable<Calendar>> GetCalendars()
         {
-            await Authenticate();
-            await InitAccess(false);
+            //await Authenticate();
+            //await InitAccess(false);
 
 
             var url = Path.Combine(apiUrl, string.Format("me/calendars?access_token={0}", access_token));
@@ -301,12 +303,15 @@ namespace CalendarCore.Outlook
             {
                 Url = url,
                 Method = "GET",
+                ContentType = "",
             };
-            var response = await MakeWebRequest<string>(request);
-            var json = response.Result;
-            var calendars = JsonDtoConverter.ToCalendars(json);
+            var response = await MakeWebRequest<JObject>(request);
+            var obj = response.Result;
+            var arr = obj.GetPropertyValue<JArray>("data");
+            var calendars = JsonDtoConverter.ToCalendars(arr);
             return calendars;
         }
+
 
 
         private async Task<IHttpHelperResponse<T>> MakeWebRequest<T>(IHttpHelperRequest request)
@@ -335,6 +340,8 @@ namespace CalendarCore.Outlook
                     Debug.WriteLine("Header: {0} = {1}", header, ex.Response.Headers[header]);
                 }
                 Debug.WriteLine("");
+
+                throw;
             }
             return response;
         }

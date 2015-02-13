@@ -102,9 +102,11 @@ namespace TestApp
         {
             _client = new OutlookClient();
             _client.OnAuthorizationNeeded += OutlookClient_OnAuthorizationNeeded;
+            _client.OnAuthorized += OutlookClient_OnAuthorized;
 
             _client.Authenticate();
         }
+
 
         private void OutlookClient_OnAuthorizationNeeded(object sender, AuthorizationNeededEventArgs e)
         {
@@ -116,11 +118,12 @@ namespace TestApp
         {
             _authArgs = new AuthEventArgs(e.Uri.ToString());
             _authNeededArgs.OnUrlLoaded(_authArgs);
-
-            if (_authArgs.Authorized)
-            {
-                this.Frame.Navigate(typeof(GroupedItemsPage), _client);
-            }
         }
+
+        private void OutlookClient_OnAuthorized(object sender, EventArgs eventArgs)
+        {
+            this.Frame.Navigate(typeof(GroupedItemsPage), _client);
+        }
+
     }
 }
