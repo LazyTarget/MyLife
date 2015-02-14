@@ -5,11 +5,11 @@
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3F828AF9-4173-4C27-A038-1CC4A48C84E0}</ProjectGuid>
+    <ProjectGuid>{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CalendarCore</RootNamespace>
-    <AssemblyName>CalendarCore</AssemblyName>
+    <RootNamespace>MyLife.Core</RootNamespace>
+    <AssemblyName>MyLife.Core</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -38,13 +38,19 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CalendarServer.cs" />
-    <Compile Include="Calendar.cs" />
+    <Compile Include="Http\HttpHelperBase.cs" />
+    <Compile Include="Http\HttpHelperRequest.cs" />
+    <Compile Include="Http\HttpHelperResponse.cs" />
+    <Compile Include="Http\IHttpHelper.cs" />
+    <Compile Include="Http\IHttpHelperRequest.cs" />
+    <Compile Include="Http\IHttpHelperResponse.cs" />
+    <Compile Include="Http\JsonExtensions.cs" />
+    <Compile Include="Http\JsonHttpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

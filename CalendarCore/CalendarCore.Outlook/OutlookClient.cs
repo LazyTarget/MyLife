@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using CalendarCore.Http;
+using MyLife.Core;
 using Newtonsoft.Json.Linq;
 
 namespace CalendarCore.Outlook

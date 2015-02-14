@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CalendarCore.Http
+namespace MyLife.Core
 {
     public interface IHttpHelper
     {

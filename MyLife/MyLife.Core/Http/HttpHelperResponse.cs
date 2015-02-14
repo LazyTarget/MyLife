@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace CalendarCore.Http
+namespace MyLife.Core
 {
     public class HttpHelperResponse : IHttpHelperResponse
     {

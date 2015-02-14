@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CalendarCore.Http
+namespace MyLife.Core
 {
     public abstract class HttpHelperBase : IHttpHelper, IHttpHelperAsync
     {

@@ -35,6 +35,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
+    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
+      <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
+      <Name>MyLife.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CalendarCore\CalendarCore.csproj">
       <Project>{3f828af9-4173-4c27-a038-1cc4a48c84e0}</Project>
       <Name>CalendarCore</Name>

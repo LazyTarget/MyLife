@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace CalendarCore.Http
+namespace MyLife.Core
 {
     public static class JsonExtensions
     {

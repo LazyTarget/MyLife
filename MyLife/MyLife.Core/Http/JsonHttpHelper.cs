@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace CalendarCore.Http
+namespace MyLife.Core
 {
     public class JsonHttpHelper : HttpHelperBase
     {
