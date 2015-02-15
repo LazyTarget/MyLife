@@ -47,6 +47,8 @@
     <Compile Include="DataObjects\UserEdit.cs" />
     <Compile Include="Extensions\MissingExtensions.cs" />
     <Compile Include="Interfaces\IReportService.cs" />
+    <Compile Include="MyLife\ModelConverter.cs" />
+    <Compile Include="MyLife\TogglClient.cs" />
     <Compile Include="QueryObjects\DetailedReportParams.cs" />
     <Compile Include="QueryObjects\ReportParams.cs" />
     <Compile Include="Responses\ApiResponse.cs">
@@ -103,6 +105,16 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
+      <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
+      <Name>MyLife.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLife\MyLife.Models\MyLife.Models.csproj">
+      <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
+      <Name>MyLife.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

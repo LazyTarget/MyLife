@@ -38,6 +38,7 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IEventChannel.cs" />
     <Compile Include="Http\HttpHelperBase.cs" />
     <Compile Include="Http\HttpHelperRequest.cs" />
     <Compile Include="Http\HttpHelperResponse.cs" />
@@ -55,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyLife.Models\MyLife.Models.csproj">
+      <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
+      <Name>MyLife.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
