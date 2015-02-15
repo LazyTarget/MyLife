@@ -15,5 +15,8 @@ namespace MyLife.Models
 
         DateTime EndTime { get; set; }
 
+
+        IEventSource Source { get; set; }
+
     }
 }

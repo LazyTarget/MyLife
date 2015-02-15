@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5d7c3d8e-ea45-4940-818b-d0a1942c178d}</ProjectGuid>
+    <ProjectGuid>{5D7C3D8E-EA45-4940-818B-D0A1942C178D}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MyLife.App</RootNamespace>
@@ -81,8 +81,28 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <ProjectReference Include="..\..\CalendarCore\CalendarCore.Outlook\CalendarCore.Outlook.csproj">
+      <Project>{3C9A8C89-DB67-4E1E-990E-FB30FE7945AA}</Project>
+      <Name>CalendarCore.Outlook</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CalendarCore\CalendarCore\CalendarCore.csproj">
+      <Project>{3F828AF9-4173-4C27-A038-1CC4A48C84E0}</Project>
+      <Name>CalendarCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLife.Channels\MyLife.Channels.Calendar\MyLife.Channels.Calendar.csproj">
+      <Project>{BE55D440-00DD-4DCA-9E53-53248DC54DED}</Project>
+      <Name>MyLife.Channels.Calendar</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLife.Channels\MyLife.Channels.Toggl\MyLife.Channels.Toggl.csproj">
+      <Project>{514D5A44-7F8D-4D18-B96A-E40608D1E847}</Project>
+      <Name>MyLife.Channels.Toggl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
+      <Project>{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}</Project>
+      <Name>MyLife.Core</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>    
+  <ItemGroup>
     <Compile Include="HubPage.xaml.cs">
       <DependentUpon>HubPage.xaml</DependentUpon>
     </Compile>
@@ -123,11 +143,19 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="..\MyLife.App.Shared\MyLife.App.Shared.projitems" Label="Shared" />
-    <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
+  <PropertyGroup Condition=" '$(TargetPlatformIdentifier)' == '' ">
     <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />

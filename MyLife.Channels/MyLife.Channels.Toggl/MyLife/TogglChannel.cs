@@ -6,20 +6,20 @@ using MyLife.Models;
 
 namespace MyLife.Channels.Toggl
 {
-    public class TogglClient : IEventChannel
+    public class TogglChannel : IEventChannel
     {
-        private readonly global::Toggl.Toggl toggl;
+        private readonly global::Toggl.Toggl _toggl;
 
         
-        public TogglClient(string key)
+        public TogglChannel(string key)
         {
-            toggl = new global::Toggl.Toggl(key);
+            _toggl = new global::Toggl.Toggl(key);
         }
 
 
         public async Task<IEnumerable<IEvent>> GetEvents()
         {
-            var list = await toggl.TimeEntry.List();
+            var list = await _toggl.TimeEntry.List();
             var events = list.Select(ModelConverter.ToEvent);
             return events;
         }

@@ -48,7 +48,7 @@
     <Compile Include="Extensions\MissingExtensions.cs" />
     <Compile Include="Interfaces\IReportService.cs" />
     <Compile Include="MyLife\ModelConverter.cs" />
-    <Compile Include="MyLife\TogglClient.cs" />
+    <Compile Include="MyLife\TogglChannel.cs" />
     <Compile Include="QueryObjects\DetailedReportParams.cs" />
     <Compile Include="QueryObjects\ReportParams.cs" />
     <Compile Include="Responses\ApiResponse.cs">

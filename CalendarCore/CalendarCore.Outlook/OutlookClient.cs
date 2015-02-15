@@ -275,7 +275,7 @@ namespace CalendarCore.Outlook
             //await Authenticate();
             //await InitAccess(false);
 
-            var url = Path.Combine(apiUrl, string.Format("{0}?access_token={1}", id, access_token));
+            var url = Path.Combine(apiUrl, string.Format("{1}?access_token={0}", access_token, id));
 
             var request = new HttpHelperRequest
             {
@@ -308,6 +308,35 @@ namespace CalendarCore.Outlook
             var arr = obj.GetPropertyValue<JArray>("data");
             var calendars = JsonDtoConverter.ToCalendars(arr);
             return calendars;
+        }
+
+
+        public async Task<IEnumerable<Event>> GetEvents(string calendarID)
+        {
+            //await Authenticate();
+            //await InitAccess(false);
+
+
+            var url = Path.Combine(apiUrl, string.Format("calendar.{1}/events?access_token={0}", access_token, calendarID));
+
+            var request = new HttpHelperRequest
+            {
+                Url = url,
+                Method = "GET",
+                ContentType = "",
+            };
+            var response = await MakeWebRequest<JObject>(request);
+            var obj = response.Result;
+            var arr = obj.GetPropertyValue<JArray>("data");
+            var calendars = JsonDtoConverter.ToEvents(arr);
+            return calendars;
+        }
+
+
+
+        public void SetAccessToken(string accessToken)
+        {
+            access_token = accessToken;
         }
 
 

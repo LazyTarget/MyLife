@@ -8,7 +8,8 @@ namespace CalendarCore
         Task<Calendar> GetCalendar(string id);
 
         Task<IEnumerable<Calendar>> GetCalendars();
-
+        
+        Task<IEnumerable<Event>> GetEvents(string calendarID);
 
     }
 }
