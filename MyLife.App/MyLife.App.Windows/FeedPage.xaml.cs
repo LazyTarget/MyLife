@@ -91,5 +91,10 @@ namespace MyLife.App
         }
 
         #endregion
+
+        private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("ItemClicked; Tag = " + (e.ClickedItem as FrameworkElement).Tag);
+        }
     }
 }
