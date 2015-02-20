@@ -22,6 +22,7 @@ namespace MyLife.App.Data
             IEventSource togglEventSource = new EventSource
             {
                 Name = "Toggl",
+                LogoUri = "https://lh3.ggpht.com/CbreFsJPetU3O6cZ20avBKTkDuks4eOZZwPeLaq8X8tWw-vE6YIlnZh2dx4tluPWAQ=w300",
             };
 
 
@@ -51,6 +52,7 @@ namespace MyLife.App.Data
                 StartTime = new DateTime(2015, 2, 19, 8, 0, 0),
                 EndTime = new DateTime(2015, 2, 19, 9, 50, 0),
                 Source = togglEventSource,
+                ImageUri = "http://geoawesomeness.com/wp-content/uploads/2014/08/progLanguages.jpg",
             }));
 
             FeedViewModel.Items.Add(new FeedItem(new Event

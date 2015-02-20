@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
+using MyLife.App.ViewModels;
 
 namespace MyLife.App
 {
@@ -66,6 +67,7 @@ namespace MyLife.App
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
             var feed = await MyLifeDataSource.GetFeedAsync();
+            //var feed = new MyLifeSampleDataSource().FeedViewModel;
             this.DefaultViewModel["Feed"] = feed;
         }
 
@@ -94,7 +96,11 @@ namespace MyLife.App
 
         private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("ItemClicked; Tag = " + (e.ClickedItem as FrameworkElement).Tag);
+            var feedItem = e.ClickedItem as FeedItem;
+            if (feedItem != null)
+            {
+                System.Diagnostics.Debug.WriteLine("ItemClicked; Title = " + feedItem.Title);
+            }
         }
     }
 }

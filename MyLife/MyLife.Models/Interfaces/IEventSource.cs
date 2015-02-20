@@ -6,5 +6,7 @@ namespace MyLife.Models
     {
         string Name { get; set; }
 
+        string LogoUri { get; set; }
+
     }
 }

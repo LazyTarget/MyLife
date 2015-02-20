@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using MyLife.Models;
 
 namespace MyLife.App.ViewModels
@@ -42,6 +44,12 @@ namespace MyLife.App.ViewModels
         public string Description { get { return _event.Description; } }
         public DateTime StartTime { get { return _event.StartTime; } }
         public DateTime EndTime { get { return _event.EndTime; } }
+
+        public ImageSource ImageSource
+        {
+            get { return !string.IsNullOrEmpty(_event.ImageUri) ? new BitmapImage(new Uri(_event.ImageUri)) : null; }
+        }
+
         public IEventSource Source { get { return _event.Source; } }
 
         public override string ToString()

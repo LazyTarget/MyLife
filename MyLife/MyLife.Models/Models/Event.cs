@@ -21,6 +21,8 @@ namespace MyLife.Models
 
         public DateTime EndTime { get; set; }
 
+        public string ImageUri { get; set; }
+
         public IEventSource Source { get; set; }
     }
 }
