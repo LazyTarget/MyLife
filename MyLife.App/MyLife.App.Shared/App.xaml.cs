@@ -7,6 +7,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -18,6 +19,8 @@ using Windows.UI.Xaml.Navigation;
 using MyLife.App.Common;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
+using MyLife.App.Data;
+using MyLife.Models;
 
 namespace MyLife.App
 {
@@ -87,6 +90,18 @@ namespace MyLife.App
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
+
+            
+            if (!MyLifeDataSource.IsAuthenticated)
+            {
+                var user = await Login.AuthenticateUserFromRoamingSettingsAsync();
+                if (user == null)
+                {
+                    if (!rootFrame.Navigate(typeof (Login)))
+                        throw new Exception("Failed to navigate to login page");
+                }
+            }
+
 
             if (rootFrame.Content == null)
             {
