@@ -8,6 +8,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.UI.ApplicationSettings;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -20,6 +21,7 @@ using MyLife.App.Common;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
 using MyLife.App.Data;
+using MyLife.App.Settings;
 using MyLife.Models;
 
 namespace MyLife.App
@@ -101,6 +103,7 @@ namespace MyLife.App
                         throw new Exception("Failed to navigate to login page");
                 }
             }
+            SettingsPane.GetForCurrentView().CommandsRequested += SettingsPane_OnCommandsRequested;
 
 
             if (rootFrame.Content == null)
@@ -134,6 +137,7 @@ namespace MyLife.App
             Window.Current.Activate();
         }
 
+
 #if WINDOWS_PHONE_APP
         /// <summary>
         /// Restores the content transitions after the app has launched.
@@ -158,6 +162,21 @@ namespace MyLife.App
             var deferral = e.SuspendingOperation.GetDeferral();
             await SuspensionManager.SaveAsync();
             deferral.Complete();
+        }
+
+
+
+        private void SettingsPane_OnCommandsRequested(SettingsPane sender, SettingsPaneCommandsRequestedEventArgs e)
+        {
+            var authCommand = new SettingsCommand("cmdAuth", "User",
+                (handler) =>
+                {
+                    var sf = new UserSettingsFlyout();
+                    sf.Show();
+                });
+
+            if (MyLifeDataSource.IsAuthenticated)
+                e.Request.ApplicationCommands.Add(authCommand);
         }
     }
 }

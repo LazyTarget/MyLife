@@ -73,8 +73,9 @@ namespace MyLife.App
         /// session.  The state will be null the first time a page is visited.</param>
         private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
         {
-            var username = (e.PageState != null ? e.PageState["Username"] as string : null) ?? roamingSettings.Values["Username"] as string;
-            var password = (e.PageState != null ? e.PageState["Password"] as string : null) ?? roamingSettings.Values["Password"] as string;
+            var authData = roamingSettings.GetContainerOrDefault("Auth");
+            var username = (e.PageState != null ? e.PageState["Username"] as string : null) ?? (authData != null ? authData.Values["Username"] as string : null);
+            var password = (e.PageState != null ? e.PageState["Password"] as string : null) ?? (authData != null ? authData.Values["Password"] as string : null);
             DefaultViewModel["Username"] = username;
             DefaultViewModel["Password"] = password;
         }
@@ -122,8 +123,9 @@ namespace MyLife.App
         {
             var applicationData = ApplicationData.Current;
             var roamingSettings = applicationData.RoamingSettings;
-            var username = roamingSettings.Values["Username"] as string;
-            var password = roamingSettings.Values["Password"] as string;
+            var authData = roamingSettings.GetContainerOrDefault("Auth");
+            var username = authData != null ? authData.Values["Username"] as string : null;
+            var password = authData != null ? authData.Values["Password"] as string : null;
             var user = await MyLifeDataSource.AuthenticateUserAsync(username, password);
             return user;
         }
@@ -137,8 +139,9 @@ namespace MyLife.App
             var user = await MyLifeDataSource.AuthenticateUserAsync(username, password);
             if (user != null)
             {
-                roamingSettings.Values["Username"] = username;
-                roamingSettings.Values["Password"] = password;
+                var authData = roamingSettings.CreateContainer("Auth", ApplicationDataCreateDisposition.Always);
+                authData.Values["Username"] = username;
+                authData.Values["Password"] = password;
                 applicationData.SignalDataChanged();
 
                 Frame.Navigate(typeof (FeedPage));

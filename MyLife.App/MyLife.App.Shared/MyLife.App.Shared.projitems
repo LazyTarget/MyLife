@@ -9,6 +9,7 @@
     <Import_RootNamespace>MyLife.App</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Common\CommonExtensions.cs" />
     <Page Include="$(MSBuildThisFileDirectory)Login.xaml">
       <SubType>Designer</SubType>
     </Page>
