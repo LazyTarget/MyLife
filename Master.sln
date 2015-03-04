@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
 EndProject
@@ -30,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Calendar", "MyLife.Channels\MyLife.Channels.Calendar\MyLife.Channels.Calendar.csproj", "{BE55D440-00DD-4DCA-9E53-53248DC54DED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "CalendarCore\TestApp\TestApp.csproj", "{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Strava", "MyLife.Channels.Strava\MyLife.Channels.Strava.csproj", "{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -176,6 +178,16 @@ Global
 		{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}.Release|x86.ActiveCfg = Release|x86
 		{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}.Release|x86.Build.0 = Release|x86
 		{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}.Release|x86.Deploy.0 = Release|x86
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|ARM.ActiveCfg = Release|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|x64.ActiveCfg = Release|Any CPU
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,5 +204,6 @@ Global
 		{71A54605-D876-4530-A50C-6969F66448F4} = {1C780040-47B5-499A-A90C-BE6B183B98B6}
 		{BE55D440-00DD-4DCA-9E53-53248DC54DED} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
 		{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED} = {78040B8D-DFF1-4911-8685-43B69F8847C8}
+		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
 	EndGlobalSection
 EndGlobal

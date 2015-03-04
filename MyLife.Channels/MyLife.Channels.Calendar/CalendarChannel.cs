@@ -23,6 +23,7 @@ namespace MyLife.Channels.Calendar
         {
             if (string.IsNullOrEmpty(_defaultCalendarID))
             {
+                // todo: remove test code
                 _defaultCalendarID = "3ae2a03e43b87c56.b3eab7507ea5429d9015a169b8dfcd19";
                 //return null;
             }

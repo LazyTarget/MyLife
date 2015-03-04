@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MyLife.App.ViewModels;
+using MyLife.Channels.Strava;
 using MyLife.Channels.Toggl;
 using MyLife.Models;
 
@@ -55,6 +56,12 @@ namespace MyLife.App.Data
             //outlookClient.SetAccessToken(accessToken);
             //var calendarChannel = new CalendarChannel(outlookClient);
             //_myLife.AddChannel(calendarChannel);
+
+
+            var authCode = "64afcf881d24e7b13aae2c1cd5e2df9f9616090a";
+            var accessToken = "a15a2ff917413947e56ae5bdcff768b009c86ae4";
+            var stravaChannel = new StravaChannel(accessToken);
+            _instance._myLife.AddChannel(stravaChannel);
 
             return _instance.User;
         }
