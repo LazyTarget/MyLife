@@ -24,6 +24,9 @@ namespace MyLife.Core
         public Encoding Encoding { get; set; }
 
 
+        public event EventHandler<HttpHelperResponseEventArgs> ResponseReceived;
+
+
 
         private async Task<IHttpHelperResponse> Process(IHttpHelperRequest request)
         {
@@ -31,9 +34,11 @@ namespace MyLife.Core
             //var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             var httpWebResponse = (HttpWebResponse) await httpWebRequest.GetResponseAsync();
             var response = new HttpHelperResponse(httpWebRequest, httpWebResponse);
+            if (ResponseReceived != null)
+                ResponseReceived(this, new HttpHelperResponseEventArgs(response));
             return response;
         }
-
+        
         private async Task<IHttpHelperResponse<T>> Process<T>(IHttpHelperRequest request)
         {
             var httpWebRequest = await BuildRequest(request);
@@ -42,6 +47,8 @@ namespace MyLife.Core
             var responseData = GetResponseData(request, httpWebResponse);
             var result = Deserialize<T>(responseData);
             var response = new HttpHelperResponse<T>(result, httpWebRequest, httpWebResponse);
+            if (ResponseReceived != null)
+                ResponseReceived(this, new HttpHelperResponseEventArgs(response));
             return response;
         }
 
