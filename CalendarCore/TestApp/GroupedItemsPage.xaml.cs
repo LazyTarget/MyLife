@@ -80,6 +80,19 @@ namespace TestApp
 
                 var events = (await _calendarServer.GetEvents(cal.ID)).ToList();
                 System.Diagnostics.Debug.WriteLine("Events, count: " + events.Count);
+
+
+                var evt = new Event()
+                {
+                    Name = "Calendar test",
+                    Location = "59.402863, 17.942459",
+                    //Location = "OutlookClient",
+                    Description = "This is a test event created by CalendarCore",
+                    Start = DateTime.UtcNow,
+                    End = DateTime.UtcNow.AddMinutes(5),
+                };
+                evt = await _calendarServer.CreateEvent(evt);
+                System.Diagnostics.Debug.WriteLine("Created event, subject: " + evt.Name);
             }
 
             // TODO: Create an appropriate data model for your problem domain to replace the sample data

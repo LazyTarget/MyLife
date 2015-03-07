@@ -11,5 +11,7 @@ namespace CalendarCore
         
         Task<IEnumerable<Event>> GetEvents(string calendarID);
 
+        Task<Event> CreateEvent(Event evt);
+
     }
 }

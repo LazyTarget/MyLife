@@ -40,6 +40,11 @@ namespace CalendarCore.Outlook
             signInUrl = new Uri(string.Format(@"https://login.live.com/oauth20_authorize.srf?client_id={0}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope={1}", client_id, scope));
         }
 
+        public OutlookClient(string accessToken)
+        {
+            access_token = accessToken;
+        }
+
 
 
 
@@ -317,7 +322,7 @@ namespace CalendarCore.Outlook
             //await InitAccess(false);
 
 
-            var url = Path.Combine(apiUrl, string.Format("calendar.{1}/events?access_token={0}", access_token, calendarID));
+            var url = Path.Combine(apiUrl, string.Format("{1}/events?access_token={0}", access_token, calendarID));
 
             var request = new HttpHelperRequest
             {
@@ -332,6 +337,24 @@ namespace CalendarCore.Outlook
             return calendars;
         }
 
+        public async Task<Event> CreateEvent(Event evt)
+        {
+            var calendarId = "";
+            var url = string.IsNullOrEmpty(calendarId)
+                            ? Path.Combine(apiUrl, string.Format("me/events?access_token={0}", access_token))
+                            : Path.Combine(apiUrl, string.Format("{1}/events?access_token={0}", access_token, calendarId));
+
+            var request = new HttpHelperRequest
+            {
+                Url = url,
+                Method = "POST",
+                Data = evt,
+            };
+            var response = await MakeWebRequest<JObject>(request);
+            var obj = response.Result;
+            var result = obj.ToObject<Event>();
+            return result;
+        }
 
 
         public void SetAccessToken(string accessToken)

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MyLife.Core
 {
@@ -19,6 +21,11 @@ namespace MyLife.Core
             };
             //Settings.Converters.Add(new JavaScriptDateTimeConverter());
             //Settings.Converters.Add(new TickDateTimeConverter());
+            Settings.Converters.Add(new IsoDateTimeConverter
+            {
+                DateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffK",
+                DateTimeStyles = DateTimeStyles.RoundtripKind | DateTimeStyles.AssumeUniversal
+            });
         }
 
 
