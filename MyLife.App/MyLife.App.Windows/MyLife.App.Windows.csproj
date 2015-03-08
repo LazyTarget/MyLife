@@ -112,6 +112,10 @@
       <Project>{3f828af9-4173-4c27-a038-1cc4a48c84e0}</Project>
       <Name>CalendarCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\MyLife.Channels.Odbc\MyLife.Channels.Odbc.csproj">
+      <Project>{b0fe3dd9-2a47-4c9b-8276-05d84551452d}</Project>
+      <Name>MyLife.Channels.Odbc</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MyLife.Channels.Strava\MyLife.Channels.Strava.csproj">
       <Project>{ac74c1ec-a67a-421e-9752-c3de8b7e9e7f}</Project>
       <Name>MyLife.Channels.Strava</Name>

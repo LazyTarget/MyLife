@@ -15,8 +15,8 @@ namespace MyLife.Core
         {
             if (channel == null)
                 throw new ArgumentNullException("channel");
-            if (_eventChannels.Any(x => x.GetType() == channel.GetType()))
-                throw new InvalidOperationException("Channel of type '" + channel.GetType() + "' already added");
+            //if (_eventChannels.Any(x => x.GetType() == channel.GetType()))
+            //    throw new InvalidOperationException("Channel of type '" + channel.GetType() + "' already added");
             _eventChannels.Add(channel);
         }
 
@@ -34,7 +34,7 @@ namespace MyLife.Core
                 }
             }
 
-            events = events.OrderBy(x => x.StartTime)
+            events = events.OrderByDescending(x => x.StartTime)
                            .ThenBy(x => x.EndTime)
                            .ToList();
             return events;

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
 EndProject
@@ -32,6 +32,15 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "CalendarCore\TestApp\TestApp.csproj", "{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Strava", "MyLife.Channels.Strava\MyLife.Channels.Strava.csproj", "{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Odbc", "MyLife.Channels.Odbc\MyLife.Channels.Odbc.csproj", "{B0FE3DD9-2A47-4C9B-8276-05D84551452D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OdbcWrapper", "OdbcWrapper", "{CE0E8D49-BE2A-4199-9D3C-FD2D8D7A85A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OdbcWrapper", "OdbcWrapper\OdbcWrapper\OdbcWrapper.csproj", "{D7DCF7C8-2A22-41EC-81CE-D78595780842}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -188,6 +197,26 @@ Global
 		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|ARM.ActiveCfg = Release|Any CPU
 		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|x64.ActiveCfg = Release|Any CPU
 		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}.Release|x86.ActiveCfg = Release|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Release|x64.ActiveCfg = Release|Any CPU
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Release|ARM.ActiveCfg = Release|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Release|x64.ActiveCfg = Release|Any CPU
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -205,5 +234,7 @@ Global
 		{BE55D440-00DD-4DCA-9E53-53248DC54DED} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
 		{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED} = {78040B8D-DFF1-4911-8685-43B69F8847C8}
 		{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
+		{B0FE3DD9-2A47-4C9B-8276-05D84551452D} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {CE0E8D49-BE2A-4199-9D3C-FD2D8D7A85A6}
 	EndGlobalSection
 EndGlobal
