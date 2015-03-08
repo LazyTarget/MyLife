@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
+using System.Reflection;
 
 namespace OdbcWrapper
 {
@@ -27,6 +29,9 @@ namespace OdbcWrapper
 
         public static T Get<T>(this ExpandoObject expando, string key)
         {
+            if (expando == null)
+                return default(T);
+
             var dict = ((IDictionary<string, object>) expando);
             T result;
             if (dict.ContainsKey(key))
@@ -46,6 +51,29 @@ namespace OdbcWrapper
             dict[key] = value;
         }
 
+
+
+        public static T To<T>(this ExpandoObject expando)
+            where T : new()
+        {
+            if (expando == null)
+                return default(T);
+
+            var result = new T();
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var dict = ((IDictionary<string, object>)expando);
+            for (var i = 0; i < dict.Keys.Count; i++)
+            {
+                var key = dict.Keys.ElementAt(i);
+                var prop = properties.SingleOrDefault(x => x.Name == key);
+                if (prop != null)
+                {
+                    var value = dict[key];
+                    prop.SetValue(result, value);
+                }
+            }
+            return result;
+        }
 
 
 

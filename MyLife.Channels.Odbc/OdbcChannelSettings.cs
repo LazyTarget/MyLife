@@ -1,6 +1,8 @@
-﻿namespace MyLife.Channels.Odbc
+﻿using MyLife.Core;
+
+namespace MyLife.Channels.Odbc
 {
-    public class OdbcChannelSettings
+    public class OdbcChannelSettings : IChannelSettings
     {
         public string GetEventsSql { get; set; }
 

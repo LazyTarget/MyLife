@@ -11,25 +11,34 @@ namespace MyLife.Channels.Strava
 {
     public class StravaChannel : IEventChannel
     {
+        public static readonly Guid ChannelIdentifier = new Guid("1cb8ef41-030b-48b4-9ec4-ab131e08dc43");
+
+
         private StravaClient _client;
         private IAuthentication _auth;
 
         public StravaChannel()
         {
-            
+
         }
 
         public StravaChannel(string accessToken)
+            : this()
         {
             _auth = new StaticAuthentication(accessToken);
             _client = new StravaClient(_auth);
         }
 
         internal StravaChannel(IAuthentication authentication)
+            : this()
         {
             _auth = authentication;
             _client = new StravaClient(_auth);
         }
+
+        public Guid Identifier { get { return ChannelIdentifier; } }
+
+
         
         public async Task<IEnumerable<IEvent>> GetEvents()
         {
@@ -59,5 +68,6 @@ namespace MyLife.Channels.Strava
             var result = events.Select(ModelConverter.ToEvent);
             return result;
         }
+
     }
 }

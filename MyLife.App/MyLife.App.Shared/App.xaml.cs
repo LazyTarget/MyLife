@@ -99,11 +99,18 @@ namespace MyLife.App
             
             if (!MyLifeDataSource.IsAuthenticated)
             {
-                var user = await Login.AuthenticateUserFromRoamingSettingsAsync();
-                if (user == null)
+                try
                 {
-                    if (!rootFrame.Navigate(typeof (Login)))
-                        throw new Exception("Failed to navigate to login page");
+                    var user = await Login.AuthenticateUserFromRoamingSettingsAsync();
+                    if (user == null)
+                    {
+                        if (!rootFrame.Navigate(typeof(Login)))
+                            throw new Exception("Failed to navigate to login page");
+                    }
+                }
+                catch (Exception ex)
+                {
+
                 }
             }
 #if WINDOWS_APP

@@ -38,11 +38,13 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IChannelSettings.cs" />
     <Compile Include="Http\HttpHelperResponseEventArgs.cs" />
+    <Compile Include="Interfaces\IChannel.cs" />
     <Compile Include="WebChannel.cs" />
     <Compile Include="ChannelBase.cs" />
-    <Compile Include="MyLife.cs" />
-    <Compile Include="IEventChannel.cs" />
+    <Compile Include="MyLifeClient.cs" />
+    <Compile Include="Interfaces\IEventChannel.cs" />
     <Compile Include="Http\HttpHelperBase.cs" />
     <Compile Include="Http\HttpHelperRequest.cs" />
     <Compile Include="Http\HttpHelperResponse.cs" />

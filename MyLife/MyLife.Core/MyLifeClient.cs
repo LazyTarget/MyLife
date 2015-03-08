@@ -6,25 +6,25 @@ using MyLife.Models;
 
 namespace MyLife.Core
 {
-    public class MyLife
+    public class MyLifeClient
     {
-        private readonly List<IEventChannel> _eventChannels = new List<IEventChannel>();
+        private readonly List<IChannel> _channels = new List<IChannel>();
         
 
-        public void AddChannel(IEventChannel channel)
+        public void AddChannel(IChannel channel)
         {
             if (channel == null)
                 throw new ArgumentNullException("channel");
-            //if (_eventChannels.Any(x => x.GetType() == channel.GetType()))
+            //if (_channels.Any(x => x.GetType() == channel.GetType()))
             //    throw new InvalidOperationException("Channel of type '" + channel.GetType() + "' already added");
-            _eventChannels.Add(channel);
+            _channels.Add(channel);
         }
 
 
         public async Task<IEnumerable<IEvent>> GetEvents()
         {
             var events = new List<IEvent>();
-            foreach (var eventChannel in _eventChannels)
+            foreach (var eventChannel in _channels.OfType<IEventChannel>())
             {
                 var e = await eventChannel.GetEvents();
                 if (e != null)

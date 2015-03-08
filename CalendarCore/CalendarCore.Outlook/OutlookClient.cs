@@ -16,11 +16,13 @@ namespace CalendarCore.Outlook
         private string client_id;
         private string client_secret;
         private string accessTokenUrl;
+        private string refreshAccessTokenUrl;
         private Uri signInUrl;
         private string apiUrl = @"https://apis.live.net/v5.0/";
         
         private string auth_code;
         private string access_token;
+        private string refresh_token;
         private JObject _authData;
         
         private readonly HttpHelperBase httpHelper = new JsonHttpHelper();
@@ -33,10 +35,11 @@ namespace CalendarCore.Outlook
 
         public OutlookClient()
         {
-            scope = "wl.basic wl.calendars wl.calendars_update wl.events_create";
+            scope = "wl.basic wl.calendars wl.calendars_update wl.events_create wl.offline_access";
             client_id = "0000000040141301";
             client_secret = "Gwfh2lFMtbD6AQQklJUbdo6dyx-DdPeY";
-            accessTokenUrl = string.Format(@"https://login.live.com/oauth20_token.srf?client_id={0}&client_secret={1}&redirect_uri=https://login.live.com/oauth20_desktop.srf&grant_type=authorization_code&code=", client_id, client_secret);
+            accessTokenUrl =        string.Format(@"https://login.live.com/oauth20_token.srf?client_id={0}&client_secret={1}&redirect_uri=https://login.live.com/oauth20_desktop.srf&grant_type=authorization_code&code=", client_id, client_secret);
+            refreshAccessTokenUrl = string.Format(@"https://login.live.com/oauth20_token.srf?client_id={0}&client_secret={1}&redirect_uri=https://login.live.com/oauth20_desktop.srf&grant_type=refresh_token&refresh_token=", client_id, client_secret);
             signInUrl = new Uri(string.Format(@"https://login.live.com/oauth20_authorize.srf?client_id={0}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope={1}", client_id, scope));
         }
 
@@ -45,6 +48,13 @@ namespace CalendarCore.Outlook
             access_token = accessToken;
         }
 
+        public static async Task<string> GetAccessTokenFromRefreshToken(string refreshToken)
+        {
+            var client = new OutlookClient();
+            client.refresh_token = refreshToken;
+            var accessToken = await client.RefreshAccess();
+            return accessToken;
+        }
 
 
 
@@ -156,6 +166,7 @@ namespace CalendarCore.Outlook
                 var response = await MakeWebRequest<JObject>(request);
                 _authData = response.Result;
                 access_token = _authData.GetPropertyValue<string>("access_token");
+                refresh_token = _authData.GetPropertyValue<string>("refresh_token");
 
                 if (!string.IsNullOrEmpty(access_token))
                     OnAuthorized(this, EventArgs.Empty);
@@ -163,6 +174,23 @@ namespace CalendarCore.Outlook
             }
             return null;
         }
+
+        
+        private async Task<string> RefreshAccess()
+        {
+            var url = refreshAccessTokenUrl + refresh_token;
+
+            var request = new HttpHelperRequest
+            {
+                Url = url,
+                Method = "GET",
+            };
+            var response = await MakeWebRequest<JObject>(request);
+            _authData = response.Result;
+            access_token = _authData.GetPropertyValue<string>("access_token");
+            return access_token;
+        }
+
 
 
         private async void OnUrlLoaded(AuthEventArgs e)

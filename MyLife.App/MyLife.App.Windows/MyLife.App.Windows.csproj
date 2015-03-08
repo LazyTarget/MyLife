@@ -128,6 +128,10 @@
       <Project>{514D5A44-7F8D-4D18-B96A-E40608D1E847}</Project>
       <Name>MyLife.Channels.Toggl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\MyLife.CoreClient\MyLife.CoreClient.csproj">
+      <Project>{4a6d6cb3-9285-4374-b765-80eceea80f7a}</Project>
+      <Name>MyLife.CoreClient</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
       <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
       <Name>MyLife.Core</Name>

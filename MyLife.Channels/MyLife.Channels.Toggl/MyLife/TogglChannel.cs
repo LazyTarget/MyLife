@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MyLife.Core;
@@ -8,6 +9,9 @@ namespace MyLife.Channels.Toggl
 {
     public class TogglChannel : IEventChannel
     {
+        public static readonly Guid ChannelIdentifier = new Guid("d9a8c13d-a3f6-4e58-92f0-e7687d21752f");
+
+
         private readonly global::Toggl.Toggl _toggl;
 
         
@@ -15,6 +19,9 @@ namespace MyLife.Channels.Toggl
         {
             _toggl = new global::Toggl.Toggl(key);
         }
+
+        public Guid Identifier { get { return ChannelIdentifier; } }
+
 
 
         public async Task<IEnumerable<IEvent>> GetEvents()

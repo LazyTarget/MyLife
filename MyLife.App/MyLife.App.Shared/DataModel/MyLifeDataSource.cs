@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MyLife.App.ViewModels;
-using MyLife.Channels.Odbc;
-using MyLife.Channels.Strava;
-using MyLife.Channels.Toggl;
+using MyLife.Core;
+using MyLife.CoreClient;
 using MyLife.Models;
 
 namespace MyLife.App.Data
@@ -19,12 +17,12 @@ namespace MyLife.App.Data
         private static readonly MyLifeDataSource _instance = new MyLifeDataSource();
 
 
-        private Core.MyLife _myLife;
+        private MyLifeClient _myLifeClient;
 
 
         public MyLifeDataSource()
         {
-            _myLife = new Core.MyLife();
+            _myLifeClient = new MyLifeClient();
 
             
         }
@@ -48,31 +46,8 @@ namespace MyLife.App.Data
             };
 
 
-            _instance._myLife = new Core.MyLife();
-
-            var toggleApiToken = "55e7ecf6095ea0d3d9d6af8aadc0fe00";
-            var togglChannel = new TogglChannel(toggleApiToken);
-            //_instance._myLife.AddChannel(togglChannel);
-
-
-            //var outlookClient = new OutlookClient();
-            //var accessToken = "EwCAAq1DBAAUGCCXc8wU/zFu9QnLdZXy+YnElFkAARaf0nPYTZgxz8qoYngiCALujrYCaZMjrLJif/HaalWM+OX+8bn10CvxjfTdTdl2kvj/9wo3nlADN4n0pqktHLo4/YzXIAy7pLQj4twdL+SBSc6PgohHkPNQRR9QdNxhLswsQMwBc1sa91DWW177IoiS7vjly5sMcT8YhDucUUHc7zwspV30fmqgzewTDCr4z7KwkwclTpf+ZGIhpqmQ18aiQGXBqy3w4Ohx/PstenGWfcvbAtjW8Rxob6NJDWe3zXcsM90bDQqd6WCjTLlYCjL0q2oMsj+KEE03RFl6d08bZF5eOrdD3/I+zRckLNe8V0n8oA4BQqAPbtQi6n1Q2YUDZgAACNyvuYVoqP3qUAEfct16JdAhGLPyEkJ2QPXjzDLi3Kig33w1xuPnF+wETblY91XygJu7SckKrRx/eRzRwVVAitxRiYnBLqMC8t9LGk+/zwz+pFNHPiNDWMGykbNKZNZYAjylelKYdJjxL9Gckmc3y7Z57Bzg9G9obV405O9nzzDQRsdh/qSWWjZn34hUlump+/JDnS21jMv9MX4S316cYr/UAL9nNR9Co/LKBdSK0yJJkNDe+BUiJDslc3+Hh3nmWp5+5VtqOIdfCEHEC+1yMjkcPgG2H4QPoNlaz/2lsrQ61AXvHKAcgmwzy48YMmcGIlHVxGUQnr4igJx1tPaH0TMO0GkFislG99SGUFP+PqX2LBo8HouIpIPleetOxEsZNhvJSU+i4K/UTllTDu9gsRh3XIaTCwYCdTkQ2ymVNQTRoX+isxVli4HYF8aO7H+8xjAhLxtnQQeieYxtAQ==";
-            //outlookClient.SetAccessToken(accessToken);
-            //var calendarChannel = new CalendarChannel(outlookClient);
-            //_myLife.AddChannel(calendarChannel);
-
-
-            var authCode = "64afcf881d24e7b13aae2c1cd5e2df9f9616090a";
-            var accessToken = "a15a2ff917413947e56ae5bdcff768b009c86ae4";
-            var stravaChannel = new StravaChannel(accessToken);
-            _instance._myLife.AddChannel(stravaChannel);
-
-
-
-            var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
-            var odbcChannel = new OdbcChannel(connectionString);
-            odbcChannel.Settings.GetEventsSql = "SELECT *, 'Steam (odbc)' AS 'Source' FROM Events";
-            _instance._myLife.AddChannel(odbcChannel);
+            //_instance._myLifeClient = new MyLifeClient();
+            _instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
 
             return _instance.User;
         }
@@ -80,7 +55,7 @@ namespace MyLife.App.Data
 
         public static async Task<FeedViewModel> GetFeedAsync()
         {
-            var feedEvents = await _instance._myLife.GetEvents();
+            var feedEvents = await _instance._myLifeClient.GetEvents();
 
             var feed = new FeedViewModel(feedEvents);
             _instance.FeedViewModel = feed;
