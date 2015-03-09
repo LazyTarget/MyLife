@@ -24,7 +24,7 @@ namespace MyLife.Channels.Toggl
 
 
 
-        public async Task<IEnumerable<IEvent>> GetEvents()
+        public async Task<IEnumerable<IEvent>> GetEvents(FeedArgs args)
         {
             var list = await _toggl.TimeEntry.List();
             var events = list.Select(ModelConverter.ToEvent);

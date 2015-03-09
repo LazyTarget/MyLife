@@ -25,7 +25,7 @@ namespace MyLife.Channels.Odbc
         public OdbcChannelSettings Settings { get; set; }
 
 
-        public async Task<IEnumerable<IEvent>> GetEvents()
+        public async Task<IEnumerable<IEvent>> GetEvents(FeedArgs args)
         {
             var sql = Settings.GetEventsSql;
             if (string.IsNullOrEmpty(sql))

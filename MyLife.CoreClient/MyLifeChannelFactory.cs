@@ -51,7 +51,7 @@ namespace MyLife.CoreClient
             var getChannelsSql = string.Format("SELECT C.Identifier, Cr.* " +
                                     "FROM CrUserChannels Cr " +
                                     "INNER JOIN Channels C ON C.ID = Cr.ChannelID " +
-                                    "WHERE UserID = {0}",
+                                    "WHERE Cr.UserID = {0} AND C.Enabled = 1 ",
                                     user.ID);
             
             var channelDataTable = await _odbc.ExecuteReader(getChannelsSql);

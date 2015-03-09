@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MyLife.Models;
@@ -21,16 +22,36 @@ namespace MyLife.Core
         }
 
 
+
         public async Task<IEnumerable<IEvent>> GetEvents()
         {
+            var result = await GetEvents(new FeedArgs());
+            return result;
+        }
+
+        public async Task<IEnumerable<IEvent>> GetEvents(FeedArgs args)
+        {
+            var filteredChannels = args.Channels;
+
             var events = new List<IEvent>();
             foreach (var eventChannel in _channels.OfType<IEventChannel>())
             {
-                var e = await eventChannel.GetEvents();
-                if (e != null)
+                if(filteredChannels.Any())
+                    if (!filteredChannels.Contains(eventChannel.Identifier))
+                        continue;
+
+                try
                 {
-                    var list = e.ToList();
-                    events.AddRange(list);
+                    var e = await eventChannel.GetEvents(args);
+                    if (e != null)
+                    {
+                        var list = e.ToList();
+                        events.AddRange(list);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Error getting feed from " + eventChannel.Identifier);
                 }
             }
 

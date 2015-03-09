@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarCore", "CalendarCore\CalendarCore\CalendarCore.csproj", "{3F828AF9-4173-4C27-A038-1CC4A48C84E0}"
 EndProject
@@ -43,6 +46,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OdbcWrapper", "OdbcWrapper\OdbcWrapper\OdbcWrapper.csproj", "{D7DCF7C8-2A22-41EC-81CE-D78595780842}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.CoreClient", "MyLife.CoreClient\MyLife.CoreClient.csproj", "{4A6D6CB3-9285-4374-B765-80ECEEA80F7A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
