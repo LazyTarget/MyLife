@@ -41,7 +41,7 @@ namespace MyLife.CoreClient
 
             if (user != null)
             {
-                var client = new MyLifeClient();
+                var client = new MyLifeClient(_odbc);
 
                 var channels = await _channelFactory.GetUserChannels(user);
                 foreach (var channel in channels)

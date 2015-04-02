@@ -8,5 +8,7 @@ namespace MyLife.Models
 
         string LogoUri { get; set; }
 
+        Guid ChannelIdentifier { get; set; }
+
     }
 }

@@ -22,10 +22,9 @@ namespace MyLife.App.Data
 
         public MyLifeDataSource()
         {
-            _myLifeClient = new MyLifeClient();
-
             
         }
+
 
         public static bool IsAuthenticated { get { return _instance.User != null; } }
 
@@ -53,9 +52,9 @@ namespace MyLife.App.Data
         }
 
 
-        public static async Task<FeedViewModel> GetFeedAsync()
+        public static async Task<FeedViewModel> GetFeedAsync(EventRequest request = null)
         {
-            var feedEvents = await _instance._myLifeClient.GetEvents();
+            var feedEvents = await _instance._myLifeClient.GetEvents(request);
 
             var feed = new FeedViewModel(feedEvents);
             _instance.FeedViewModel = feed;

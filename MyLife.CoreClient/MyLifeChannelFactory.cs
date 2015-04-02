@@ -45,9 +45,9 @@ namespace MyLife.CoreClient
         }
 
 
-        public async Task<IEnumerable<IChannel>> GetUserChannels(User user)
+        public async Task<IEnumerable<ChannelInfo>> GetUserChannels(User user)
         {
-            var result = new List<IChannel>();
+            var result = new List<ChannelInfo>();
             var getChannelsSql = string.Format("SELECT C.Identifier, Cr.* " +
                                     "FROM CrUserChannels Cr " +
                                     "INNER JOIN Channels C ON C.ID = Cr.ChannelID " +
@@ -62,23 +62,36 @@ namespace MyLife.CoreClient
                 ExpandoObject settingsData = null;
                 var channelSettingsID = channelData.Get<long>("ChannelSettingsID");
                 if (channelSettingsID > 0)
-                {
-                    var getSettingsDataSql = string.Format("SELECT * " +
-                                                           "FROM ChannelSettings " +
-                                                           "WHERE ID = {0}",
-                        channelSettingsID);
-                    var channelSettingsTable = await _odbc.ExecuteReader(getSettingsDataSql);
-                    if (channelSettingsTable != null && channelSettingsTable.RowCount > 0)
-                    {
-                        var r = channelSettingsTable.Rows.First();
-                        settingsData = r.ToExpando();
-                    }
-                }
+                    settingsData = await GetChannelSettings(channelSettingsID);
 
                 var channel = await Create(channelData, settingsData);
-                result.Add(channel);
+                var channelInfo = new ChannelInfo
+                {
+                    Channel = channel,
+                    UserChannelID = channelData.Get<long>("ID"),
+                };
+                result.Add(channelInfo);
             }
             return result;
+        }
+        
+        private async Task<ExpandoObject> GetChannelSettings(long channelSettingsID)
+        {
+            ExpandoObject res = null;
+            if (channelSettingsID > 0)
+            {
+                var getSettingsDataSql = string.Format("SELECT * " +
+                                                       "FROM ChannelSettings " +
+                                                       "WHERE ID = {0}",
+                    channelSettingsID);
+                var channelSettingsTable = await _odbc.ExecuteReader(getSettingsDataSql);
+                if (channelSettingsTable != null && channelSettingsTable.RowCount > 0)
+                {
+                    var r = channelSettingsTable.Rows.First();
+                    res = r.ToExpando();
+                }
+            }
+            return res;
         }
 
 

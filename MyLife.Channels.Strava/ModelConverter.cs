@@ -13,8 +13,9 @@ namespace MyLife.Channels.Strava
             };
             return source;
         }
-        
-        public static IEvent ToEvent(ActivitySummary obj)
+
+
+        private static Event _ToEvent(ActivitySummary obj)
         {
             var res = new Event
             {
@@ -28,10 +29,15 @@ namespace MyLife.Channels.Strava
             return res;
         }
 
-
+        public static IEvent ToEvent(ActivitySummary obj)
+        {
+            var res = _ToEvent(obj);
+            return res;
+        }
+        
         public static IEvent ToEvent(Activity obj)
         {
-            var res = ToEvent((ActivitySummary) obj);
+            var res = _ToEvent((ActivitySummary) obj);
             res.Description = obj.Description;
             return res;
         }

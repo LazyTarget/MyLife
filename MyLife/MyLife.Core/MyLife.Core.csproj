@@ -38,6 +38,7 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChannelInfo.cs" />
     <Compile Include="Interfaces\IChannelSettings.cs" />
     <Compile Include="Http\HttpHelperResponseEventArgs.cs" />
     <Compile Include="Interfaces\IChannel.cs" />
@@ -58,6 +59,9 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OdbcWrapper">
+      <HintPath>..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

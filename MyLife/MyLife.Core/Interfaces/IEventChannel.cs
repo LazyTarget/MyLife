@@ -6,6 +6,6 @@ namespace MyLife.Core
 {
     public interface IEventChannel : IChannel
     {
-        Task<IEnumerable<IEvent>> GetEvents();
+        Task<IEnumerable<IEvent>> GetEvents(EventRequest request);
     }
 }

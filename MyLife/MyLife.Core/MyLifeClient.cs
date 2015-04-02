@@ -3,15 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MyLife.Models;
+using OdbcWrapper;
 
 namespace MyLife.Core
 {
     public class MyLifeClient
     {
-        private readonly List<IChannel> _channels = new List<IChannel>();
-        
+        private readonly OdbcClient _odbc;
+        private readonly List<ChannelInfo> _channels = new List<ChannelInfo>();
 
-        public void AddChannel(IChannel channel)
+        public MyLifeClient(OdbcClient odbc)
+        {
+            _odbc = odbc;
+        }
+
+
+        public void AddChannel(ChannelInfo channel)
         {
             if (channel == null)
                 throw new ArgumentNullException("channel");
@@ -21,15 +28,36 @@ namespace MyLife.Core
         }
 
 
-        public async Task<IEnumerable<IEvent>> GetEvents()
+        public async Task<IEnumerable<IEvent>> GetEvents(EventRequest request)
         {
-            var events = new List<IEvent>();
-            foreach (var eventChannel in _channels.OfType<IEventChannel>())
+            if (request == null)
             {
-                var e = await eventChannel.GetEvents();
+                var days = 7;
+                request = new EventRequest
+                {
+                    StartTime = DateTime.Now.AddDays(-days),
+                    EndTime = DateTime.Now.AddDays(days)
+                };
+            }
+
+
+            var events = new List<IEvent>();
+            foreach (var channelInfo in _channels)
+            {
+                var eventChannel = channelInfo.Channel as IEventChannel;
+                if (eventChannel == null)
+                    continue;
+                var e = await eventChannel.GetEvents(request);
                 if (e != null)
                 {
-                    var list = e.ToList();
+                    e = e.Select(x =>
+                    {
+                        x.Source = new EventSource();
+                        x.Source.ChannelIdentifier = eventChannel.Identifier;
+                        return x;
+                    });
+                    var list = await Task.WhenAll(GetModifiedEvents(e, channelInfo));
+                    list = list.Where(x => x != null).ToArray();
                     events.AddRange(list);
                 }
             }
@@ -38,6 +66,43 @@ namespace MyLife.Core
                            .ThenBy(x => x.EndTime)
                            .ToList();
             return events;
+        }
+
+
+        private IEnumerable<Task<IEvent>> GetModifiedEvents(IEnumerable<IEvent> events, ChannelInfo channelInfo)
+        {
+            foreach (var evt in events)
+            {
+                var task = GetModifiedEvent(evt, channelInfo);
+                yield return task;
+            }
+        }
+
+
+        private async Task<IEvent> GetModifiedEvent(IEvent evt, ChannelInfo channelInfo)
+        {
+            if (evt is ModifiedEvent)
+                return evt;
+
+            IEvent result = null;
+            var sql = string.Format("SELECT * FROM ModifiedEvents WHERE ID = '{0}' AND UserChannelID = '{1}'", evt.ID, channelInfo.UserChannelID);
+            var dt = await _odbc.ExecuteReader(sql);
+            if (dt != null && dt.RowCount > 0)
+            {
+                foreach (var dataRow in dt.Rows)
+                {
+                    var res = dataRow.To<ModifiedEvent>();
+                    if (res != null)
+                    {
+                        res.OriginalEvent = evt;
+                        result = res;
+                        break;
+                    }
+                }
+            }
+            if (result == null)
+                result = evt;
+            return result;
         }
 
     }

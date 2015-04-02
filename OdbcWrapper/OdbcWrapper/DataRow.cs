@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Data.Common;
 using System.Dynamic;
 using System.Linq;
@@ -46,7 +46,18 @@ namespace OdbcWrapper
                 var value = _dataRecord.GetValue(i);
                 var prop = properties.SingleOrDefault(x => x.Name == caption);
                 if (prop != null)
-                    prop.SetValue(result, value);
+                {
+                    if (value == DBNull.Value)
+                        value = default(T);
+                    try
+                    {
+                        prop.SetValue(result, value);
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
+                }
             }
             return result;
         }

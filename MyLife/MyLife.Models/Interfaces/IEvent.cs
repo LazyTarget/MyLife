@@ -4,19 +4,19 @@ namespace MyLife.Models
 {
     public interface IEvent
     {
-        string ID { get; set; }
+        string ID { get; }
 
-        string Text { get; set; }
+        string Text { get; }
 
-        string Description { get; set; }
-
-
-        DateTime StartTime { get; set; }
-
-        DateTime EndTime { get; set; }
+        string Description { get; }
 
 
-        string ImageUri { get; set; }
+        DateTime StartTime { get; }
+
+        DateTime EndTime { get; }
+
+
+        string ImageUri { get; }
 
         IEventSource Source { get; set; }
 

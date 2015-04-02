@@ -27,7 +27,7 @@ namespace MyLife.Channels.Calendar
         public CalendarChannelSettings Settings { get; set; }
 
 
-        public async Task<IEnumerable<IEvent>> GetEvents()
+        public async Task<IEnumerable<IEvent>> GetEvents(EventRequest request)
         {
             if (string.IsNullOrEmpty(_defaultCalendarID))
             {
