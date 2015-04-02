@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MyLife.App.ViewModels;
 using MyLife.Core;
 using MyLife.CoreClient;
@@ -45,8 +46,15 @@ namespace MyLife.App.Data
             };
 
 
-            //_instance._myLifeClient = new MyLifeClient();
-            _instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
+            try
+            {
+                //_instance._myLifeClient = new MyLifeClient();
+                _instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
+            }
+            catch (Exception ex)
+            {
+                
+            }
 
             return _instance.User;
         }
