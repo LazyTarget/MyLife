@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -40,7 +41,7 @@ namespace PollingEngine.Core
                     Console.WriteLine("Starting program: " + progName);
                     try
                     {
-                        prog.OnStarting(context);
+                        prog.OnStarting(context).Wait();
                         context.State = State.Running;
                         context.TimeStarted = DateTime.Now;
                     }
@@ -51,10 +52,10 @@ namespace PollingEngine.Core
                 }
                 else if (context.State == State.Running)
                 {
-                    Console.WriteLine("OnInterval for program: " + progName);
+                    Debug.WriteLine("OnInterval for program: " + progName);
                     try
                     {
-                        prog.OnInterval(context);
+                        prog.OnInterval(context).Wait();
                     }
                     catch (Exception ex)
                     {
@@ -67,7 +68,7 @@ namespace PollingEngine.Core
                     Console.WriteLine("Stopping program: " + progName);
                     try
                     {
-                        prog.OnStopping(context);
+                        prog.OnStopping(context).Wait();
                         context.TimeStopped = DateTime.Now;
                         context.State = State.Stopped;
                     }

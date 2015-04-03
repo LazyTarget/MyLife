@@ -1,9 +1,11 @@
-﻿namespace PollingEngine.Core
+﻿using System.Threading.Tasks;
+
+namespace PollingEngine.Core
 {
     public interface IPollingProgram
     {
-        void OnStarting(PollingContext context);
-        void OnInterval(PollingContext context);
-        void OnStopping(PollingContext context);
+        Task OnStarting(PollingContext context);
+        Task OnInterval(PollingContext context);
+        Task OnStopping(PollingContext context);
     }
 }

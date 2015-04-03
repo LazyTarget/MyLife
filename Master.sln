@@ -54,6 +54,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Implementations", "Implemen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamPoller", "PollingEngine\Implementations\SteamPoller\SteamPoller.csproj", "{384A2D65-EBE8-4808-9798-9F24B7911B76}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XbmcPoller", "PollingEngine\Implementations\XbmcPoller\XbmcPoller.csproj", "{77FED2F2-4357-4D68-9D5D-79C334D399C1}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		MyLife.App\MyLife.App.Shared\MyLife.App.Shared.projitems*{4ebb3138-2b46-45ff-84fb-d856719e0776}*SharedItemsImports = 13
@@ -269,6 +271,16 @@ Global
 		{384A2D65-EBE8-4808-9798-9F24B7911B76}.Release|ARM.ActiveCfg = Release|Any CPU
 		{384A2D65-EBE8-4808-9798-9F24B7911B76}.Release|x64.ActiveCfg = Release|Any CPU
 		{384A2D65-EBE8-4808-9798-9F24B7911B76}.Release|x86.ActiveCfg = Release|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Release|ARM.ActiveCfg = Release|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Release|x64.ActiveCfg = Release|Any CPU
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -293,5 +305,6 @@ Global
 		{885DEFB7-06EE-46CB-B75B-CE4E9128246B} = {DA1337C6-38B0-4E02-97E1-438561503164}
 		{C799F809-FEAD-4A81-87CE-67BC58FE5FCA} = {DA1337C6-38B0-4E02-97E1-438561503164}
 		{384A2D65-EBE8-4808-9798-9F24B7911B76} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
+		{77FED2F2-4357-4D68-9D5D-79C334D399C1} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 	EndGlobalSection
 EndGlobal

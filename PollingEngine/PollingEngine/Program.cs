@@ -12,8 +12,8 @@ namespace PollingEngine
 
             var manager = new ProgramManager();
             var contexts = new List<PollingContext>();
-            var steamPoller = new SteamPoller.SteamPoller();
-            contexts.Add(new PollingContext(steamPoller, TimeSpan.FromSeconds(15)));
+            //contexts.Add(new PollingContext(new SteamPoller.SteamPoller(), TimeSpan.FromSeconds(15)));
+            contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(), TimeSpan.FromSeconds(5)));
 
             manager.Load(contexts);
             manager.Start();

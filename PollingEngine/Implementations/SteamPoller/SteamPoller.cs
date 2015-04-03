@@ -18,30 +18,30 @@ namespace SteamPoller
     public class SteamPoller : IPollingProgram
     {
         private static string _apiKey = "511DFA79B7394CEFA286165D20C46FC1";
-        private static SteamIdentity _steamPollIdentity = SteamIdentity.FromSteamID(76561197994923014);
+        private SteamIdentity _steamPollIdentity = SteamIdentity.FromSteamID(76561197994923014);
 
-        private static readonly Dictionary<DateTime, GamingInfo> _data = new Dictionary<DateTime, GamingInfo>();
-        private static readonly List<GamingSession> _sessions = new List<GamingSession>();
+        private readonly Dictionary<DateTime, GamingInfo> _data = new Dictionary<DateTime, GamingInfo>();
+        private readonly List<GamingSession> _sessions = new List<GamingSession>();
 
 
-        public void OnStarting(PollingContext context)
+        public async Task OnStarting(PollingContext context)
         {
             SteamWebAPI.SetGlobalKey(_apiKey);
             
         }
 
-        public void OnInterval(PollingContext context)
+        public async Task OnInterval(PollingContext context)
         {
-            PollGamingInfo_Portable(context, _steamPollIdentity).Wait();
+            await PollGamingInfo_Portable(context, _steamPollIdentity);
         }
 
-        public void OnStopping(PollingContext context)
+        public async Task OnStopping(PollingContext context)
         {
             
         }
 
         
-        private static async Task PollGamingInfo_Portable(PollingContext context, SteamIdentity identity)
+        private async Task PollGamingInfo_Portable(PollingContext context, SteamIdentity identity)
         {
             var time = DateTime.Now;
             var pollStartTime = context.TimeStarted;
@@ -123,13 +123,13 @@ namespace SteamPoller
 
 
 
-        private static async Task Steam_OnSessionStarted(GamingSessionEventArgs e)
+        private async Task Steam_OnSessionStarted(GamingSessionEventArgs e)
         {
             
         }
 
 
-        private static async Task Steam_OnSessionEnded(GamingSessionEventArgs e)
+        private async Task Steam_OnSessionEnded(GamingSessionEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(e.Session.Player.GameID))
             {
