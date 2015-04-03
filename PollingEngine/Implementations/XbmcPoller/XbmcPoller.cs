@@ -54,7 +54,15 @@ namespace XbmcPoller
             
             bool isDiff;
             bool ended = false;
-            var itemInfo = await GetItemInfo();
+            ItemInfo itemInfo = null;
+            try
+            {
+                itemInfo = await GetItemInfo();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting item info: {0}", ex.Message);
+            }
 
             //await GetPlaybackInfo();
 
