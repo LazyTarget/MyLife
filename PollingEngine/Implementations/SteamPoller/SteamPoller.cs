@@ -12,6 +12,7 @@ using PollingEngine.Core;
 using PortableSteam;
 using PortableSteam.Interfaces.General.ISteamApps;
 using PortableSteam.Interfaces.General.ISteamUser;
+using PortableSteam.Interfaces.General.ISteamUserStats;
 
 namespace SteamPoller
 {
@@ -22,6 +23,8 @@ namespace SteamPoller
 
         private readonly Dictionary<DateTime, GamingInfo> _data = new Dictionary<DateTime, GamingInfo>();
         private readonly List<GamingSession> _sessions = new List<GamingSession>();
+        private GetUserStatsForGameResponseData _gamestatsBefore;
+        private GetUserStatsForGameResponseData _gamestatsAfter;
 
 
         public async Task OnStarting(PollingContext context)
@@ -125,7 +128,20 @@ namespace SteamPoller
 
         private async Task Steam_OnSessionStarted(GamingSessionEventArgs e)
         {
-            
+            _gamestatsBefore = null;
+
+            if (!string.IsNullOrEmpty(e.Session.Player.GameID))
+            {
+                try
+                {
+                    var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(Convert.ToInt32(e.Session.Player.GameID), _steamPollIdentity).GetResponseAsync();
+                    _gamestatsBefore = stats.Data;
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
         }
 
 
@@ -189,6 +205,34 @@ namespace SteamPoller
                 }
 
 
+                try
+                {
+                    var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(Convert.ToInt32(e.Session.Player.GameID), _steamPollIdentity).GetResponseAsync();
+                    _gamestatsAfter = stats.Data;
+
+                    var diffs =
+                        _gamestatsAfter.Stats
+                            .Where(x => x.Value != _gamestatsBefore.Stats.First(y => y.Name == x.Name).Value)
+                            .Select(x => new StatDiff {Pre = _gamestatsBefore.Stats.First(y => y.Name == x.Name), Post = x})
+                            .OrderByDescending(x => x.PercentualDiff)
+                            .ToList();
+
+                    desc += Environment.NewLine;
+                    if (diffs.Any())
+                    {
+                        desc += "Changed stats: " + Environment.NewLine;
+                        foreach (var statDiff in diffs)
+                        {
+                            desc += string.Format("{0}{1}", statDiff, Environment.NewLine);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+
                 var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
@@ -219,7 +263,39 @@ namespace SteamPoller
 
 
 
+        public class StatDiff
+        {
+            public GetUserStatsForGameResponseStats Pre { get; set; }
 
+            public GetUserStatsForGameResponseStats Post { get; set; }
+
+
+            public double Differance
+            {
+                get
+                {
+                    var diff = Post.Value - (double)Pre.Value;
+                    return diff;
+                }
+            }
+            
+            public double PercentualDiff
+            {
+                get
+                {
+                    if (Post.Value <= 0)
+                        return 0;
+                    var procent = Differance/Post.Value;
+                    return procent;
+                }
+            }
+
+            public override string ToString()
+            {
+                var res = string.Format("{0}: {1}=>{2} ({3:p0})", Post.Name, Pre.Value, Post.Value, PercentualDiff);
+                return res;
+            }
+        }
 
 
         public class GamingInfo
