@@ -207,7 +207,8 @@ namespace SteamPoller
 
                 try
                 {
-                    var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(Convert.ToInt32(e.Session.Player.GameID), _steamPollIdentity).GetResponseAsync();
+                    var gameID = Convert.ToInt32(e.Session.Player.GameID);
+                    var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(gameID, _steamPollIdentity).GetResponseAsync();
                     _gamestatsAfter = stats.Data;
 
                     var diffs =
@@ -217,9 +218,17 @@ namespace SteamPoller
                             .OrderByDescending(x => x.PercentualDiff)
                             .ToList();
 
-                    desc += Environment.NewLine;
                     if (diffs.Any())
                     {
+                        desc += Environment.NewLine;
+                        desc += Environment.NewLine;
+
+                        var pop = WritePopularStats(diffs, gameID);
+                        if (!string.IsNullOrEmpty(pop))
+                        {
+                            desc += string.Format("Popular stats: {0}{1}{0}", Environment.NewLine, pop);
+                        }
+
                         desc += "Changed stats: " + Environment.NewLine;
                         foreach (var statDiff in diffs)
                         {
@@ -262,9 +271,82 @@ namespace SteamPoller
         }
 
 
+        private string WritePopularStats(List<StatDiff> diffs, int gameID)
+        {
+            var res = "";
+            if (gameID == 730)      // CS:GO
+            {
+                var dict = new Dictionary<string, string>
+                {
+                    {"total_kills", "You killed {diff} people"},
+                    {"total_deaths", "You died {diff} times"},
+                    {"kill_death_ratio", null},
+                    {"accuracy", null},
+                    {"total_dominations", "You dominated {diff} people"},
+                    {"total_damage_done", "Total damage done: {diff}"},
+                    {"total_wins", "You won {diff} times"},
+                    {"total_rounds_played", "You played {diff} rounds"},
+                    {"total_mvps", "You earned {diff} MVP stars"},
+                    {"total_kills_knife", "Killed {diff} people with the Knife"},
+                    {"total_kills_m4a1", "Killed {diff} people with M4A1"},
+                    {"total_kills_m4a1-s", "Killed {diff} people with M4A1-S"},
+                    {"total_kills_ak47", "Killed {diff} people with AK47"},
+                    {"total_kills_awp", "Killed {diff} people with AWP"},
+                    {"awp_accuracy", null},
+                };
+
+                foreach (var pair in dict)
+                {
+                    var d = diffs.FirstOrDefault(x => x.Name == pair.Key);
+                    if (d != null)
+                        res += pair.Value.Replace("{diff}", d.Differance.ToString()) + Environment.NewLine;
+                    else
+                    {
+                        if (pair.Key == "kill_death_ratio")
+                        {
+                            var kills = diffs.FirstOrDefault(x => x.Name == "total_kills");
+                            var deaths = diffs.FirstOrDefault(x => x.Name == "total_deaths");
+                            if (kills != null && deaths != null)
+                            {
+                                var ratio = kills.Differance / deaths.Differance;
+                                res += string.Format("You had {0} as k/d ratio", ratio) + Environment.NewLine;
+                            }
+                        }
+                        else if (pair.Key == "awp_accuracy")
+                        {
+                            var awpShots = diffs.FirstOrDefault(x => x.Name == "total_shots_awp");
+                            var awpHits = diffs.FirstOrDefault(x => x.Name == "total_hits_awp");
+                            if (awpShots != null && awpHits != null)
+                            {
+                                var accuracy = awpHits.Differance / awpShots.Differance;
+                                res += string.Format("You had {0:p1} accuracy with the AWP", accuracy) + Environment.NewLine;
+                            }
+                        }
+                        else if (pair.Key == "accuracy")
+                        {
+                            var shots = diffs.FirstOrDefault(x => x.Name == "total_shots_hit");
+                            var hits = diffs.FirstOrDefault(x => x.Name == "total_shots_fired");
+                            if (shots != null && hits != null)
+                            {
+                                var accuracy = hits.Differance / shots.Differance;
+                                res += string.Format("You had {0:p1} accuracy", accuracy) + Environment.NewLine;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return res;
+        }
+
 
         public class StatDiff
         {
+            public string Name
+            {
+                get { return Post.Name; }
+            }
+
             public GetUserStatsForGameResponseStats Pre { get; set; }
 
             public GetUserStatsForGameResponseStats Post { get; set; }
@@ -292,7 +374,7 @@ namespace SteamPoller
 
             public override string ToString()
             {
-                var res = string.Format("{0}: {1}=>{2} ({3:p0})", Post.Name, Pre.Value, Post.Value, PercentualDiff);
+                var res = string.Format("{0}: {1} => {2} = {3} ({4:p2})", Post.Name, Pre.Value, Post.Value, Differance, PercentualDiff);
                 return res;
             }
         }
