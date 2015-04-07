@@ -139,6 +139,8 @@ namespace SteamPoller
                     var gameID = Convert.ToInt32(e.Session.Player.GameID);
                     var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(gameID, _steamPollIdentity).GetResponseAsync();
                     _gamestatsBefore = stats.Data;
+                    Debug.WriteLine("game stats (pre), achieve count: " + (_gamestatsBefore.Achievements != null ? _gamestatsBefore.Achievements.Count : 0));
+                    Debug.WriteLine("game stats (pre), stat count: " + (_gamestatsBefore.Stats != null ? _gamestatsBefore.Stats.Count : 0));
                 }
                 catch (Exception ex)
                 {
@@ -220,37 +222,92 @@ namespace SteamPoller
                     {
                         var gameID = Convert.ToInt32(e.Session.Player.GameID);
                         var stats = await SteamWebAPI.General().ISteamUserStats().GetUserStatsForGame(gameID, _steamPollIdentity).GetResponseAsync();
-                        _gamestatsAfter = stats.Data;
-
-                        var diffs =
-                            _gamestatsAfter.Stats
-                                .Where(x => x.Value != _gamestatsBefore.Stats.First(y => y.Name == x.Name).Value)
-                                .Select(x => new StatDiff {Pre = _gamestatsBefore.Stats.First(y => y.Name == x.Name), Post = x})
-                                .OrderByDescending(x => x.PercentualDiff)
-                                .ToList();
-
-                        if (diffs.Any())
+                        if (stats != null && stats.Data != null)
                         {
-                            desc += Environment.NewLine;
-                            desc += Environment.NewLine;
+                            _gamestatsAfter = stats.Data;
+                            Debug.WriteLine("game stats (post), achieve count: " + (_gamestatsAfter.Achievements != null ? _gamestatsAfter.Achievements.Count : 0));
+                            Debug.WriteLine("game stats (post), stat count: " + (_gamestatsAfter.Stats != null ? _gamestatsAfter.Stats.Count : 0));
 
-                            var pop = WritePopularStats(diffs, gameID);
-                            if (!string.IsNullOrEmpty(pop))
+
+                            try
                             {
-                                desc += string.Format("Popular stats: {0}{1}{0}", Environment.NewLine, pop);
+                                var diffs = _gamestatsAfter.Achievements != null
+                                    ? _gamestatsAfter.Achievements
+                                        .Where(x => x.Achieved)
+                                        .Where(x =>
+                                        {
+                                            var pre = _gamestatsBefore.Achievements.FirstOrDefault(y => x.Name == y.Name);
+                                            return pre == null || !pre.Achieved;
+                                        })
+                                        .OrderByDescending(x => x.Achieved)
+                                        .ThenBy(x => x.Name)
+                                        .ToList()
+                                    : new List<GetUserStatsForGameResponseAchievements>();
+
+                                if (diffs.Any())
+                                {
+                                    desc += Environment.NewLine;
+                                    desc += Environment.NewLine;
+
+                                    desc += "Unlocked achivements: " + Environment.NewLine;
+                                    foreach (var achive in diffs)
+                                    {
+                                        desc += string.Format("{0}{1}", achive.Name, Environment.NewLine);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine("Error getting game achieves (post):");
+                                Debug.WriteLine(ex);
                             }
 
-                            desc += "Changed stats: " + Environment.NewLine;
-                            foreach (var statDiff in diffs)
+
+                            try
                             {
-                                desc += string.Format("{0}{1}", statDiff, Environment.NewLine);
+                                var diffs = _gamestatsAfter.Stats != null
+                                    ? _gamestatsAfter.Stats
+                                        .Where(x => _gamestatsBefore.Stats.Any(y => y.Name == x.Name))
+                                        .Where(x => x.Value != _gamestatsBefore.Stats.First(y => y.Name == x.Name).Value)
+                                        .Select(x => new StatDiff
+                                        {
+                                            Pre = _gamestatsBefore.Stats.First(y => y.Name == x.Name),
+                                            Post = x
+                                        })
+                                        .OrderByDescending(x => x.PercentualDiff)
+                                        .ToList()
+                                    : new List<StatDiff>();
+
+                                if (diffs.Any())
+                                {
+                                    desc += Environment.NewLine;
+                                    desc += Environment.NewLine;
+
+                                    var pop = WritePopularStats(diffs, gameID);
+                                    if (!string.IsNullOrEmpty(pop))
+                                    {
+                                        desc += string.Format("Popular stats: {0}{1}{0}", Environment.NewLine, pop);
+                                    }
+
+                                    desc += "Changed stats: " + Environment.NewLine;
+                                    foreach (var statDiff in diffs)
+                                    {
+                                        desc += string.Format("{0}{1}", statDiff, Environment.NewLine);
+                                    }
+                                }
                             }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine("Error getting game stats (post):");
+                                Debug.WriteLine(ex);
+                            }
+
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("Error getting game stats (post):");
+                    Debug.WriteLine("Error getting post game stats:");
                     Debug.WriteLine(ex);
                 }
 
