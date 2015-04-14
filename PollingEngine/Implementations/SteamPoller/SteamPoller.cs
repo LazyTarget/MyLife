@@ -214,7 +214,7 @@ namespace SteamPoller
 
                 try
                 {
-                    if (_gamestatsBefore == null || _gamestatsBefore.Stats == null || !_gamestatsBefore.Stats.Any())
+                    if (_gamestatsBefore == null)
                     {
                         Console.WriteLine("Missing game stats before game session, ignoring stats after");
                     }
@@ -267,11 +267,11 @@ namespace SteamPoller
                             {
                                 var diffs = _gamestatsAfter.Stats != null
                                     ? _gamestatsAfter.Stats
-                                        .Where(x => _gamestatsBefore.Stats.Any(y => y.Name == x.Name))
-                                        .Where(x => x.Value != _gamestatsBefore.Stats.First(y => y.Name == x.Name).Value)
+                                        //.Where(x => _gamestatsBefore.Stats.Any(y => y.Name == x.Name))
+                                        .Where(x => x.Value != _gamestatsBefore.Stats.Where(y => y.Name == x.Name).Select(y => y.Value).FirstOrDefault())
                                         .Select(x => new StatDiff
                                         {
-                                            Pre = _gamestatsBefore.Stats.First(y => y.Name == x.Name),
+                                            Pre = _gamestatsBefore.Stats.FirstOrDefault(y => y.Name == x.Name),
                                             Post = x
                                         })
                                         .OrderByDescending(x => x.PercentualDiff)
@@ -434,7 +434,8 @@ namespace SteamPoller
             {
                 get
                 {
-                    var diff = Post.Value - (double)Pre.Value;
+                    var pre = Pre != null ? (double) Pre.Value : 0;
+                    var diff = Post.Value - pre;
                     return diff;
                 }
             }
@@ -452,7 +453,7 @@ namespace SteamPoller
 
             public override string ToString()
             {
-                var res = string.Format("{0}: {1} => {2} = {3} ({4:p2})", Post.Name, Pre.Value, Post.Value, Differance, PercentualDiff);
+                var res = string.Format("{0}: {1} => {2} = {3} ({4:p2})", Post.Name, Pre != null ? Pre.Value : 0, Post.Value, Differance, PercentualDiff);
                 return res;
             }
         }
