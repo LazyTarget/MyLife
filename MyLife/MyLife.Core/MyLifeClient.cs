@@ -12,6 +12,12 @@ namespace MyLife.Core
         private readonly OdbcClient _odbc;
         private readonly List<ChannelInfo> _channels = new List<ChannelInfo>();
 
+
+        public MyLifeClient()
+        {
+            
+        }
+
         public MyLifeClient(OdbcClient odbc)
         {
             _odbc = odbc;
@@ -58,6 +64,7 @@ namespace MyLife.Core
                     });
                     var list = await Task.WhenAll(GetModifiedEvents(e, channelInfo));
                     list = list.Where(x => x != null).ToArray();
+                    //list = list.Where(x => x.StartTime >= request.StartTime && x.EndTime <= request.EndTime).ToArray();
                     events.AddRange(list);
                 }
             }
@@ -81,6 +88,8 @@ namespace MyLife.Core
 
         private async Task<IEvent> GetModifiedEvent(IEvent evt, ChannelInfo channelInfo)
         {
+            if (_odbc == null)
+                return evt;
             if (evt is ModifiedEvent)
                 return evt;
 

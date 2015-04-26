@@ -15,19 +15,26 @@ namespace MyLife.App.Data
     /// </summary>
     public sealed class MyLifeDataSource
     {
-        private static readonly MyLifeDataSource _instance = new MyLifeDataSource();
+        private static readonly MyLifeDataSource _instance;
+        public static TestEventChannel _testChannel;
 
-
-        private MyLifeClient _myLifeClient;
+        static MyLifeDataSource()
+        {
+            _instance = new MyLifeDataSource();
+        }
 
 
         public MyLifeDataSource()
         {
-            
+#if DEBUG
+            if (_testChannel == null)
+                _testChannel = new RandomEventChannel();
+#endif
         }
 
+        private MyLifeClient _myLifeClient;
 
-        public static bool IsAuthenticated { get { return _instance.User != null; } }
+        public static bool IsAuthenticated { get { return _instance != null && _instance.User != null; } }
 
         public User User { get; private set; }
         
@@ -48,8 +55,17 @@ namespace MyLife.App.Data
 
             try
             {
-                //_instance._myLifeClient = new MyLifeClient();
-                _instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
+                _instance._myLifeClient = new MyLifeClient();
+                //_instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
+
+
+                if (_testChannel != null)
+                {
+                    _instance._myLifeClient.AddChannel(new ChannelInfo
+                    {
+                        Channel = _testChannel,
+                    });
+                }
             }
             catch (Exception ex)
             {
