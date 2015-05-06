@@ -159,8 +159,8 @@ namespace ProcessPoller
                 if (cn.State != ConnectionState.Open)
                     cn.Open();
 
-                var sql = "INSERT INTO ProcessEvents(ProcessID, ProcessName, MachineName, HasExited, StartTime, ExitTime, ExitCode, ModuleName, FileName) " +
-                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                var sql = "INSERT INTO ProcessEvents(ProcessID, ProcessName, MachineName, HasExited, StartTime, ExitTime, ExitCode, MainWindowTitle, ModuleName, FileName) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 var cmd = new OdbcCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@ProcessID", processRunInfo.ProcessID);
                 cmd.Parameters.AddWithValue("@ProcessName", processRunInfo.ProcessName);
@@ -169,6 +169,7 @@ namespace ProcessPoller
                 cmd.Parameters.AddWithValue("@StartTime", processRunInfo.StartTime);
                 cmd.Parameters.AddWithValue("@ExitTime", processRunInfo.HasExited ? (object) processRunInfo.ExitTime : DBNull.Value);
                 cmd.Parameters.AddWithValue("@ExitCode", processRunInfo.ExitCode.HasValue ? (object)processRunInfo.ExitCode.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@MainWindowTitle", !string.IsNullOrEmpty(processRunInfo.MainWindowTitle) ? (object) processRunInfo.MainWindowTitle : DBNull.Value);
                 cmd.Parameters.AddWithValue("@ModuleName", !string.IsNullOrEmpty(processRunInfo.ModuleName) ? (object) processRunInfo.ModuleName : DBNull.Value);
                 cmd.Parameters.AddWithValue("@FileName", !string.IsNullOrEmpty(processRunInfo.FileName) ? (object) processRunInfo.FileName : DBNull.Value);
 

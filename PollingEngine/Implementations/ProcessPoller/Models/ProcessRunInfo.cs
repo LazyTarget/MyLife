@@ -9,11 +9,14 @@ namespace ProcessPoller
 {
     public class ProcessRunInfo
     {
+        private Process _process;
+
         public static ProcessRunInfo FromProcess(Process proc)
         {
             try
             {
                 var res = new ProcessRunInfo();
+                res._process = proc;
                 res.ProcessID = proc.Id;
                 res.ProcessName = proc.ProcessName;
                 res.MachineName = proc.MachineName;
@@ -32,6 +35,7 @@ namespace ProcessPoller
 
                 try
                 {
+                    res.MainWindowTitle = proc.MainWindowTitle;
                     res.ModuleName = proc.MainModule.ModuleName;
                     res.FileName = proc.MainModule.FileName;
                 }
@@ -70,6 +74,7 @@ namespace ProcessPoller
         public string MachineName { get; private set; }
         public string ModuleName { get; private set; }
         public string FileName { get; private set; }
+        public string MainWindowTitle { get; private set; }
         public bool HasExited { get; set; }
         public int? ExitCode { get; private set; }
         public DateTime StartTime { get; private set; }
@@ -97,8 +102,9 @@ namespace ProcessPoller
 
         public Process GetProcess()
         {
-            var proc = Process.GetProcessById(ProcessID);
-            return proc;
+            //var proc = Process.GetProcessById(ProcessID);
+            //return proc;
+            return _process;
         }
 
         public override string ToString()
