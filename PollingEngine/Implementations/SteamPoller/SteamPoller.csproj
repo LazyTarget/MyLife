@@ -38,6 +38,7 @@
       <HintPath>..\..\..\packages\SteamWebAPI.1.0.13\lib\portable-net45+wp8+win8\PortableSteam.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Extensions">

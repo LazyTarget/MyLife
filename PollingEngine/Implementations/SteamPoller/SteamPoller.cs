@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
@@ -312,7 +313,8 @@ namespace SteamPoller
                 }
 
 
-                var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
+                //var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
+                var connectionString = ConfigurationManager.ConnectionStrings["PollingDatabase"].ConnectionString;
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
                     cn.Open();
