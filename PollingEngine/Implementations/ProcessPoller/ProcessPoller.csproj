@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{885DEFB7-06EE-46CB-B75B-CE4E9128246B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{B5F898D5-729E-4F69-AD10-7ED4317DBD65}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PollingEngine</RootNamespace>
-    <AssemblyName>PollingEngine</AssemblyName>
+    <RootNamespace>ProcessPoller</RootNamespace>
+    <AssemblyName>ProcessPoller</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,7 +31,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,28 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="ProcessPoller.cs" />
+    <Compile Include="Models\ProcessRunInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Implementations\ProcessPoller\ProcessPoller.csproj">
-      <Project>{b5f898d5-729e-4f69-ad10-7ed4317dbd65}</Project>
-      <Name>ProcessPoller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Implementations\SteamPoller\SteamPoller.csproj">
-      <Project>{384a2d65-ebe8-4808-9798-9f24b7911b76}</Project>
-      <Name>SteamPoller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Implementations\XbmcPoller\XbmcPoller.csproj">
-      <Project>{77fed2f2-4357-4d68-9d5d-79c334d399c1}</Project>
-      <Name>XbmcPoller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PollingEngine.Core\PollingEngine.Core.csproj">
+    <ProjectReference Include="..\..\PollingEngine.Core\PollingEngine.Core.csproj">
       <Project>{e959066a-1d55-4dbd-b5bf-49a717272576}</Project>
       <Name>PollingEngine.Core</Name>
     </ProjectReference>
