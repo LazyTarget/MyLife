@@ -21,6 +21,7 @@ namespace ProcessPoller
 
         public async Task OnInterval(PollingContext context)
         {
+            Console.WriteLine("Polling processes");
             var time = DateTime.Now;
             var processes = Process.GetProcesses();
 
@@ -55,12 +56,8 @@ namespace ProcessPoller
 
 
 
-            //Console.WriteLine("Poll interval");
             foreach (var processRunInfo in exited)
             {
-                processRunInfo.HasExited = true;
-                processRunInfo.ExitTime = DateTime.Now;
-
                 OnProcessExited(processRunInfo);
             }
 
