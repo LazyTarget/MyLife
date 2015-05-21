@@ -195,6 +195,10 @@ namespace XbmcPoller
             
         }
 
+        public void ApplyArguments(string[] args)
+        {
+            
+        }
 
 
         private async Task<ItemInfo> GetItemInfo()

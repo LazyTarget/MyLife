@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using PollingEngine.Core;
 using PortableSteam;
-using PortableSteam.Interfaces.General.ISteamApps;
 using PortableSteam.Interfaces.General.ISteamUser;
 using PortableSteam.Interfaces.General.ISteamUserStats;
 
@@ -17,8 +16,6 @@ namespace SteamPoller
 {
     public class SteamPoller2 : IPollingProgram
     {
-        private long _lastSessionID = 0;
-        private string _apiKey = "511DFA79B7394CEFA286165D20C46FC1";
         private readonly Dictionary<SteamIdentity, GamerInfo> _data = new Dictionary<SteamIdentity, GamerInfo>();
         private OdbcConnection _odbc;
         private ISteamPollerSettings _settings;
@@ -34,8 +31,10 @@ namespace SteamPoller
             settings.Identities = new List<long>
             {
                 { 76561197994923014 },  // LazyTarget
-                { 76561198000854855 },  // Moerta
-                { 76561198038673865 },  // Exo
+                //{ 76561198000854855 },  // Moerta
+                //{ 76561198038673865 },  // Exo
+                { 76561198006316454 },  // Richard
+                //{ 76561198071019307 },  // Snakeman
             };
         }
 
@@ -70,14 +69,63 @@ namespace SteamPoller
             
         }
 
-        
+        public void ApplyArguments(string[] args)
+        {
+            if (args.Length >= 2)
+            {
+                var verb = args[0].ToLower();
+                var subject = args[1].ToLower();
+                var value = args.Length >= 3 ? args[2] : null;
+
+                if (verb == "subscribe")
+                {
+                    value = subject;
+                    long steamID;
+                    if (long.TryParse(value, out steamID))
+                    {
+                        if (Identities.Any(x => x.SteamID == steamID))
+                            Console.WriteLine("SteamIdentity already subscribed: " + value);
+                        else
+                        {
+                            Identities.Add(SteamIdentity.FromSteamID(steamID));
+                            Console.WriteLine("Subscribed to SteamIdentity: " + steamID);
+                        }
+                    }
+                    else
+                        Console.WriteLine("Failed to parse SteamIdentity: {0}. Must be numeric", value);
+                }
+                else if (verb == "unsubscribe")
+                {
+                    value = subject;
+                    long steamID;
+                    if (long.TryParse(value, out steamID))
+                    {
+                        if (Identities.Any(x => x.SteamID == steamID))
+                        {
+                            var matches = Identities.Where(x => x.SteamID == steamID).ToList();
+                            foreach (var steamIdentity in matches)
+                                Identities.Remove(steamIdentity);
+                            Console.WriteLine("SteamIdentity unsubscribed: " + value);
+                        }
+                        else
+                        {
+                            Identities.Add(SteamIdentity.FromSteamID(steamID));
+                            Console.WriteLine("Not subscribed to SteamIdentity: " + steamID);
+                        }
+                    }
+                    else
+                        Console.WriteLine("Failed to parse SteamIdentity: {0}. Must be numeric", value);
+                }
+            }
+        }
+
 
         private async Task PollGamingInfo_Portable(PollingContext context, IList<SteamIdentity> identities)
         {
-            var time = DateTime.Now;
-            var pollStartTime = context.TimeStarted;
-            if (pollStartTime == DateTime.MinValue)
-                pollStartTime = time;
+            var time = DateTime.UtcNow;
+            //var pollStartTime = context.TimeStarted.ToUniversalTime();
+            //if (pollStartTime == DateTime.MinValue)
+            //    pollStartTime = time;
             
             var players = await SteamWebAPI.General().ISteamUser().GetPlayerSummaries(identities.ToArray()).GetResponseAsync();
             if (players == null || players.Data == null || players.Data.Players == null)
@@ -108,18 +156,17 @@ namespace SteamPoller
                 if (diff)
                 {
                     Debug.WriteLine("Diff detected:");
-                    Debug.WriteLine("PersonaState: {0} vs {1}", gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.PersonaState.ToString() : "NO LAST INFO NULL", currentSession.Player.PersonaState);
-                    Debug.WriteLine("GameID: {0} vs {1}", gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.GameID ?? "NULL" : "NO LAST INTO", currentSession.Player.GameID ?? "NULL");
-                    Debug.WriteLine("GameExtraInfo: {0} vs {1}", gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.GameExtraInfo ?? "NULL" : "NULL", currentSession.Player.GameExtraInfo ?? "NULL");
+                    Debug.WriteLine("PersonaState: {0} vs {1}",     gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.PersonaState.ToString() : "NO LAST INFO NULL", currentSession.Player.PersonaState);
+                    Debug.WriteLine("GameID: {0} vs {1}",           gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.GameID ?? "NULL" : "NO LAST INTO", currentSession.Player.GameID ?? "NULL");
+                    Debug.WriteLine("GameExtraInfo: {0} vs {1}",    gamerInfo.ActiveSession != null ? gamerInfo.ActiveSession.Player.GameExtraInfo ?? "NULL" : "NULL", currentSession.Player.GameExtraInfo ?? "NULL");
 
                     if (gamerInfo.ActiveSession != null)
                     {
                         Debug.WriteLine("Session ended: \t\t" + gamerInfo.ActiveSession);
                         await Steam_OnSessionEnded(new GamingSessionEventArgs { Session = gamerInfo.ActiveSession, Identity = player.Identity });
                     }
-
-                    currentSession.SessionID = ++_lastSessionID;
                     gamerInfo.ActiveSession = currentSession;
+
 
                     // todo: clear previous?, or use X intervals to ensure user stopped playing
                     gamerInfo.Sessions.Add(gamerInfo.ActiveSession);
@@ -131,6 +178,20 @@ namespace SteamPoller
                 {
                     var timeDiff = time.Subtract(gamerInfo.ActiveSession.Time);
                     gamerInfo.ActiveSession.Duration = timeDiff;
+
+
+                    if (!string.IsNullOrWhiteSpace(gamerInfo.Player.GameID))
+                    {
+                        var updateInterval = 40;
+                        //var modulo = timeDiff.TotalSeconds % (context.Interval.TotalSeconds);
+                        var modulo = context.IntervalSequence % updateInterval;
+                        if (modulo == 0)
+                        {
+                            // Each 40th interval, update gaming session (at 15 sec/interval = each 10 minutes)
+                            Console.WriteLine("Updating game session: " + gamerInfo.ActiveSession);
+                            await StoreUserGameSession(gamerInfo.ActiveSession, true);
+                        }
+                    }
                 }
                 
                 Debug.WriteLine("Session: \t\t\t" + gamerInfo.ActiveSession);
@@ -147,6 +208,16 @@ namespace SteamPoller
 
         private async Task Steam_OnSessionStarted(GamingSessionEventArgs e)
         {
+            try
+            {
+                await StoreUserGameSession(e.Session, true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to store game session, Error: " + ex.Message);
+                throw;
+            }
+
             if (!string.IsNullOrWhiteSpace(e.Session.Player.GameID))
             {
                 var gameID = Convert.ToInt32(e.Session.Player.GameID);
@@ -174,11 +245,11 @@ namespace SteamPoller
 
             try
             {
-                await StoreUserGameSession(e.Session);
+                await StoreUserGameSession(e.Session, false);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                Console.WriteLine("Failed to store game session, Error: " + ex.Message);
                 throw;
             }
         }
@@ -312,6 +383,8 @@ namespace SteamPoller
 
         private async Task StoreUserGameStats(int gameID, SteamIdentity steamIdentity, IList<GetUserStatsForGameResponseStats> stats, long sessionID)
         {
+            if (stats == null || !stats.Any())
+                return;
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
             var time = DateTime.UtcNow;
@@ -325,8 +398,8 @@ namespace SteamPoller
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
                     cmd.Parameters.AddWithValue("@GameID", gameID);
-                    cmd.Parameters.AddWithValue("@SessionID", sessionID);
-                    cmd.Parameters.AddWithValue("@Time", time);
+                    cmd.Parameters.AddWithValue("@SessionID", sessionID > 0 ? (object)sessionID : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Time", time.ToUniversalTime());
                     cmd.Parameters.AddWithValue("@Name", stat.Name);
                     cmd.Parameters.AddWithValue("@Value", stat.Value);
 
@@ -343,6 +416,8 @@ namespace SteamPoller
 
         private async Task StoreUserGameAchievements(int gameID, SteamIdentity steamIdentity, IList<GetUserStatsForGameResponseAchievements> achievements, long sessionID)
         {
+            if (achievements == null || !achievements.Any())
+                return;
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
             var time = DateTime.UtcNow;
@@ -356,8 +431,8 @@ namespace SteamPoller
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
                     cmd.Parameters.AddWithValue("@GameID", gameID);
-                    cmd.Parameters.AddWithValue("@SessionID", sessionID);
-                    cmd.Parameters.AddWithValue("@Time", time);
+                    cmd.Parameters.AddWithValue("@SessionID", sessionID > 0 ? (object) sessionID : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Time", time.ToUniversalTime());
                     cmd.Parameters.AddWithValue("@Name", achive.Name);
                     cmd.Parameters.AddWithValue("@Achieved", achive.Achieved);
 
@@ -372,29 +447,72 @@ namespace SteamPoller
         }
 
 
-        private async Task StoreUserGameSession(GamingSession session)
+        private async Task StoreUserGameSession(GamingSession session, bool active)
         {
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
 
             int gameID;
             int.TryParse(session.Player.GameID, out gameID);
-            var start = session.Time;
-            var end = session.Time.Add(session.Duration);
+            if (gameID <= 0)
+                return;
+
+            var start = session.Time.ToUniversalTime();
+            var end = session.Time.Add(session.Duration).ToUniversalTime();
             var steamIdentity = session.Player.Identity;
+            var cmd = _odbc.CreateCommand();
+            var changes = 0;
             try
             {
-                var sql = "INSERT INTO Steam_GamingSessions(UserID, GameID, GameName, StartTime, EndTime) " +
-                            "VALUES (?, ?, ?, ?, ?)";
-                var cmd = _odbc.CreateCommand();
-                cmd.CommandText = sql;
-                cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
-                cmd.Parameters.AddWithValue("@GameID", gameID);
-                cmd.Parameters.AddWithValue("@GameName", session.Player.GameExtraInfo);
-                cmd.Parameters.AddWithValue("@StartTime", start);
-                cmd.Parameters.AddWithValue("@EndTime", end);
+                if (session.SessionID <= 0)
+                {
+                    // Close active sessions
+                    var sql = "UPDATE Steam_GamingSessions " +
+                              "SET Active = ? " +       // todo: append a Interval to the EndTime?
+                              "WHERE UserID = ? AND GameID = ?";
+                    cmd.CommandText = sql;
+                    cmd.Parameters.AddWithValue("@Active", false);
+                    cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
+                    cmd.Parameters.AddWithValue("@GameID", gameID);
+                    changes += cmd.ExecuteNonQuery();       // todo: inteligently continue sessions?
 
-                var changes = cmd.ExecuteNonQuery();
+
+                    // Append current session
+                    cmd = _odbc.CreateCommand();
+                    sql = "INSERT INTO Steam_GamingSessions(UserID, GameID, GameName, StartTime, EndTime, Active) " +
+                          "VALUES (?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
+                    var sessionIDParam = new OdbcParameter("@SessionID", OdbcType.BigInt, 4)
+                    {
+                        Direction = ParameterDirection.Output,
+                    };
+                    cmd.CommandText = sql;
+                    cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
+                    cmd.Parameters.AddWithValue("@GameID", gameID);
+                    cmd.Parameters.AddWithValue("@GameName", session.Player.GameExtraInfo);
+                    cmd.Parameters.AddWithValue("@StartTime", start);
+                    cmd.Parameters.AddWithValue("@EndTime", end);
+                    cmd.Parameters.AddWithValue("@Active", active);
+                    cmd.Parameters.Add(sessionIDParam);
+                    changes += cmd.ExecuteNonQuery();
+                    session.SessionID = (long) sessionIDParam.Value;
+                }
+                else
+                {
+                    var sql = "UPDATE Steam_GamingSessions " +
+                              "SET StartTime = ?, " +
+                              "    EndTime = ?, " +
+                              "    Active = ? " +
+                              "WHERE ID = ?";
+                    cmd.CommandText = sql;
+                    //cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
+                    //cmd.Parameters.AddWithValue("@GameID", gameID);
+                    //cmd.Parameters.AddWithValue("@GameName", session.Player.GameExtraInfo);
+                    cmd.Parameters.AddWithValue("@StartTime", start);
+                    cmd.Parameters.AddWithValue("@EndTime", end);
+                    cmd.Parameters.AddWithValue("@Active", active);
+                    cmd.Parameters.AddWithValue("@SessionID", session.SessionID);
+                    changes += cmd.ExecuteNonQuery();
+                }
             }
             catch (Exception ex)
             {

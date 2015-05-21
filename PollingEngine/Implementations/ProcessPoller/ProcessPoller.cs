@@ -75,6 +75,10 @@ namespace ProcessPoller
             
         }
 
+        public void ApplyArguments(string[] args)
+        {
+            
+        }
 
 
         private static string TimeSpanToString(TimeSpan duration)

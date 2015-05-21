@@ -14,6 +14,8 @@ namespace PollingEngine.Core
 
         public TimeSpan Interval { get; private set; }
 
+        public int IntervalSequence { get; internal set; }
+
         public State State { get; set; }
         
         public DateTime TimeStarted { get; set; }

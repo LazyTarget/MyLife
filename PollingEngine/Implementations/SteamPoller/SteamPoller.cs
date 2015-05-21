@@ -44,7 +44,12 @@ namespace SteamPoller
             
         }
 
-        
+        public void ApplyArguments(string[] args)
+        {
+            
+        }
+
+
         private async Task PollGamingInfo_Portable(PollingContext context, SteamIdentity identity)
         {
             var time = DateTime.Now;

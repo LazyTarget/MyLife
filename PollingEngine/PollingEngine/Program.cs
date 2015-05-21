@@ -13,9 +13,9 @@ namespace PollingEngine
 
             var manager = new ProgramManager();
             var contexts = new List<PollingContext>();
-            contexts.Add(new PollingContext(new SteamPoller.SteamPoller(), TimeSpan.FromSeconds(15)));
-            contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(), TimeSpan.FromSeconds(15)));
-            contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(), TimeSpan.FromSeconds(15)));
+            contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(), TimeSpan.FromSeconds(15)));
+            //contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(), TimeSpan.FromSeconds(15)));
+            //contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(), TimeSpan.FromSeconds(15)));
 
             manager.Load(contexts);
             manager.Start();
@@ -79,6 +79,27 @@ namespace PollingEngine
                                     Console.WriteLine("TimeStarted: " + ctx.TimeStarted);
                                     Console.WriteLine("TimeStopped: " + ctx.TimeStopped);
                                     Console.WriteLine();
+                                    Console.WriteLine();
+                                }
+                                else
+                                    Console.WriteLine("Context '{0}' not found", value);
+                            }
+                        }
+                        else if (verb == "set")
+                        {
+                            if (subject == "progconfig")
+                            {
+                                var ctx = contexts.FirstOrDefault(x => x.Program.GetType().Name.Equals(value, StringComparison.InvariantCultureIgnoreCase));
+                                if (ctx != null)
+                                {
+                                    var configArgs = parts.Skip(3).ToArray();
+
+                                    Console.WriteLine();
+                                    Console.WriteLine("--Pushing configs to program-- ");
+                                    Console.WriteLine("Args: " + string.Join(" ", configArgs));
+                                    Console.WriteLine("Program: " + ctx.Program);
+                                    ctx.Program.ApplyArguments(configArgs);
+
                                     Console.WriteLine();
                                 }
                                 else

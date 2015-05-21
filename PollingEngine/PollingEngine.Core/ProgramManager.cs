@@ -55,6 +55,7 @@ namespace PollingEngine.Core
                     Debug.WriteLine("OnInterval for program: " + progName);
                     try
                     {
+                        context.IntervalSequence++;
                         prog.OnInterval(context).Wait();
                     }
                     catch (Exception ex)
@@ -79,7 +80,7 @@ namespace PollingEngine.Core
                 }
                 else if (context.State == State.Stopped)
                 {
-                    
+                    //context.IntervalSequence = 0;
                 }
             }
             Console.WriteLine("Program exited: " + progName);

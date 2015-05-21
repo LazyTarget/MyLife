@@ -7,5 +7,6 @@ namespace PollingEngine.Core
         Task OnStarting(PollingContext context);
         Task OnInterval(PollingContext context);
         Task OnStopping(PollingContext context);
+        void ApplyArguments(string[] args);
     }
 }
