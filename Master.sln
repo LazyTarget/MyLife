@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
 EndProject
@@ -57,6 +57,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XbmcPoller", "PollingEngine\Implementations\XbmcPoller\XbmcPoller.csproj", "{77FED2F2-4357-4D68-9D5D-79C334D399C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessPoller", "PollingEngine\Implementations\ProcessPoller\ProcessPoller.csproj", "{B5F898D5-729E-4F69-AD10-7ED4317DBD65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution items", "_Solution items", "{47EDEEEB-3B43-4BAD-819E-B3CADF364823}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C662A444-DFB5-4BA3-8D38-7C8B98D6CE6A}"
+	ProjectSection(SolutionItems) = preProject
+		Data\Database Create script.sql = Data\Database Create script.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -319,5 +326,6 @@ Global
 		{384A2D65-EBE8-4808-9798-9F24B7911B76} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 		{77FED2F2-4357-4D68-9D5D-79C334D399C1} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
+		{C662A444-DFB5-4BA3-8D38-7C8B98D6CE6A} = {47EDEEEB-3B43-4BAD-819E-B3CADF364823}
 	EndGlobalSection
 EndGlobal
