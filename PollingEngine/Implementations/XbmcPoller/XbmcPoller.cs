@@ -321,7 +321,7 @@ namespace XbmcPoller
 
 
                 //var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
-                var connectionString = ConfigurationManager.ConnectionStrings["PollingDatabase"].ConnectionString;
+                var connectionString = ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
                     cn.Open();

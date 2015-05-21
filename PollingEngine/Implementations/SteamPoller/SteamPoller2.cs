@@ -31,6 +31,7 @@ namespace SteamPoller
             settings.Identities = new List<long>
             {
                 { 76561197994923014 },  // LazyTarget
+                { 76561197969519652 },  // Avac
                 //{ 76561198000854855 },  // Moerta
                 //{ 76561198038673865 },  // Exo
                 { 76561198006316454 },  // Richard
@@ -148,7 +149,8 @@ namespace SteamPoller
                 if (gamerInfo == null)
                 {
                     gamerInfo = new GamerInfo();
-                    gamerInfo.Player = player;
+                    //gamerInfo.Player = player;
+                    gamerInfo.Identity = player.Identity;
                     _data[player.Identity] = gamerInfo;
                 }
 
@@ -180,7 +182,7 @@ namespace SteamPoller
                     gamerInfo.ActiveSession.Duration = timeDiff;
 
 
-                    if (!string.IsNullOrWhiteSpace(gamerInfo.Player.GameID))
+                    if (!string.IsNullOrWhiteSpace(gamerInfo.ActiveSession.Player.GameID))
                     {
                         var updateInterval = 40;
                         //var modulo = timeDiff.TotalSeconds % (context.Interval.TotalSeconds);
@@ -649,7 +651,8 @@ namespace SteamPoller
                 Sessions = new List<GamingSession>();
             }
 
-            public GetPlayerSummariesResponsePlayer Player { get; set; }
+            //public GetPlayerSummariesResponsePlayer Player { get; set; }
+            public SteamIdentity Identity { get; set; }
             public List<GamingSession> Sessions { get; set; }
             public GamingSession ActiveSession { get; set; }
         }

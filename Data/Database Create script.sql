@@ -1,6 +1,6 @@
 USE [master]
 GO
-/****** Object:  Database [PollingData]    Script Date: 2015-05-21 15:51:58 ******/
+/****** Object:  Database [PollingData]    Script Date: 2015-05-21 22:42:56 ******/
 CREATE DATABASE [PollingData]
  CONTAINMENT = NONE
  ON  PRIMARY 
@@ -73,16 +73,14 @@ ALTER DATABASE [PollingData] SET TARGET_RECOVERY_TIME = 0 SECONDS
 GO
 ALTER DATABASE [PollingData] SET DELAYED_DURABILITY = DISABLED 
 GO
-EXEC sys.sp_db_vardecimal_storage_format N'PollingData', N'ON'
-GO
 USE [PollingData]
 GO
-/****** Object:  User [Developer]    Script Date: 2015-05-21 15:51:59 ******/
+/****** Object:  User [Developer]    Script Date: 2015-05-21 22:42:56 ******/
 CREATE USER [Developer] FOR LOGIN [Developer] WITH DEFAULT_SCHEMA=[dbo]
 GO
 ALTER ROLE [db_owner] ADD MEMBER [Developer]
 GO
-/****** Object:  Table [dbo].[Steam_GameAchievements]    Script Date: 2015-05-21 15:51:59 ******/
+/****** Object:  Table [dbo].[Steam_GameAchievements]    Script Date: 2015-05-21 22:42:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -106,7 +104,7 @@ CREATE TABLE [dbo].[Steam_GameAchievements](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Steam_GameStats]    Script Date: 2015-05-21 15:51:59 ******/
+/****** Object:  Table [dbo].[Steam_GameStats]    Script Date: 2015-05-21 22:42:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -130,7 +128,7 @@ CREATE TABLE [dbo].[Steam_GameStats](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Steam_GamingSessions]    Script Date: 2015-05-21 15:51:59 ******/
+/****** Object:  Table [dbo].[Steam_GamingSessions]    Script Date: 2015-05-21 22:42:56 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -144,6 +142,7 @@ CREATE TABLE [dbo].[Steam_GamingSessions](
 	[GameName] [varchar](255) NOT NULL,
 	[StartTime] [datetime] NOT NULL,
 	[EndTime] [datetime] NOT NULL,
+	[Active] [bit] NOT NULL,
  CONSTRAINT [PK_Steam_GamingSessions] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC

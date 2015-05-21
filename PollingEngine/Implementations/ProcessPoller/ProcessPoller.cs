@@ -155,7 +155,7 @@ namespace ProcessPoller
                 
                 Debug.WriteLine("Begin creating odbc entry");
 
-                var connectionString = ConfigurationManager.ConnectionStrings["PollingDatabase"].ConnectionString;
+                var connectionString = ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
                     cn.Open();
