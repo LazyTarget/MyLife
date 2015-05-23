@@ -38,12 +38,20 @@ namespace PollingEngine.Core
                 var prog = context.Program;
                 if (context.State == State.Starting)
                 {
-                    Console.WriteLine("Starting program: " + progName);
+                    Console.WriteLine("Starting program: {0}. Interval: {1}", progName, context.Interval);
                     try
                     {
                         prog.OnStarting(context).Wait();
-                        context.State = State.Running;
-                        context.TimeStarted = DateTime.Now;
+                        if (context.Interval.TotalSeconds > 0)
+                        {
+                            context.State = State.Running;
+                            context.TimeStarted = DateTime.Now;
+                        }
+                        else
+                        {
+                            context.State = State.Stopped;
+                            Debug.WriteLine("Invalid interval for program: '{0}': {1}", progName, context.Interval);
+                        }
                     }
                     catch (Exception ex)
                     {

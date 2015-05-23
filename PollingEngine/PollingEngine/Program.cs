@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using PollingEngine.Core;
 
@@ -13,9 +14,9 @@ namespace PollingEngine
 
             var manager = new ProgramManager();
             var contexts = new List<PollingContext>();
-            contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(), TimeSpan.FromSeconds(30)));
-            contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(), TimeSpan.FromSeconds(15)));
-            contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(), TimeSpan.FromSeconds(20)));
+            contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(),     TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.SteamPoller2")))));
+            contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(),        TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.XbmcPoller")))));
+            contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(),  TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.ProcessPoller")))));
 
             manager.Load(contexts);
             manager.Start();
