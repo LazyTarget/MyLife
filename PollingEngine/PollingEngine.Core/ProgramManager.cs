@@ -56,6 +56,7 @@ namespace PollingEngine.Core
                     catch (Exception ex)
                     {
                         Console.WriteLine("Error starting program '{0}': {1}", progName, ex.Message);
+                        context.State = State.Stopping;     // stop program if failure to start
                     }
                 }
                 else if (context.State == State.Running)
@@ -65,6 +66,7 @@ namespace PollingEngine.Core
                     {
                         context.IntervalSequence++;
                         prog.OnInterval(context).Wait();
+                        context.TimeRunning = context.TimeRunning.Add(context.Interval);
                     }
                     catch (Exception ex)
                     {
@@ -84,6 +86,7 @@ namespace PollingEngine.Core
                     catch (Exception ex)
                     {
                         Console.WriteLine("Error stopping program '{0}': {1}", progName, ex.Message);
+                        context.State = State.Stopped;     // force stop program if failure to stop
                     }
                 }
                 else if (context.State == State.Stopped)

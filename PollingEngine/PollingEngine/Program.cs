@@ -74,11 +74,13 @@ namespace PollingEngine
                                 {
                                     Console.WriteLine();
                                     Console.WriteLine("--Program info-- ");
+                                    Console.WriteLine("Program: " + ctx.Program);
                                     Console.WriteLine("State: " + ctx.State);
                                     Console.WriteLine("Interval: " + ctx.Interval);
-                                    Console.WriteLine("Program: " + ctx.Program);
+                                    Console.WriteLine("IntervalSequence: " + ctx.IntervalSequence);
                                     Console.WriteLine("TimeStarted: " + ctx.TimeStarted);
                                     Console.WriteLine("TimeStopped: " + ctx.TimeStopped);
+                                    Console.WriteLine("TimeRunning: " + ctx.TimeRunning);
                                     Console.WriteLine();
                                     Console.WriteLine();
                                 }

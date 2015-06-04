@@ -21,6 +21,7 @@ namespace PollingEngine.Core
         public DateTime TimeStarted { get; set; }
 
         public DateTime TimeStopped { get; set; }
-
+        
+        public TimeSpan TimeRunning { get; set; }
     }
 }
