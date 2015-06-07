@@ -9,6 +9,11 @@
         string ApiPassword { get; }
 
         string ConnString { get; }
+
+
+        int MinSessionLength { get; }
+
+        int MinVideoLength { get; }
         
     }
 }

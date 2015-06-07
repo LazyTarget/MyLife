@@ -32,7 +32,7 @@ namespace XbmcPoller
         [ConfigurationProperty("ApiPassword")]
         public string ApiPassword
         {
-            get { return (string) this["ApiPassword"]; }
+            get { return (string)this["ApiPassword"]; }
             set { this["ApiPassword"] = value; }
         }
 
@@ -41,6 +41,20 @@ namespace XbmcPoller
         {
             get { return (string)this["ConnString"]; }
             set { this["ConnString"] = value; }
+        }
+
+        [ConfigurationProperty("MinSessionLength", DefaultValue = 15)]
+        public int MinSessionLength
+        {
+            get { return (int)this["MinSessionLength"]; }
+            set { this["MinSessionLength"] = value; }
+        }
+
+        [ConfigurationProperty("MinVideoLength", DefaultValue = 30)]
+        public int MinVideoLength
+        {
+            get { return (int)this["MinVideoLength"]; }
+            set { this["MinVideoLength"] = value; }
         }
     }
 }

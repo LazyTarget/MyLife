@@ -9,5 +9,9 @@
         public string ApiPassword { get; set; }
 
         public string ConnString { get; set; }
+        
+        public int MinSessionLength { get; set; }
+
+        public int MinVideoLength { get; set; }
     }
 }
