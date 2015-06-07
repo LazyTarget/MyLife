@@ -287,6 +287,8 @@ namespace SteamPoller
 
         private async Task<IList<GetUserStatsForGameResponseStats>> FilterStatsWithDifferance(int gameID, SteamIdentity steamIdentity, IList<GetUserStatsForGameResponseStats> stats)
         {
+            if (stats == null || !stats.Any())
+                return null;
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
 
@@ -335,6 +337,8 @@ namespace SteamPoller
 
         private async Task<IList<GetUserStatsForGameResponseAchievements>> FilterAchievementsWithDifferance(int gameID, SteamIdentity steamIdentity, IList<GetUserStatsForGameResponseAchievements> achievements)
         {
+            if (achievements == null || !achievements.Any())
+                return null;
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
 
@@ -449,14 +453,14 @@ namespace SteamPoller
 
         private async Task StoreUserGameSession(GamingSession session, bool active)
         {
-            if (_odbc.State != ConnectionState.Open)
-                _odbc.Open();
-
             int gameID;
             int.TryParse(session.Player.GameID, out gameID);
             if (gameID <= 0)
                 return;
+            if (_odbc.State != ConnectionState.Open)
+                _odbc.Open();
 
+            var gameName = session.Player.GameExtraInfo ?? "NULL";
             var start = session.Time.ToUniversalTime();
             var end = session.Time.Add(session.Duration).ToUniversalTime();
             var steamIdentity = session.Player.Identity;
@@ -488,7 +492,7 @@ namespace SteamPoller
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
                     cmd.Parameters.AddWithValue("@GameID", gameID);
-                    cmd.Parameters.AddWithValue("@GameName", session.Player.GameExtraInfo);
+                    cmd.Parameters.AddWithValue("@GameName", gameName);
                     cmd.Parameters.AddWithValue("@StartTime", start);
                     cmd.Parameters.AddWithValue("@EndTime", end);
                     cmd.Parameters.AddWithValue("@Active", active);
