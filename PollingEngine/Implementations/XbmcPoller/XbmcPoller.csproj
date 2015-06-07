@@ -51,12 +51,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ItemInfo.cs" />
+    <Compile Include="Models\CrSessionVideo.cs" />
+    <Compile Include="Models\VideoItemInfo.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="Settings\IXbmcPollerSettings.cs" />
     <Compile Include="Settings\XbmcPollerConfigSection.cs" />
     <Compile Include="Settings\XbmcPollerSettingsConfigElement.cs" />
     <Compile Include="Settings\XbmcPollerSettings.cs" />
+    <Compile Include="Models\WatchSessionInfo.cs" />
     <Compile Include="XbmcPoller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

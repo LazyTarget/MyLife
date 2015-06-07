@@ -1,6 +1,6 @@
 USE [master]
 GO
-/****** Object:  Database [PollingData]    Script Date: 2015-05-21 22:42:56 ******/
+/****** Object:  Database [PollingData]    Script Date: 2015-06-07 23:48:33 ******/
 CREATE DATABASE [PollingData]
  CONTAINMENT = NONE
  ON  PRIMARY 
@@ -75,12 +75,74 @@ ALTER DATABASE [PollingData] SET DELAYED_DURABILITY = DISABLED
 GO
 USE [PollingData]
 GO
-/****** Object:  User [Developer]    Script Date: 2015-05-21 22:42:56 ******/
+/****** Object:  User [Developer]    Script Date: 2015-06-07 23:48:33 ******/
 CREATE USER [Developer] FOR LOGIN [Developer] WITH DEFAULT_SCHEMA=[dbo]
 GO
 ALTER ROLE [db_owner] ADD MEMBER [Developer]
 GO
-/****** Object:  Table [dbo].[Steam_GameAchievements]    Script Date: 2015-05-21 22:42:56 ******/
+/****** Object:  Table [dbo].[Kodi_CrSessionVideos]    Script Date: 2015-06-07 23:48:33 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Kodi_CrSessionVideos](
+	[SessionID] [bigint] NOT NULL,
+	[VideoID] [bigint] NOT NULL,
+	[StartTime] [datetime] NULL,
+	[EndTime] [datetime] NULL,
+	[Active] [bit] NOT NULL,
+ CONSTRAINT [PK_Kodi_CrSessionVideos] PRIMARY KEY CLUSTERED 
+(
+	[SessionID] ASC,
+	[VideoID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Kodi_VideoSessions]    Script Date: 2015-06-07 23:48:33 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Kodi_VideoSessions](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[StartTime] [datetime] NOT NULL,
+	[EndTime] [datetime] NOT NULL,
+	[Active] [bit] NOT NULL,
+ CONSTRAINT [PK_Kodi_VideoSessions] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Kodi_ViewedVideos]    Script Date: 2015-06-07 23:48:33 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Kodi_ViewedVideos](
+	[ID] [bigint] IDENTITY(1,1) NOT NULL,
+	[Type] [varchar](100) NULL,
+	[Title] [varchar](max) NULL,
+	[Showtitle] [varchar](max) NULL,
+	[Label] [varchar](max) NULL,
+	[Runtime] [int] NULL,
+	[Season] [int] NULL,
+	[Episode] [int] NULL,
+	[Thumbnail] [varchar](max) NULL,
+ CONSTRAINT [PK_Kodi_ViewedVideos] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Steam_GameAchievements]    Script Date: 2015-06-07 23:48:33 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -104,7 +166,7 @@ CREATE TABLE [dbo].[Steam_GameAchievements](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Steam_GameStats]    Script Date: 2015-05-21 22:42:56 ******/
+/****** Object:  Table [dbo].[Steam_GameStats]    Script Date: 2015-06-07 23:48:33 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -128,7 +190,7 @@ CREATE TABLE [dbo].[Steam_GameStats](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Steam_GamingSessions]    Script Date: 2015-05-21 22:42:56 ******/
+/****** Object:  Table [dbo].[Steam_GamingSessions]    Script Date: 2015-06-07 23:48:33 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -151,6 +213,17 @@ CREATE TABLE [dbo].[Steam_GamingSessions](
 
 GO
 SET ANSI_PADDING OFF
+GO
+ALTER TABLE [dbo].[Kodi_CrSessionVideos]  WITH CHECK ADD  CONSTRAINT [FK_Kodi_CrSessionVideos_Kodi_VideoSessions] FOREIGN KEY([SessionID])
+REFERENCES [dbo].[Kodi_VideoSessions] ([ID])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Kodi_CrSessionVideos] CHECK CONSTRAINT [FK_Kodi_CrSessionVideos_Kodi_VideoSessions]
+GO
+ALTER TABLE [dbo].[Kodi_CrSessionVideos]  WITH CHECK ADD  CONSTRAINT [FK_Kodi_CrSessionVideos_Kodi_ViewedVideos] FOREIGN KEY([VideoID])
+REFERENCES [dbo].[Kodi_ViewedVideos] ([ID])
+GO
+ALTER TABLE [dbo].[Kodi_CrSessionVideos] CHECK CONSTRAINT [FK_Kodi_CrSessionVideos_Kodi_ViewedVideos]
 GO
 USE [master]
 GO
