@@ -11,8 +11,9 @@ namespace SteamPoller
 
         public string SteamApiKey { get; set; }
 
-        public string PollingDataConnString { get; set; }
+        public string ConnString { get; set; }
         
-        public IList<long> Identities { get; set; } 
+        public IList<long> Identities { get; set; }
+
     }
 }

@@ -23,20 +23,18 @@ namespace SteamPoller
 
         public SteamPoller2()
         {
-            // All settings to be loaded via System.Configuration (app.config)
-            var settings = new SteamPollerSettings();
-            _settings = settings;
-            settings.SteamApiKey = "511DFA79B7394CEFA286165D20C46FC1";
-            settings.PollingDataConnString = ConfigurationManager.ConnectionStrings["PollingDatabase"].ConnectionString; ;
-            settings.Identities = new List<long>
+            _settings = SteamPollerSettingsConfigElement.LoadFromConfig();
+        }
+
+        public ISteamPollerSettings Settings
+        {
+            get { return _settings; }
+            set
             {
-                { 76561197994923014 },  // LazyTarget
-                { 76561197969519652 },  // Avac
-                //{ 76561198000854855 },  // Moerta
-                //{ 76561198038673865 },  // Exo
-                { 76561198006316454 },  // Richard
-                //{ 76561198071019307 },  // Snakeman
-            };
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _settings = value;
+            }
         }
 
 
@@ -48,7 +46,7 @@ namespace SteamPoller
         {
             SteamWebAPI.SetGlobalKey(_settings.SteamApiKey);
 
-            _odbc = new OdbcConnection(_settings.PollingDataConnString);
+            _odbc = new OdbcConnection(_settings.ConnString);
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
 

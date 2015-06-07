@@ -4,9 +4,9 @@ namespace SteamPoller
 {
     public interface ISteamPollerSettings
     {
-        string SteamApiKey { get; set; }
+        string SteamApiKey { get; }
 
-        string PollingDataConnString { get; }
+        string ConnString { get; }
 
         IList<long> Identities { get; }
         

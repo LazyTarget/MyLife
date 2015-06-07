@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
@@ -8,7 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -20,25 +18,36 @@ namespace XbmcPoller
     public class XbmcPoller : IPollingProgram
     {
         private TimeSpan _timeSinceDiff;
-        private readonly HttpClient _client;
+        private HttpClient _client;
         private readonly Dictionary<DateTime, ItemInfo> _data = new Dictionary<DateTime, ItemInfo>();
+        private IXbmcPollerSettings _settings;
 
         public XbmcPoller()
         {
-            var handler = new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential("xbmc", "e4d5exd5"),
-            };
-            _client = new HttpClient(handler);
-            _client.BaseAddress = new Uri("http://localhost:8082/jsonrpc");
+            _settings = XbmcPollerSettingsConfigElement.LoadFromConfig();
+        }
 
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        public IXbmcPollerSettings Settings
+        {
+            get { return _settings; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _settings = value;
+            }
         }
 
 
         public async Task OnStarting(PollingContext context)
         {
-            
+            var handler = new HttpClientHandler()
+            {
+                Credentials = new NetworkCredential(_settings.ApiUsername, _settings.ApiPassword),
+            };
+            _client = new HttpClient(handler);
+            _client.BaseAddress = new Uri(_settings.ApiBaseUrl);
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public async Task OnInterval(PollingContext context)
@@ -321,7 +330,8 @@ namespace XbmcPoller
 
 
                 //var connectionString = "Driver={SQL Server};Server=.;UID=Developer;PWD=123456789;Database=OdbcTest";
-                var connectionString = ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
+                //var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
+                var connectionString = _settings.ConnString;
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
                     cn.Open();

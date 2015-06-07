@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using PollingEngine.Core;
 
@@ -12,11 +13,35 @@ namespace PollingEngine
         {
             // todo: create as winservice
 
+
             var manager = new ProgramManager();
             var contexts = new List<PollingContext>();
-            contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(),     TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.SteamPoller2")))));
-            contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(),        TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.XbmcPoller")))));
+            //var pollers = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x=>x.ExportedTypes.Where(y=>y.GetInterfaces().Contains(typeof(IPollingProgram))));
+
+            var pollingEngineConfigSection = PollingEngineConfigSection.LoadFromConfig();
+            foreach (IPollingProgramGeneralSettings poller in pollingEngineConfigSection.Pollers)
+            {
+                if (!poller.Enabled)
+                {
+                    Debug.WriteLine("Ignoring PollingProgram '{0}' as it has Enabled set to false", poller.Type);
+                    continue;
+                }
+                var type = Type.GetType(poller.Type);
+                if (type == null)
+                {
+                    Console.WriteLine("Ignoring PollingProgram '{0}' as it could not find the Type", poller.Type);
+                    continue;
+                }
+                var prog = Activator.CreateInstance(type);
+                var pollingProgram = (IPollingProgram) prog;
+                var pollingContext = new PollingContext(pollingProgram, poller.Interval);
+                contexts.Add(pollingContext);
+            }
+            
+            //contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(),     TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.SteamPoller2")))));
+            //contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(),        TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.XbmcPoller")))));
             contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(),  TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.ProcessPoller")))));
+
 
             manager.Load(contexts);
             manager.Start();
