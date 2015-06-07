@@ -46,6 +46,7 @@ namespace PollingEngine.Core
                         {
                             context.State = State.Running;
                             context.TimeStarted = DateTime.Now;
+                            Console.WriteLine("Started program: " + progName);
                         }
                         else
                         {
@@ -84,6 +85,7 @@ namespace PollingEngine.Core
                         prog.OnStopping(context).Wait();
                         context.TimeStopped = DateTime.Now;
                         context.State = State.Stopped;
+                        Console.WriteLine("Stopped program: " + progName);
                     }
                     catch (Exception ex)
                     {
@@ -101,10 +103,29 @@ namespace PollingEngine.Core
         }
 
 
-        public void Exit()
+        public void Exit(bool force)
         {
-            Console.WriteLine("Setting should exit");
-            _shouldExit = true;
+            if (force)
+            {
+                Console.WriteLine("Setting should exit");
+                _shouldExit = true;
+            }
+            else
+            {
+                Console.WriteLine("Requesting stop on all programs");
+                foreach (var ctx in _contexts)      // todo: make change aware
+                {
+                    if (ctx.State == State.Running ||
+                        ctx.State == State.Starting)
+                    {
+                        ctx.State = State.Stopping;
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+            }
         }
 
 

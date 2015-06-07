@@ -56,8 +56,10 @@ namespace PollingEngine
             {
                 Console.WriteLine();
                 var input = Console.ReadLine();
+                if (input == "stop all")
+                    manager.Exit(false);
                 if (input == "exit")
-                    manager.Exit();
+                    manager.Exit(true);
                 else if (input == "end")
                     break;
                 else if (input == "cls")
