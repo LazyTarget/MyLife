@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using PollingEngine.Core;
 
 namespace PollingEngine
@@ -12,6 +13,9 @@ namespace PollingEngine
         static void Main(string[] args)
         {
             // todo: create as winservice
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_OnUnhandledException;
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_OnFirstChanceException;
 
 
             var manager = new ProgramManager();
@@ -141,6 +145,18 @@ namespace PollingEngine
 
             Console.WriteLine("Program will exit after [enter]");
             Console.ReadLine();
+        }
+
+        private static void CurrentDomain_OnFirstChanceException(object sender, FirstChanceExceptionEventArgs args)
+        {
+            Trace.WriteLine("OnFirstChanceException:");
+            Trace.WriteLine(args.Exception);
+        }
+
+        private static void CurrentDomain_OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            Trace.WriteLine("OnUnhandledException:");
+            Trace.WriteLine(args.ExceptionObject);
         }
     }
 }
