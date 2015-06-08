@@ -43,18 +43,18 @@ namespace XbmcPoller
             set { this["ConnString"] = value; }
         }
 
-        [ConfigurationProperty("MinSessionLength", DefaultValue = 15)]
-        public int MinSessionLength
+        [ConfigurationProperty("MinVideoLength", DefaultValue = "00:01")]
+        public TimeSpan MinVideoLength
         {
-            get { return (int)this["MinSessionLength"]; }
-            set { this["MinSessionLength"] = value; }
+            get { return (TimeSpan)this["MinVideoLength"]; }
+            set { this["MinVideoLength"] = value; }
         }
 
-        [ConfigurationProperty("MinVideoLength", DefaultValue = 30)]
-        public int MinVideoLength
+        [ConfigurationProperty("MergeSessionPeriod", DefaultValue = "00:10")]
+        public TimeSpan MergeSessionPeriod
         {
-            get { return (int)this["MinVideoLength"]; }
-            set { this["MinVideoLength"] = value; }
+            get { return (TimeSpan)this["MergeSessionPeriod"]; }
+            set { this["MergeSessionPeriod"] = value; }
         }
     }
 }

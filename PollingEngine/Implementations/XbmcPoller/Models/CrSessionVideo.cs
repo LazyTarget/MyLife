@@ -13,5 +13,7 @@ namespace XbmcPoller
         public DateTime EndTime { get; set; }
 
         public bool Active { get; set; }
+        
+        public bool SessionVideoCreated { get; set; }
     }
 }

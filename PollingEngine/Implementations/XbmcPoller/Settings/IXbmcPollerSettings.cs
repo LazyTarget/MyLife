@@ -1,4 +1,6 @@
-﻿namespace XbmcPoller
+﻿using System;
+
+namespace XbmcPoller
 {
     public interface IXbmcPollerSettings
     {
@@ -10,10 +12,9 @@
 
         string ConnString { get; }
 
+        TimeSpan MinVideoLength { get; }
 
-        int MinSessionLength { get; }
-
-        int MinVideoLength { get; }
+        TimeSpan MergeSessionPeriod { get; }
         
     }
 }

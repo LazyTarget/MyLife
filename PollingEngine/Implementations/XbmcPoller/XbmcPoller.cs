@@ -213,6 +213,7 @@ namespace XbmcPoller
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("PingXbmc() failed: " + ex);
                 pingOk = false;
             }
 
@@ -222,20 +223,40 @@ namespace XbmcPoller
                 // Xbmc is running
                 if (_sessionInfo == null)
                 {
-                    // Initialize session if not initialized
-                    _sessionInfo = new WatchSessionInfo
+                    var initializeNew = true;
+                    if (_settings.MergeSessionPeriod > TimeSpan.Zero)
                     {
-                        StartTime = time,
-                        EndTime = time,
-                        LastPollTime = time,
-                    };
-                    Console.WriteLine("Initialized session with Kodi");
+                        var lastSession = await GetLastSession();
+                        if (lastSession != null)
+                        {
+                            var diff = time.Subtract(lastSession.EndTime);
+                            if (diff <= _settings.MergeSessionPeriod)
+                            {
+                                // Continue on recent session
+                                initializeNew = false;
+                                _sessionInfo = lastSession;
+                                Console.WriteLine("Continuing Kodi session");
+                            }
+                        }
+                    }
+
+                    if (initializeNew)
+                    {
+                        // Initialize new session
+                        _sessionInfo = new WatchSessionInfo
+                        {
+                            StartTime = time,
+                            EndTime = time,
+                            LastPollTime = time,
+                        };
+                        Console.WriteLine("Initialized session with Kodi");
+                    }
                 }
 
                 //_sessionInfo.LastPollTime = time;
                 _sessionInfo.EndTime = time;
                 _sessionInfo.Active = pingOk;
-                StoreSessionInfo(_sessionInfo);      // todo: optimize, save only each X intervals...
+                await StoreSessionInfo(_sessionInfo);      // todo: optimize, save only each X intervals...
             }
             else
             {
@@ -264,16 +285,7 @@ namespace XbmcPoller
 
             //await GetPlaybackInfo();
 
-
-            //var index = _data.Select(x => x.Value).ToList().FindLastIndex(x => CompareTo(x, itemInfo) != 0);
-            //var newIndex = Math.Min(index + 1, _data.Count - 1);
-            //var startInfoPair = index >= 0 ? _data.ElementAtOrDefault(newIndex) : new KeyValuePair<DateTime, ItemInfo>();
-            //var start = startInfoPair.Key;
-            //if (start == DateTime.MinValue)
-            //    start = pollStartTime;
-
-            //var duration = time.Subtract(start);
-
+            
             var lastVideo = _sessionInfo.ActiveVideo != null ? _sessionInfo.ActiveVideo.Video : null;
 
             DiffType diffType;
@@ -294,7 +306,7 @@ namespace XbmcPoller
                             continue;
                         sessionVideo.Active = false;
                         //sessionVideo.EndTime = time;        // not to be updated in StartedWatching (the only differance from ChangedProgram)
-                        StoreSessionVideo(sessionVideo);
+                        await StoreSessionVideo(sessionVideo);
                     }
 
                     // Set the active video
@@ -306,7 +318,7 @@ namespace XbmcPoller
                         Active = true,
                         Video = videoItemInfo,
                     };
-                    StoreSessionVideo(_sessionInfo.ActiveVideo);
+                    await StoreSessionVideo(_sessionInfo.ActiveVideo);
                     _sessionInfo.Videos.Add(_sessionInfo.ActiveVideo);
                 }
                 else
@@ -321,7 +333,7 @@ namespace XbmcPoller
 
                         _sessionInfo.ActiveVideo.Active = true;
                         _sessionInfo.ActiveVideo.EndTime = time;
-                        StoreSessionVideo(_sessionInfo.ActiveVideo);        // todo: optimize number of requests
+                        await StoreSessionVideo(_sessionInfo.ActiveVideo);        // todo: optimize number of requests
                     }
                     else
                     {
@@ -339,7 +351,7 @@ namespace XbmcPoller
                                 continue;
                             sessionVideo.Active = false;
                             sessionVideo.EndTime = time;
-                            StoreSessionVideo(sessionVideo);            // todo: optimize number of requests?
+                            await StoreSessionVideo(sessionVideo);            // todo: optimize number of requests?
                         }
 
                         // Set the active video
@@ -351,7 +363,7 @@ namespace XbmcPoller
                             Active = true,
                             Video = videoItemInfo,
                         };
-                        StoreSessionVideo(_sessionInfo.ActiveVideo);
+                        await StoreSessionVideo(_sessionInfo.ActiveVideo);
                         _sessionInfo.Videos.Add(_sessionInfo.ActiveVideo);
                     }
                 }
@@ -383,13 +395,13 @@ namespace XbmcPoller
                             continue;
                         sessionVideo.Active = false;
                         sessionVideo.EndTime = time;
-                        StoreSessionVideo(sessionVideo);            // todo: optimize number of requests?
+                        await StoreSessionVideo(sessionVideo);            // todo: optimize number of requests?
                     }
 
                     // Set the active video
                     _sessionInfo.ActiveVideo.Active = false;
                     _sessionInfo.ActiveVideo.EndTime = time;
-                    StoreSessionVideo(_sessionInfo.ActiveVideo);
+                    await StoreSessionVideo(_sessionInfo.ActiveVideo);
                     _sessionInfo.ActiveVideo = null;
                 }
             }
@@ -411,46 +423,34 @@ namespace XbmcPoller
             }
 
 
-            switch (diffType)
+            try
             {
-                case DiffType.None:
-                    Console.WriteLine("Not watching anything {0}", TimeSpanToString(_timeSinceDiff));
-                    break;
-                case DiffType.StartedWatching:
-                    Console.WriteLine("Started watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
-                    break;
-                case DiffType.StoppedWatching:
-                    Console.WriteLine("Stopped watching '{0}'{1}", lastVideo.Title, TimeSpanToString(_timeSinceDiff));
-                    break;
-                case DiffType.StillWatching:
-                    Console.WriteLine("Still watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
-                    break;
-                case DiffType.ChangedProgram:
-                    Console.WriteLine("Changed program from '{0}' to '{1}'{2}", lastVideo.Title, videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
-                    break;
+                switch (diffType)
+                {
+                    case DiffType.None:
+                        Console.WriteLine("Not watching anything {0}", TimeSpanToString(_timeSinceDiff));
+                        break;
+                    case DiffType.StartedWatching:
+                        Console.WriteLine("Started watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        break;
+                    case DiffType.StoppedWatching:
+                        Console.WriteLine("Stopped watching '{0}'{1}", lastVideo.Title, TimeSpanToString(_timeSinceDiff));
+                        break;
+                    case DiffType.StillWatching:
+                        Console.WriteLine("Still watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        break;
+                    case DiffType.ChangedProgram:
+                        Console.WriteLine("Changed program from '{0}' to '{1}'{2}", lastVideo.Title, videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        break;
+                }
             }
-            
-            
-            //if (ended)
-            //{
-            //    var start = time.Subtract(_timeSinceDiff);
-
-            //    // Add to odbc database
-            //    var sessionInfo = new WatchSessionInfo
-            //    {
-            //        VideoItem = lastInfo,
-            //        StartTime = start,
-            //        EndTime = time,
-            //        Active = diffType == DiffType.StillWatching || 
-            //                 diffType == DiffType.StartedWatching || 
-            //                 diffType == DiffType.ChangedProgram,
-            //    };
-            //    StoreSessionInfo(sessionInfo);
-
-            //    _timeSinceDiff = TimeSpan.Zero;
-            //}
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error logging the poll status (XbmcPoller)");
+                Console.WriteLine(ex);
+            }
         }
+
 
         private async Task CloseSession()
         {
@@ -459,18 +459,35 @@ namespace XbmcPoller
                 return;
 
             // Close active videos
-            foreach (var sessionVideo in _sessionInfo.Videos)
+            for (var i = 0; i < _sessionInfo.Videos.Count; i++)
             {
+                var sessionVideo = _sessionInfo.Videos[i];
+                if (sessionVideo == _sessionInfo.ActiveVideo)
+                    continue;
                 if (sessionVideo.Active)
                     sessionVideo.EndTime = time;        // correct?
                 sessionVideo.Active = false;
-                await StoreSessionVideo(sessionVideo);        // todo: optimize?
+
+                var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
+                if (_settings.MinVideoLength > TimeSpan.Zero &&
+                    duration < _settings.MinVideoLength)
+                {
+                    await DeleteSessionVideo(sessionVideo);
+                    if (_sessionInfo.Videos.Remove(sessionVideo))
+                        i--;
+                }
+                else
+                    await StoreSessionVideo(sessionVideo);        // todo: optimize?
             }
 
             // Close session
+            if (_sessionInfo.Active)
+                _sessionInfo.EndTime = time;
             _sessionInfo.Active = false;
-            _sessionInfo.EndTime = time;
-            await StoreSessionInfo(_sessionInfo);
+            if (!_sessionInfo.Videos.Any())
+                await DeleteSessionInfo(_sessionInfo);
+            else
+                await StoreSessionInfo(_sessionInfo);
             _sessionInfo = null;
         }
 
@@ -671,6 +688,143 @@ namespace XbmcPoller
             }
         }
 
+        public async Task DeleteSessionVideo(CrSessionVideo sessionVideo)
+        {
+            try
+            {
+                if (sessionVideo == null || sessionVideo.SessionID <= 0 || sessionVideo.ViewedVideoID <= 0)
+                    return;
+                
+                var connectionString = _settings.ConnString;
+                var odbc = new OdbcConnection(connectionString);
+                if (odbc.State != ConnectionState.Open)
+                    odbc.Open();
+                
+                Debug.WriteLine("Begin deleting odbc entry");
+                var cmd = odbc.CreateCommand();
+                cmd.CommandText = "DELETE FROM Kodi_CrSessionVideos " +
+                                  "WHERE SessionID = ? AND VideoID = ?";
+                cmd.Parameters.AddWithValue("@SessionID", sessionVideo.SessionID);
+                cmd.Parameters.AddWithValue("@VideoID", sessionVideo.ViewedVideoID);
+                var changes = cmd.ExecuteNonQuery();
+                if (changes > 0)
+                    Console.WriteLine("Successfully deleted video session (too short)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                throw;
+            }
+        }
+
+        public async Task DeleteSessionInfo(WatchSessionInfo session)
+        {
+            try
+            {
+                if (session == null || session.SessionID <= 0)
+                    return;
+                
+                var connectionString = _settings.ConnString;
+                var odbc = new OdbcConnection(connectionString);
+                if (odbc.State != ConnectionState.Open)
+                    odbc.Open();
+                
+                var cmd = odbc.CreateCommand();
+                cmd.CommandText = "SELECT COUNT(*) FROM Kodi_CrSessionVideos WHERE SessionID = ?";
+                cmd.Parameters.AddWithValue("@SessionID", session.SessionID);
+                var hasVideos = (int)cmd.ExecuteScalar() > 0;
+                if (!hasVideos)
+                {
+                    Debug.WriteLine("Begin deleting odbc entry");
+                    cmd = odbc.CreateCommand();
+                    cmd.CommandText = "DELETE FROM Kodi_VideoSessions " +
+                                      "WHERE ID = ?";
+                    cmd.Parameters.AddWithValue("@SessionID", session.SessionID);
+                    var changes = cmd.ExecuteNonQuery();
+                    if (changes > 0)
+                        Console.WriteLine("Successfully deleted view session (too short)");
+                }
+                else
+                    Debug.WriteLine("Ignoring deletion of SessionInfo as it has videos (with valid length)");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                throw;
+            }
+        }
+
+
+        public async Task<WatchSessionInfo> GetLastSession()
+        {
+            try
+            {
+                var connectionString = _settings.ConnString;
+                var odbc = new OdbcConnection(connectionString);
+                if (odbc.State != ConnectionState.Open)
+                    odbc.Open();
+
+                var cmd = odbc.CreateCommand();
+                cmd.CommandText = "SELECT TOP(1) * FROM Kodi_VideoSessions ORDER BY ID DESC";
+                WatchSessionInfo session = null;
+                using (OdbcDataReader reader = cmd.ExecuteReader())
+                {
+                    var cSessionID = reader.GetOrdinal("ID");
+                    var cStartTime = reader.GetOrdinal("StartTime");
+                    var cEndTime = reader.GetOrdinal("EndTime");
+                    var cActive = reader.GetOrdinal("Active");
+                    foreach (IDataRecord record in reader)
+                    {
+                        session = new WatchSessionInfo();
+                        session.SessionID = record.GetInt64(cSessionID);
+                        session.StartTime = record.GetDateTime(cStartTime);
+                        session.EndTime = session.LastPollTime = record.GetDateTime(cEndTime);
+                        session.Active = record.GetBoolean(cActive);
+
+                        try
+                        {
+                            var cmd2 = odbc.CreateCommand();
+                            cmd2.CommandText = "SELECT * FROM Kodi_CrSessionVideos " +
+                                               "WHERE SessionID = ?";
+                            cmd2.Parameters.AddWithValue("@SessionID", session.SessionID);
+                            using (OdbcDataReader reader2 = cmd2.ExecuteReader())
+                            {
+                                var cSessionID2 = reader2.GetOrdinal("SessionID");
+                                var cVideoID = reader2.GetOrdinal("VideoID");
+                                var cStartTime2 = reader2.GetOrdinal("StartTime");
+                                var cEndTime2 = reader2.GetOrdinal("EndTime");
+                                var cActive2 = reader2.GetOrdinal("Active");
+                                foreach (IDataRecord record2 in reader2)
+                                {
+                                    var sessionVideo = new CrSessionVideo();
+                                    sessionVideo.SessionID = record2.GetInt64(cSessionID2);
+                                    sessionVideo.ViewedVideoID = record2.GetInt64(cVideoID);
+                                    //sessionVideo.Video = // todo: load video as well
+                                    sessionVideo.Active = record2.GetBoolean(cActive2);
+                                    sessionVideo.StartTime = record2.GetDateTime(cStartTime2);
+                                    sessionVideo.EndTime = record2.GetDateTime(cEndTime2);
+                                    sessionVideo.SessionVideoCreated = true;
+                                    session.Videos.Add(sessionVideo);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            
+                        }
+                        return session;
+                    }
+                }
+                return session;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                throw;
+            }
+        }
+
 
         public async Task StoreSessionVideo(CrSessionVideo sessionVideo)
         {
@@ -681,10 +835,33 @@ namespace XbmcPoller
                 if (odbc.State != ConnectionState.Open)
                     odbc.Open();
 
-                var cmd = odbc.CreateCommand();
+                OdbcCommand cmd;
                 var changes = 0;
                 var video = sessionVideo.Video;
                 var sql = "";
+                if (sessionVideo.ViewedVideoID <= 0)
+                {
+                    // Find matching video entity
+                    sql = "SELECT ID FROM Kodi_ViewedVideos " +
+                          "WHERE Type = ? AND " +
+                          "      Title = ? AND " +
+                          "      Showtitle = ? AND " +
+                          "      Label = ? AND " +
+                        //"      Runtime = ? AND " +
+                          "      Episode = ? AND " +
+                          "      Season = ?";
+                    cmd = odbc.CreateCommand();
+                    cmd.CommandText = sql;
+                    cmd.Parameters.AddWithValue("@Type", !string.IsNullOrEmpty(video.Type) ? (object)video.Type : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Title", !string.IsNullOrEmpty(video.Title) ? (object)video.Title : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Showtitle", !string.IsNullOrEmpty(video.Showtitle) ? (object)video.Showtitle : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Label", !string.IsNullOrEmpty(video.Label) ? (object)video.Label : DBNull.Value);
+                    //cmd.Parameters.AddWithValue("@Runtime", (int)Math.Ceiling(video.Runtime.TotalSeconds));
+                    cmd.Parameters.AddWithValue("@Episode", video.Episode);
+                    cmd.Parameters.AddWithValue("@Season", video.Season);
+                    var obj = cmd.ExecuteScalar();
+                    sessionVideo.ViewedVideoID = obj != null && obj != DBNull.Value ? (long) obj : 0;
+                }
                 if (sessionVideo.ViewedVideoID <= 0)
                 {
                     // Add viewed video
@@ -694,6 +871,7 @@ namespace XbmcPoller
                     {
                         Direction = ParameterDirection.Output,
                     };
+                    cmd = odbc.CreateCommand();
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@Type", !string.IsNullOrEmpty(video.Type) ? (object)video.Type : DBNull.Value);
                     cmd.Parameters.AddWithValue("@Title", !string.IsNullOrEmpty(video.Title) ? (object)video.Title : DBNull.Value);
@@ -706,8 +884,10 @@ namespace XbmcPoller
                     cmd.Parameters.Add(videoIDParam);
                     changes += cmd.ExecuteNonQuery();
                     sessionVideo.ViewedVideoID = (long)videoIDParam.Value;
+                }
 
-
+                if (!sessionVideo.SessionVideoCreated)
+                {
                     // Add CrSessionVideo
                     sql = "INSERT INTO Kodi_CrSessionVideos(SessionID, VideoID, StartTime, EndTime, Active) " +
                           "VALUES (?, ?, ?, ?, ?)";
@@ -719,6 +899,7 @@ namespace XbmcPoller
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
                     cmd.Parameters.AddWithValue("@Active", sessionVideo.Active);
                     changes += cmd.ExecuteNonQuery();
+                    sessionVideo.SessionVideoCreated = true;
                 }
                 else
                 {
@@ -728,6 +909,7 @@ namespace XbmcPoller
                               "    EndTime = ?, " +
                               "    Active = ? " +
                               "WHERE SessionID = ? AND VideoID = ?";
+                    cmd = odbc.CreateCommand();
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@StartTime", sessionVideo.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
