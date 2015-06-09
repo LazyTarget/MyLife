@@ -165,6 +165,26 @@ namespace SteamPoller
                         Debug.WriteLine("Session ended: \t\t" + gamerInfo.ActiveSession);
                         await Steam_OnSessionEnded(new GamingSessionEventArgs { Session = gamerInfo.ActiveSession, Identity = player.Identity });
                     }
+
+                    if (_settings.MergeSessionPeriod > TimeSpan.Zero && !string.IsNullOrWhiteSpace(currentSession.Player.GameID))
+                    {
+                        // check if should continue on previous session
+                        var mostRecentSession = await GetUserLastGamingSession(player.Identity);
+                        if (mostRecentSession != null && currentSession.Player.GameID == mostRecentSession.Player.GameID)
+                        {
+                            // playing the same game
+                            var endTime = mostRecentSession.Time.Add(mostRecentSession.Duration);
+                            var timeDiff = currentSession.Time.Subtract(endTime);
+                            if (timeDiff <= _settings.MergeSessionPeriod)
+                            {
+                                // merge sessions
+                                currentSession.Time = mostRecentSession.Time;
+                                var fullDuration = time.Subtract(mostRecentSession.Time);
+                                currentSession.Duration = fullDuration;
+                                currentSession.SessionID = mostRecentSession.SessionID;
+                            }
+                        }
+                    }
                     gamerInfo.ActiveSession = currentSession;
 
 
@@ -182,12 +202,11 @@ namespace SteamPoller
 
                     if (!string.IsNullOrWhiteSpace(gamerInfo.ActiveSession.Player.GameID))
                     {
-                        var updateInterval = 40;
-                        //var modulo = timeDiff.TotalSeconds % (context.Interval.TotalSeconds);
+                        // UpdateInterval = 40 => Each 40th interval, update gaming session (at 15 sec/interval = each 10 minutes)
+                        var updateInterval = 5;
                         var modulo = context.IntervalSequence % updateInterval;
                         if (modulo == 0)
                         {
-                            // Each 40th interval, update gaming session (at 15 sec/interval = each 10 minutes)
                             Console.WriteLine("Updating game session: " + gamerInfo.ActiveSession);
                             await StoreUserGameSession(gamerInfo.ActiveSession, true);
                         }
@@ -525,6 +544,67 @@ namespace SteamPoller
             }
         }
 
+
+        private async Task<GamingSession> GetUserLastGamingSession(SteamIdentity steamIdentity)
+        {
+            if (_odbc.State != ConnectionState.Open)
+                _odbc.Open();
+            
+            try
+            {
+                var cmd = _odbc.CreateCommand();
+                var sql = "SELECT TOP(1) * FROM Steam_GamingSessions " +
+                            "WHERE UserID = ? " +
+                            "ORDER BY EndTime DESC";
+                cmd.CommandText = sql;
+                cmd.Parameters.AddWithValue("@UserID", steamIdentity.SteamID);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var cSessionID = reader.GetOrdinal("ID");
+                    var cGameID = reader.GetOrdinal("GameID");
+                    var cGameName = reader.GetOrdinal("GameName");
+                    var cStartTime = reader.GetOrdinal("StartTime");
+                    var cEndTime = reader.GetOrdinal("EndTime");
+                    var cActive = reader.GetOrdinal("Active");
+
+                    foreach (IDataRecord record in reader)
+                    {
+                        var active = record.GetBoolean(cActive);
+                        // todo: ignore if is active?
+
+                        var session = new GamingSession();
+                        session.SessionID = record.GetInt64(cSessionID);
+
+                        // todo: uncomment if more player info is required (other than GameID, GameExtraInfo)
+                        //var players = await SteamWebAPI.General()
+                        //    .ISteamUser()
+                        //    .GetPlayerSummaries(new[] {steamIdentity})
+                        //    .GetResponseAsync();
+                        //session.Player = players != null && players.Data != null && players.Data.Players != null &&
+                        //                 players.Data.Players.Count > 0
+                        //    ? players.Data.Players[0]
+                        //    : null;
+                        session.Player = session.Player ?? new GetPlayerSummariesResponsePlayer();
+
+                        session.Player.GameID = record.GetInt32(cGameID).ToString();
+                        session.Player.GameExtraInfo = record.GetString(cGameName);
+                        session.Player.Identity = steamIdentity;
+                        session.Time = record.GetDateTime(cStartTime);
+                        var endTime = record.GetDateTime(cEndTime);
+                        session.Duration = endTime.Subtract(session.Time);
+                        return session;
+                    }
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting last session for user");
+                Console.WriteLine(ex);
+                return null;
+            }
+        }
 
 
         [Obsolete("Should be moved to the application implementing using PollingData")]

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SteamPoller
 {
@@ -9,6 +10,8 @@ namespace SteamPoller
         string ConnString { get; }
 
         IList<long> Identities { get; }
+
+        TimeSpan MergeSessionPeriod { get; }
         
     }
 }

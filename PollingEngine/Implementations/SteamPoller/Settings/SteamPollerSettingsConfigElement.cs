@@ -49,5 +49,12 @@ namespace SteamPoller
                 return Identities.Cast<SteamIDConfigElement>().Select(x => x.SteamID).ToList();
             }
         }
+
+        [ConfigurationProperty("MergeSessionPeriod", DefaultValue = "00:05")]
+        public TimeSpan MergeSessionPeriod
+        {
+            get { return (TimeSpan)this["MergeSessionPeriod"]; }
+            set { this["MergeSessionPeriod"] = value; }
+        }
     }
 }
