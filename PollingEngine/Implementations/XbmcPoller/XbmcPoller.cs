@@ -806,6 +806,8 @@ namespace XbmcPoller
                                     sessionVideo.EndTime = record2.GetDateTime(cEndTime2);
                                     sessionVideo.SessionVideoCreated = true;
                                     session.Videos.Add(sessionVideo);
+                                    session.ActiveVideo = sessionVideo;
+                                    sessionVideo.Video = await GetVideo(sessionVideo.ViewedVideoID);
                                 }
                             }
                         }
@@ -817,6 +819,56 @@ namespace XbmcPoller
                     }
                 }
                 return session;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                throw;
+            }
+        }
+
+
+        public async Task<VideoItemInfo> GetVideo(long videoID)
+        {
+            try
+            {
+                var connectionString = _settings.ConnString;
+                var odbc = new OdbcConnection(connectionString);
+                if (odbc.State != ConnectionState.Open)
+                    odbc.Open();
+
+                var cmd = odbc.CreateCommand();
+                cmd.CommandText = "SELECT * FROM Kodi_ViewedVideos " +
+                                  "WHERE ID = ?";
+                cmd.Parameters.AddWithValue("@VideoID", videoID);
+                VideoItemInfo video = null;
+                using (OdbcDataReader reader = cmd.ExecuteReader())
+                {
+                    //var cVideoID = reader.GetOrdinal("ID");
+                    var cType = reader.GetOrdinal("Type");
+                    var cTitle = reader.GetOrdinal("Title");
+                    var cShowtitle = reader.GetOrdinal("Showtitle");
+                    var cLabel = reader.GetOrdinal("Label");
+                    var cRuntime = reader.GetOrdinal("Runtime");
+                    var cSeason = reader.GetOrdinal("Season");
+                    var cEpisode = reader.GetOrdinal("Episode");
+                    var cThumbnail = reader.GetOrdinal("Thumbnail");
+                    foreach (IDataRecord record in reader)
+                    {
+                        // todo: null protection
+                        video = new VideoItemInfo();
+                        video.Type = record.GetString(cType);
+                        video.Title = record.GetString(cTitle);
+                        video.Showtitle = record.GetString(cShowtitle);
+                        video.Label = record.GetString(cLabel);
+                        video.Runtime = TimeSpan.FromSeconds(record.GetInt32(cRuntime));
+                        video.Season = record.GetInt32(cSeason);
+                        video.Episode = record.GetInt32(cEpisode);
+                        video.Thumbnail = record.GetString(cThumbnail);
+                        return video;
+                    }
+                }
+                return video;
             }
             catch (Exception ex)
             {
