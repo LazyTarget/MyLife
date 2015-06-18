@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace XbmcPoller
@@ -68,5 +69,18 @@ namespace XbmcPoller
             return 0;
         }
 
+
+        public override string ToString()
+        {
+            var parts = new string[] {Title, Showtitle, Label};
+            parts = parts.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+
+            var res = string.Join("/", parts);
+            if (string.IsNullOrWhiteSpace(res))
+                return base.ToString();
+
+            res = string.Format("{0} [{1}]", res, Type);
+            return res;
+        }
     }
 }

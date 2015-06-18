@@ -431,16 +431,16 @@ namespace XbmcPoller
                         Console.WriteLine("Not watching anything {0}", TimeSpanToString(_timeSinceDiff));
                         break;
                     case DiffType.StartedWatching:
-                        Console.WriteLine("Started watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        Console.WriteLine("Started watching '{0}'{1}", videoItemInfo, TimeSpanToString(_timeSinceDiff));
                         break;
                     case DiffType.StoppedWatching:
-                        Console.WriteLine("Stopped watching '{0}'{1}", lastVideo.Title, TimeSpanToString(_timeSinceDiff));
+                        Console.WriteLine("Stopped watching '{0}'{1}", lastVideo, TimeSpanToString(_timeSinceDiff));
                         break;
                     case DiffType.StillWatching:
-                        Console.WriteLine("Still watching '{0}'{1}", videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        Console.WriteLine("Still watching '{0}'{1}", videoItemInfo, TimeSpanToString(_timeSinceDiff));
                         break;
                     case DiffType.ChangedProgram:
-                        Console.WriteLine("Changed program from '{0}' to '{1}'{2}", lastVideo.Title, videoItemInfo.Title, TimeSpanToString(_timeSinceDiff));
+                        Console.WriteLine("Changed program from '{0}' to '{1}'{2}", lastVideo, videoItemInfo, TimeSpanToString(_timeSinceDiff));
                         break;
                 }
             }
@@ -742,7 +742,7 @@ namespace XbmcPoller
                     cmd.Parameters.AddWithValue("@SessionID", session.SessionID);
                     var changes = cmd.ExecuteNonQuery();
                     if (changes > 0)
-                        Console.WriteLine("Successfully deleted view session (too short)");
+                        Console.WriteLine("Successfully deleted view session (too short/no video)");
                 }
                 else
                     Debug.WriteLine("Ignoring deletion of SessionInfo as it has videos (with valid length)");
@@ -790,6 +790,7 @@ namespace XbmcPoller
                             cmd2.Parameters.AddWithValue("@SessionID", session.SessionID);
                             using (OdbcDataReader reader2 = cmd2.ExecuteReader())
                             {
+                                var cCrSessionVideoID = reader2.GetOrdinal("ID");
                                 var cSessionID2 = reader2.GetOrdinal("SessionID");
                                 var cVideoID = reader2.GetOrdinal("VideoID");
                                 var cStartTime2 = reader2.GetOrdinal("StartTime");
@@ -804,7 +805,7 @@ namespace XbmcPoller
                                     sessionVideo.Active = record2.GetBoolean(cActive2);
                                     sessionVideo.StartTime = record2.GetDateTime(cStartTime2);
                                     sessionVideo.EndTime = record2.GetDateTime(cEndTime2);
-                                    sessionVideo.SessionVideoCreated = true;
+                                    sessionVideo.ID = record2.GetInt64(cCrSessionVideoID);
                                     session.Videos.Add(sessionVideo);
                                     session.ActiveVideo = sessionVideo;
                                     sessionVideo.Video = await GetVideo(sessionVideo.ViewedVideoID);
@@ -938,11 +939,15 @@ namespace XbmcPoller
                     sessionVideo.ViewedVideoID = (long)videoIDParam.Value;
                 }
 
-                if (!sessionVideo.SessionVideoCreated)
+                if (sessionVideo.ID <= 0)
                 {
                     // Add CrSessionVideo
                     sql = "INSERT INTO Kodi_CrSessionVideos(SessionID, VideoID, StartTime, EndTime, Active) " +
-                          "VALUES (?, ?, ?, ?, ?)";
+                          "VALUES (?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
+                    var crSessionVideoIDParam = new OdbcParameter("@CrSessionVideoID", OdbcType.BigInt, 4)
+                    {
+                        Direction = ParameterDirection.Output,
+                    };
                     cmd = odbc.CreateCommand();
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@SessionID", sessionVideo.SessionID);
@@ -950,24 +955,27 @@ namespace XbmcPoller
                     cmd.Parameters.AddWithValue("@StartTime", sessionVideo.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
                     cmd.Parameters.AddWithValue("@Active", sessionVideo.Active);
+                    cmd.Parameters.Add(crSessionVideoIDParam);
                     changes += cmd.ExecuteNonQuery();
-                    sessionVideo.SessionVideoCreated = true;
+                    sessionVideo.ID = (long) crSessionVideoIDParam.Value;
                 }
                 else
                 {
                     // Update CrSessionVideo
                     sql = "UPDATE Kodi_CrSessionVideos " +
-                              "SET StartTime = ?, " +
-                              "    EndTime = ?, " +
-                              "    Active = ? " +
-                              "WHERE SessionID = ? AND VideoID = ?";
+                          "SET StartTime = ?, " +
+                          "    EndTime = ?, " +
+                          "    Active = ? " +
+                          //"WHERE SessionID = ? AND VideoID = ?";
+                          "WHERE ID = ?";
                     cmd = odbc.CreateCommand();
                     cmd.CommandText = sql;
                     cmd.Parameters.AddWithValue("@StartTime", sessionVideo.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
                     cmd.Parameters.AddWithValue("@Active", sessionVideo.Active);
-                    cmd.Parameters.AddWithValue("@SessionID", sessionVideo.SessionID);
-                    cmd.Parameters.AddWithValue("@VideoID", sessionVideo.ViewedVideoID);
+                    //cmd.Parameters.AddWithValue("@SessionID", sessionVideo.SessionID);
+                    //cmd.Parameters.AddWithValue("@VideoID", sessionVideo.ViewedVideoID);
+                    cmd.Parameters.AddWithValue("@ID", sessionVideo.ID);
                     changes += cmd.ExecuteNonQuery();
                 }
 

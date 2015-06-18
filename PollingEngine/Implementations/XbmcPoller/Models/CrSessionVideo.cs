@@ -4,6 +4,7 @@ namespace XbmcPoller
 {
     public class CrSessionVideo
     {
+        public long ID { get; set; }
         public long SessionID { get; set; }
         public long ViewedVideoID { get; set; }
         public VideoItemInfo Video { get; set; }
@@ -13,7 +14,5 @@ namespace XbmcPoller
         public DateTime EndTime { get; set; }
 
         public bool Active { get; set; }
-        
-        public bool SessionVideoCreated { get; set; }
     }
 }
