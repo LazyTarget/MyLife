@@ -182,7 +182,10 @@ namespace SteamPoller
                                 var fullDuration = time.Subtract(mostRecentSession.Time);
                                 currentSession.Duration = fullDuration;
                                 currentSession.SessionID = mostRecentSession.SessionID;
+                                Console.WriteLine("Continuing game session: " + currentSession);
                             }
+                            else
+                                Console.WriteLine("Time diff to big, will not continue game session. Time diff: " + timeDiff);
                         }
                     }
                     gamerInfo.ActiveSession = currentSession;
@@ -411,6 +414,7 @@ namespace SteamPoller
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
             var time = DateTime.UtcNow;
+            var changes = 0;
             foreach (var stat in stats)
             {
                 try
@@ -425,8 +429,9 @@ namespace SteamPoller
                     cmd.Parameters.AddWithValue("@Time", time.ToUniversalTime());
                     cmd.Parameters.AddWithValue("@Name", stat.Name);
                     cmd.Parameters.AddWithValue("@Value", stat.Value);
-
-                    var changes = await cmd.ExecuteNonQueryAsync();
+                    var c = await cmd.ExecuteNonQueryAsync();
+                    if (c > 0)
+                        changes += c;
                 }
                 catch (Exception ex)
                 {
@@ -434,6 +439,7 @@ namespace SteamPoller
                     //throw;
                 }
             }
+            Console.WriteLine("{0}, {1} - Stats stored: {2}", GetPlayerAlias(steamIdentity), GetGameNameFromGameID(gameID), changes);
         }
 
 
@@ -444,6 +450,7 @@ namespace SteamPoller
             if (_odbc.State != ConnectionState.Open)
                 _odbc.Open();
             var time = DateTime.UtcNow;
+            var changes = 0;
             foreach (var achive in achievements)
             {
                 try
@@ -458,8 +465,9 @@ namespace SteamPoller
                     cmd.Parameters.AddWithValue("@Time", time.ToUniversalTime());
                     cmd.Parameters.AddWithValue("@Name", achive.Name);
                     cmd.Parameters.AddWithValue("@Achieved", achive.Achieved);
-
-                    var changes = await cmd.ExecuteNonQueryAsync();
+                    var c = await cmd.ExecuteNonQueryAsync();
+                    if (c > 0)
+                        changes += c;
                 }
                 catch (Exception ex)
                 {
@@ -467,6 +475,7 @@ namespace SteamPoller
                     //throw;
                 }
             }
+            Console.WriteLine("{0}, {1} - Achievements stored: {2}", GetPlayerAlias(steamIdentity), GetGameNameFromGameID(gameID), changes);
         }
 
 
@@ -604,6 +613,51 @@ namespace SteamPoller
                 Console.WriteLine(ex);
                 return null;
             }
+        }
+
+        private string GetPlayerAlias(SteamIdentity steamIdentity)
+        {
+            string res = null;
+            try
+            {
+                var gamingInfo = _data.Where(x => x.Key.SteamID == steamIdentity.SteamID).Select(x => x.Value).FirstOrDefault();
+                if (gamingInfo != null)
+                {
+                    var player = gamingInfo.Sessions.Where(x => x.Player != null).Select(x => x.Player).FirstOrDefault();
+                    if (player != null)
+                    {
+                        res = player.PersonaName;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error getting player alias");
+                Debug.WriteLine(ex);
+                res = steamIdentity.SteamID.ToString();
+            }
+            return res;
+        }
+
+        private string GetGameNameFromGameID(long gameID)
+        {
+            string res = null;
+            try
+            {
+                var sessions = _data.Select(x => x.Value).SelectMany(x => x.Sessions);
+                var session = sessions.FirstOrDefault(x => x.Player != null && x.Player.GameID == gameID.ToString());
+                if (session != null)
+                {
+                    res = session.Player.GameExtraInfo;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error getting game name");
+                Debug.WriteLine(ex);
+                res = "#" + gameID;
+            }
+            return res;
         }
 
 
