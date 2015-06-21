@@ -285,13 +285,14 @@ namespace XbmcPoller
 
             //await GetPlaybackInfo();
 
-            
-            var lastVideo = _sessionInfo.ActiveVideo != null ? _sessionInfo.ActiveVideo.Video : null;
+
+            var activeVideo = _sessionInfo.ActiveVideo;
+            var lastVideo = activeVideo != null ? activeVideo.Video : null;
 
             DiffType diffType;
             if (videoItemInfo != null)
             {
-                if (lastVideo == null)
+                if (lastVideo == null || (activeVideo != null && !activeVideo.Active))
                 {
                     // Started watching
                     isDiff = true;
@@ -370,7 +371,7 @@ namespace XbmcPoller
             }
             else
             {
-                if (lastVideo == null)
+                if (lastVideo == null || (activeVideo != null && !activeVideo.Active))
                 {
                     // no diff
                     isDiff = false;
@@ -399,9 +400,12 @@ namespace XbmcPoller
                     }
 
                     // Set the active video
-                    _sessionInfo.ActiveVideo.Active = false;
-                    _sessionInfo.ActiveVideo.EndTime = time;
-                    await StoreSessionVideo(_sessionInfo.ActiveVideo);
+                    if (_sessionInfo.ActiveVideo.Active)
+                    {
+                        _sessionInfo.ActiveVideo.Active = false;
+                        _sessionInfo.ActiveVideo.EndTime = time;
+                        await StoreSessionVideo(_sessionInfo.ActiveVideo);
+                    }
                     _sessionInfo.ActiveVideo = null;
                 }
             }
