@@ -75,7 +75,7 @@ namespace PollingEngine.Core
                         Console.WriteLine("Error in program '{0}': {1}", progName, ex.Message);
                         Debug.WriteLine(ex);
                     }
-                    Thread.Sleep(context.Interval);
+                    Wait(context.Interval);
                 }
                 else if (context.State == State.Stopping)
                 {
@@ -97,9 +97,18 @@ namespace PollingEngine.Core
                 else if (context.State == State.Stopped)
                 {
                     //context.IntervalSequence = 0;
+                    Wait(context.Interval);
                 }
             }
             Console.WriteLine("Program exited: " + progName);
+        }
+
+
+        private void Wait(TimeSpan interval)
+        {
+            if (interval <= TimeSpan.Zero)
+                interval = TimeSpan.FromSeconds(5);
+            Thread.Sleep(interval);
         }
 
 
