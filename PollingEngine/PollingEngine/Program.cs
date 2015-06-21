@@ -52,14 +52,18 @@ namespace PollingEngine
 
             Console.WriteLine("Programs started");
 
+            string input;
             while (true)
             {
                 Console.WriteLine();
-                var input = Console.ReadLine();
+                input = Console.ReadLine();
                 if (input == "stop all")
                     manager.Exit(false);
                 if (input == "exit")
+                {
                     manager.Exit(true);
+                    break;
+                }
                 else if (input == "end")
                     break;
                 else if (input == "cls")
@@ -145,8 +149,11 @@ namespace PollingEngine
                 }
             }
 
-            Console.WriteLine("Program will exit after [enter]");
-            Console.ReadLine();
+            if (input != "exit")
+            {
+                Console.WriteLine("Program will exit after [enter]");
+                Console.ReadLine();
+            }
         }
 
         private static void CurrentDomain_OnFirstChanceException(object sender, FirstChanceExceptionEventArgs args)
