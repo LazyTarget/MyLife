@@ -599,8 +599,8 @@ namespace SteamPoller
                         session.Player.GameID = record.GetInt32(cGameID).ToString();
                         session.Player.GameExtraInfo = record.GetString(cGameName);
                         session.Player.Identity = steamIdentity;
-                        session.Time = record.GetDateTime(cStartTime);
-                        var endTime = record.GetDateTime(cEndTime);
+                        session.Time = DateTime.SpecifyKind(record.GetDateTime(cStartTime), DateTimeKind.Utc);
+                        var endTime = DateTime.SpecifyKind(record.GetDateTime(cEndTime), DateTimeKind.Utc);
                         session.Duration = endTime.Subtract(session.Time);
                         return session;
                     }
