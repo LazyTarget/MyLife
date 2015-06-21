@@ -27,8 +27,8 @@ namespace MyLife.App.Data
         public MyLifeDataSource()
         {
 #if DEBUG
-            if (_testChannel == null)
-                _testChannel = new RandomEventChannel();
+            //if (_testChannel == null)
+            //    _testChannel = new RandomEventChannel();
 #endif
         }
 
@@ -55,8 +55,8 @@ namespace MyLife.App.Data
 
             try
             {
-                _instance._myLifeClient = new MyLifeClient();
-                //_instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
+                //_instance._myLifeClient = new MyLifeClient();
+                _instance._myLifeClient = await MyLifeClientFactory.Instance.AuthenticateUser(username, password);
 
 
                 if (_testChannel != null)

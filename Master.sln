@@ -65,6 +65,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C662A444-D
 		Data\PollingData_CreateDB.sql = Data\PollingData_CreateDB.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.SteamPoller", "MyLife.Channels\MyLife.Channels.SteamPoller\MyLife.Channels.SteamPoller.csproj", "{817DED1B-274A-4A55-B161-F11BAAA69ED8}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		MyLife.App\MyLife.App.Shared\MyLife.App.Shared.projitems*{4ebb3138-2b46-45ff-84fb-d856719e0776}*SharedItemsImports = 13
@@ -300,6 +302,16 @@ Global
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65}.Release|ARM.ActiveCfg = Release|Any CPU
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65}.Release|x64.ActiveCfg = Release|Any CPU
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65}.Release|x86.ActiveCfg = Release|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|ARM.ActiveCfg = Release|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|x64.ActiveCfg = Release|Any CPU
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -327,5 +339,6 @@ Global
 		{77FED2F2-4357-4D68-9D5D-79C334D399C1} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 		{C662A444-DFB5-4BA3-8D38-7C8B98D6CE6A} = {47EDEEEB-3B43-4BAD-819E-B3CADF364823}
+		{817DED1B-274A-4A55-B161-F11BAAA69ED8} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
 	EndGlobalSection
 EndGlobal

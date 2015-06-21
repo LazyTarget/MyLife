@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CalendarCore.Outlook;
 using MyLife.Channels.Calendar;
 using MyLife.Channels.Odbc;
+using MyLife.Channels.SteamPoller;
 using MyLife.Channels.Strava;
 using MyLife.Channels.Toggl;
 using MyLife.Core;
@@ -51,7 +52,7 @@ namespace MyLife.CoreClient
             var getChannelsSql = string.Format("SELECT C.Identifier, Cr.* " +
                                     "FROM CrUserChannels Cr " +
                                     "INNER JOIN Channels C ON C.ID = Cr.ChannelID " +
-                                    "WHERE Cr.UserID = {0} Cr.Enabled = 1 AND C.Enabled = 1 ",
+                                    "WHERE Cr.UserID = {0} AND Cr.Enabled = 1 AND C.Enabled = 1 ",
                                     user.ID);
             
             var channelDataTable = await _odbc.ExecuteReader(getChannelsSql);
@@ -127,6 +128,13 @@ namespace MyLife.CoreClient
                 var odbcChannel = new OdbcChannel(connectionString);
                 odbcChannel.Settings = settingsData.To<OdbcChannelSettings>();
                 return odbcChannel;
+            }
+            if (identifier == SteamChannel.ChannelIdentifier)
+            {
+                var connectionString = channelData.Get<string>("ConnectionString");
+                var steamChannel = new SteamChannel(connectionString);
+                steamChannel.Settings = settingsData.To<SteamChannelSettings>();
+                return steamChannel;
             }
             throw new NotImplementedException("Channel not yet implemented");
         }

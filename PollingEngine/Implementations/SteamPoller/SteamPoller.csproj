@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\GamingSession.cs" />
     <Compile Include="Settings\ISteamPollerSettings.cs" />
     <Compile Include="Settings\SteamIDCollection.cs" />
     <Compile Include="Settings\SteamPollerSettings.cs" />

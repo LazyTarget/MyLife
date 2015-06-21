@@ -5,11 +5,11 @@
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4A6D6CB3-9285-4374-B765-80ECEEA80F7A}</ProjectGuid>
+    <ProjectGuid>{817DED1B-274A-4A55-B161-F11BAAA69ED8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLife.CoreClient</RootNamespace>
-    <AssemblyName>MyLife.CoreClient</AssemblyName>
+    <RootNamespace>MyLife.Channels.SteamPoller</RootNamespace>
+    <AssemblyName>MyLife.Channels.SteamPoller</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,39 +35,11 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\CalendarCore\CalendarCore.Outlook\CalendarCore.Outlook.csproj">
-      <Project>{3c9a8c89-db67-4e1e-990e-fb30fe7945aa}</Project>
-      <Name>CalendarCore.Outlook</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CalendarCore\CalendarCore\CalendarCore.csproj">
-      <Project>{3f828af9-4173-4c27-a038-1cc4a48c84e0}</Project>
-      <Name>CalendarCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife.Channels.Odbc\MyLife.Channels.Odbc.csproj">
-      <Project>{b0fe3dd9-2a47-4c9b-8276-05d84551452d}</Project>
-      <Name>MyLife.Channels.Odbc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife.Channels.Strava\MyLife.Channels.Strava.csproj">
-      <Project>{ac74c1ec-a67a-421e-9752-c3de8b7e9e7f}</Project>
-      <Name>MyLife.Channels.Strava</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife.Channels\MyLife.Channels.Calendar\MyLife.Channels.Calendar.csproj">
-      <Project>{be55d440-00dd-4dca-9e53-53248dc54ded}</Project>
-      <Name>MyLife.Channels.Calendar</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife.Channels\MyLife.Channels.SteamPoller\MyLife.Channels.SteamPoller.csproj">
-      <Project>{817ded1b-274a-4a55-b161-f11baaa69ed8}</Project>
-      <Name>MyLife.Channels.SteamPoller</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife.Channels\MyLife.Channels.Toggl\MyLife.Channels.Toggl.csproj">
-      <Project>{514d5a44-7f8d-4d18-b96a-e40608d1e847}</Project>
-      <Name>MyLife.Channels.Toggl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLife\MyLife.Core\MyLife.Core.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
       <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
       <Name>MyLife.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyLife\MyLife.Models\MyLife.Models.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife.Models\MyLife.Models.csproj">
       <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
       <Name>MyLife.Models</Name>
     </ProjectReference>
@@ -77,17 +49,17 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="Randomizer.cs" />
-    <Compile Include="MyLifeChannelFactory.cs" />
-    <Compile Include="MyLifeClientFactory.cs" />
+    <Compile Include="ModelConverter.cs" />
+    <Compile Include="SteamChannelSettings.cs" />
+    <Compile Include="SteamChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RandomEventChannel.cs" />
-    <Compile Include="TestEventChannel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OdbcWrapper">
-      <HintPath>..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+      <HintPath>..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamPoller">
+      <HintPath>..\..\PollingEngine\Implementations\SteamPoller\bin\Debug\SteamPoller.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
