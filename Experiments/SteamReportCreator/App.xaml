@@ -1,0 +1,15 @@
+﻿<Application
+    x:Class="SteamReportCreator.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SteamReportCreator"
+    xmlns:localData="using:SteamReportCreator.Data">
+
+    <Application.Resources>
+
+        <!-- Application-specific resources -->
+
+        <x:String x:Key="AppName">SteamReportCreator</x:String>
+
+    </Application.Resources>
+</Application>

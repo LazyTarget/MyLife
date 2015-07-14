@@ -13,7 +13,14 @@ namespace OdbcWrapper
             _connection = new OdbcConnection(connectionString);
         }
 
-        
+
+        public OdbcCommand2 CreateCommand()
+        {
+            var cmd = new OdbcCommand2(_connection);
+            return cmd;
+        }
+
+
         public async Task<int> ExecuteNonQuery(string sql)
         {
             if (_connection.State != ConnectionState.Open)

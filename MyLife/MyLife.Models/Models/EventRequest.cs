@@ -2,11 +2,8 @@
 
 namespace MyLife.Models
 {
-    public class EventRequest
+    public class EventRequest : TimePeriod
     {
-        public DateTime StartTime { get; set; }
         
-        public DateTime EndTime { get; set; }
-
     }
 }

@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarCore", "CalendarCore\CalendarCore\CalendarCore.csproj", "{3F828AF9-4173-4C27-A038-1CC4A48C84E0}"
 EndProject
@@ -66,6 +69,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{C662A444-D
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.SteamPoller", "MyLife.Channels\MyLife.Channels.SteamPoller\MyLife.Channels.SteamPoller.csproj", "{817DED1B-274A-4A55-B161-F11BAAA69ED8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experiments", "Experiments", "{67E1F730-38F7-4E3A-A9F0-5B28959FB109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamReportCreator", "Experiments\SteamReportCreator\SteamReportCreator.csproj", "{B8A151E7-74B2-43A4-A0CC-306D9094AF04}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -312,6 +322,30 @@ Global
 		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|ARM.ActiveCfg = Release|Any CPU
 		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|x64.ActiveCfg = Release|Any CPU
 		{817DED1B-274A-4A55-B161-F11BAAA69ED8}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|ARM.ActiveCfg = Debug|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|ARM.Build.0 = Debug|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|ARM.Deploy.0 = Debug|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x64.ActiveCfg = Debug|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x64.Build.0 = Debug|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x64.Deploy.0 = Debug|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x86.ActiveCfg = Debug|x86
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x86.Build.0 = Debug|x86
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Debug|x86.Deploy.0 = Debug|x86
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|ARM.ActiveCfg = Release|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|ARM.Build.0 = Release|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|ARM.Deploy.0 = Release|ARM
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x64.ActiveCfg = Release|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x64.Build.0 = Release|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x64.Deploy.0 = Release|x64
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x86.ActiveCfg = Release|x86
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x86.Build.0 = Release|x86
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -340,5 +374,6 @@ Global
 		{B5F898D5-729E-4F69-AD10-7ED4317DBD65} = {C799F809-FEAD-4A81-87CE-67BC58FE5FCA}
 		{C662A444-DFB5-4BA3-8D38-7C8B98D6CE6A} = {47EDEEEB-3B43-4BAD-819E-B3CADF364823}
 		{817DED1B-274A-4A55-B161-F11BAAA69ED8} = {B5524857-DDA1-4D09-A950-3CDB72632AE4}
+		{B8A151E7-74B2-43A4-A0CC-306D9094AF04} = {67E1F730-38F7-4E3A-A9F0-5B28959FB109}
 	EndGlobalSection
 EndGlobal

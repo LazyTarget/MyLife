@@ -68,7 +68,9 @@ namespace OdbcWrapper
                 var prop = properties.SingleOrDefault(x => x.Name == key);
                 if (prop != null)
                 {
-                    var value = dict[key];
+                    var raw = dict[key];
+                    //var value = Convert.ChangeType(raw, prop.PropertyType);
+                    var value = SafeConvert(raw, prop.PropertyType, null);
                     prop.SetValue(result, value);
                 }
             }
@@ -103,7 +105,17 @@ namespace OdbcWrapper
                     return result;
                 if (value == DBNull.Value)
                     return result;
-                if (typeof (IConvertible).IsAssignableFrom(typeof (T)))
+                if (typeof (T) == value.GetType())
+                {
+                    result = (T) value;
+                }
+                else if (typeof(T).IsEnum)
+                {
+                    var str = value.SafeConvert<string>();
+                    var obj = Enum.Parse(typeof(T), str);
+                    result = (T)obj;
+                }
+                else if (typeof (IConvertible).IsAssignableFrom(typeof (T)))
                 {
                     var obj = Convert.ChangeType(value, typeof (T));
                     result = (T) obj;
@@ -111,6 +123,46 @@ namespace OdbcWrapper
                 else
                 {
                     result = (T) value;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return result;
+            }
+        }
+
+        public static object SafeConvert(this object value, Type targetType, object defaultValue)
+        {
+            var result = defaultValue;
+            try
+            {
+                if (value == null)
+                    return result;
+                if (value == DBNull.Value)
+                    return result;
+                var type = value.GetType();
+                if (targetType == type)
+                {
+                    result = value;
+                }
+                else if (targetType.IsAssignableFrom(type))
+                {
+                    result = value;
+                }
+                else if (targetType.IsEnum)
+                {
+                    var str = value.SafeConvert<string>();
+                    result = Enum.Parse(targetType, str);
+                }
+                else if (typeof (IConvertible).IsAssignableFrom(targetType))
+                {
+                    result = Convert.ChangeType(value, targetType);
+                }
+                else
+                {
+                    //result = (T) value;       // todo?
+                    throw new NotImplementedException();
                 }
                 return result;
             }

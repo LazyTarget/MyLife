@@ -29,7 +29,8 @@ namespace MyLife.Channels.SteamPoller
                     durationStr += string.Format(" for {0}h {1}m", obj.Duration.Hours, obj.Duration.Minutes);
             }
 
-            var text = string.Format("You played {0}{1}", obj.GameName, durationStr);        // todo: translation support
+            var t = obj.Active ? "are playing" : "played";
+            var text = string.Format("You {0} {1}{2}", t, obj.GameName, durationStr);        // todo: translation support
             var desc = "You unlocked following achievements... (todo)";
 
             var res = new Event

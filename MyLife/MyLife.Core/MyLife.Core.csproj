@@ -42,6 +42,7 @@
     <Compile Include="Interfaces\IChannelSettings.cs" />
     <Compile Include="Http\HttpHelperResponseEventArgs.cs" />
     <Compile Include="Interfaces\IChannel.cs" />
+    <Compile Include="Interfaces\IReportChannel.cs" />
     <Compile Include="WebChannel.cs" />
     <Compile Include="ChannelBase.cs" />
     <Compile Include="MyLifeClient.cs" />

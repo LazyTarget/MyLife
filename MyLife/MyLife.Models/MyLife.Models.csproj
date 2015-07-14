@@ -41,8 +41,12 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums.cs" />
+    <Compile Include="Interfaces\IReport.cs" />
     <Compile Include="Interfaces\IEventSource.cs" />
     <Compile Include="Interfaces\IEvent.cs" />
+    <Compile Include="Interfaces\IReportRequest.cs" />
+    <Compile Include="Models\TimePeriod.cs" />
     <Compile Include="Models\ModifiedEvent.cs" />
     <Compile Include="Models\Event.cs" />
     <Compile Include="Models\EventSource.cs" />

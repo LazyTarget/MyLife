@@ -49,7 +49,14 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums.cs" />
     <Compile Include="ModelConverter.cs" />
+    <Compile Include="Models\SteamFilterCollection.cs" />
+    <Compile Include="Models\SteamReport.cs" />
+    <Compile Include="Models\SteamReportFilter.cs" />
+    <Compile Include="Interfaces\ISteamReportGenerationRequest.cs" />
+    <Compile Include="Models\SteamReportGenerationRequest.cs" />
+    <Compile Include="SteamReportFilterer.cs" />
     <Compile Include="SteamChannelSettings.cs" />
     <Compile Include="SteamChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -62,6 +69,7 @@
       <HintPath>..\..\PollingEngine\Implementations\SteamPoller\bin\Debug\SteamPoller.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -44,6 +44,8 @@
     <Compile Include="DataRow.cs" />
     <Compile Include="DataTable.cs" />
     <Compile Include="DataExtensions.cs" />
+    <Compile Include="OdbcParameter2.cs" />
+    <Compile Include="OdbcCommand2.cs" />
     <Compile Include="OdbcClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
