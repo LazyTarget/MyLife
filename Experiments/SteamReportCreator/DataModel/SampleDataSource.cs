@@ -124,6 +124,7 @@ namespace SteamReportCreator.Data
                 //    Operator = FilterOperator.Equals,
                 //    Value = "730",
                 //});
+                reportRequest.UserID = 1;
 
 
                 var report = await steamChannel.GenerateReport(reportRequest);

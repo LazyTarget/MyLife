@@ -4,7 +4,7 @@ namespace MyLife.Models
 {
     public interface IReport
     {
-        string ID { get; }
+        string PublicID { get; }
 
         string Name { get; }
 

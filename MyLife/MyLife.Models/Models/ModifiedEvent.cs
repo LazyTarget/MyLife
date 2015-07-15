@@ -9,6 +9,7 @@ namespace MyLife.Models
         private string _description;
         private DateTime? _startTime;
         private DateTime? _endTime;
+        private DateTime? _timeCreated;
         private string _imageUri;
 
         public ModifiedEvent()
@@ -65,6 +66,23 @@ namespace MyLife.Models
                     _endTime = null;
                 else
                     _endTime = value;
+            }
+        }
+
+        public DateTime TimeCreated
+        {
+            get
+            {
+                if (_timeCreated != null && _timeCreated.HasValue)
+                    return _timeCreated.Value;
+                return GetValue(x => x.TimeCreated, OriginalEvent);
+            }
+            set
+            {
+                if (value == DateTime.MinValue)
+                    _timeCreated = null;
+                else
+                    _timeCreated = value;
             }
         }
 

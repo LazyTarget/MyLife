@@ -4,7 +4,12 @@ namespace MyLife.Models
 {
     public interface IReportGenerationRequest
     {
-        string ID { get; }
+        /// <summary>
+        /// MyLife user id
+        /// </summary>
+        long UserID { get; set; }
+
+        string PublicID { get; }
 
         string Name { get; }
 

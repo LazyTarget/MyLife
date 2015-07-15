@@ -94,21 +94,23 @@ namespace MyLife.Core
                 return evt;
 
             IEvent result = null;
-            var sql = string.Format("SELECT * FROM ModifiedEvents WHERE ID = '{0}' AND UserChannelID = '{1}'", evt.ID, channelInfo.UserChannelID);
-            var dt = await _odbc.ExecuteReader(sql);
-            if (dt != null && dt.RowCount > 0)
-            {
-                foreach (var dataRow in dt.Rows)
-                {
-                    var res = dataRow.To<ModifiedEvent>();
-                    if (res != null)
-                    {
-                        res.OriginalEvent = evt;
-                        result = res;
-                        break;
-                    }
-                }
-            }
+
+            // todo: make as a MyLife user setting
+            //var sql = string.Format("SELECT * FROM ModifiedEvents WHERE ID = '{0}' AND UserChannelID = '{1}'", evt.ID, channelInfo.UserChannelID);
+            //var dt = await _odbc.ExecuteReader(sql);
+            //if (dt != null && dt.RowCount > 0)
+            //{
+            //    foreach (var dataRow in dt.Rows)
+            //    {
+            //        var res = dataRow.To<ModifiedEvent>();
+            //        if (res != null)
+            //        {
+            //            res.OriginalEvent = evt;
+            //            result = res;
+            //            break;
+            //        }
+            //    }
+            //}
             if (result == null)
                 result = evt;
             return result;

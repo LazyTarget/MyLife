@@ -11,6 +11,8 @@ using MyLife.Channels.Strava;
 using MyLife.Channels.Toggl;
 using MyLife.Core;
 using MyLife.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OdbcWrapper;
 
 namespace MyLife.CoreClient
@@ -42,6 +44,7 @@ namespace MyLife.CoreClient
             channels.Add(CalendarChannel.ChannelIdentifier, typeof (CalendarChannel));
             channels.Add(StravaChannel.ChannelIdentifier, typeof (StravaChannel));
             channels.Add(OdbcChannel.ChannelIdentifier, typeof (OdbcChannel));
+            channels.Add(SteamChannel.ChannelIdentifier, typeof (SteamChannel));
             return channels;
         }
 
@@ -50,7 +53,7 @@ namespace MyLife.CoreClient
         {
             var result = new List<ChannelInfo>();
             var getChannelsSql = string.Format("SELECT C.Identifier, Cr.* " +
-                                    "FROM CrUserChannels Cr " +
+                                    "FROM UserChannels Cr " +
                                     "INNER JOIN Channels C ON C.ID = Cr.ChannelID " +
                                     "WHERE Cr.UserID = {0} AND Cr.Enabled = 1 AND C.Enabled = 1 ",
                                     user.ID);
@@ -60,12 +63,16 @@ namespace MyLife.CoreClient
             {
                 var channelData = row.ToExpando();
 
-                ExpandoObject settingsData = null;
+                JObject customSettingsJson = null;
                 var channelSettingsID = channelData.Get<long>("ChannelSettingsID");
                 if (channelSettingsID > 0)
-                    settingsData = await GetChannelSettings(channelSettingsID);
+                {
+                    var settingsData = await GetChannelSettings(channelSettingsID);
+                    settingsData.Remove("ID");
+                    channelData.Extend(settingsData);
+                }
 
-                var channel = await Create(channelData, settingsData);
+                var channel = await Create(channelData);
                 var channelInfo = new ChannelInfo
                 {
                     Channel = channel,
@@ -96,8 +103,14 @@ namespace MyLife.CoreClient
         }
 
 
-        private async Task<IChannel> Create(ExpandoObject channelData, ExpandoObject settingsData)
+        private async Task<IChannel> Create(ExpandoObject channelData)
         {
+            var customSettingsJson = channelData.Get<string>("Settings");
+            if (string.IsNullOrWhiteSpace(customSettingsJson))
+                customSettingsJson = "{}";
+            var customSettings = JObject.Parse(customSettingsJson);
+
+
             var identifier = channelData.Get<Guid>("Identifier");
             if (identifier == Guid.Empty)
                 throw new ArgumentException("Invalid channel identifier");
@@ -126,14 +139,17 @@ namespace MyLife.CoreClient
             {
                 var connectionString = channelData.Get<string>("ConnectionString");
                 var odbcChannel = new OdbcChannel(connectionString);
-                odbcChannel.Settings = settingsData.To<OdbcChannelSettings>();
+                odbcChannel.Settings = customSettings.ToObjectOrDefault<OdbcChannelSettings>() ?? new OdbcChannelSettings();
                 return odbcChannel;
             }
             if (identifier == SteamChannel.ChannelIdentifier)
             {
+                var settings = customSettings.ToObjectOrDefault<SteamChannelSettings>() ?? new SteamChannelSettings();
+                var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
                 var connectionString = channelData.Get<string>("ConnectionString");
                 var steamChannel = new SteamChannel(connectionString);
-                steamChannel.Settings = settingsData.To<SteamChannelSettings>();
+                steamChannel.Settings = settings;
                 return steamChannel;
             }
             throw new NotImplementedException("Channel not yet implemented");

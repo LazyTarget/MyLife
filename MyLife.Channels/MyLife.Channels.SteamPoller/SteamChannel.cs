@@ -14,10 +14,11 @@ namespace MyLife.Channels.SteamPoller
         public static readonly Guid ChannelIdentifier = new Guid("a45faa27-4f86-4b89-85d6-131c8233df15");
 
         
-        public Guid Identifier { get { return ChannelIdentifier; } }
 
-        public SteamChannelSettings Settings { get; set; }
-
+        private readonly OdbcClient _odbc;
+        private readonly SteamReportFilterer _reportFilterer;
+        private SteamChannelSettings _settings = new SteamChannelSettings();
+        
 
         public SteamChannel(string connectionString)
         {
@@ -25,23 +26,36 @@ namespace MyLife.Channels.SteamPoller
             _reportFilterer = new SteamReportFilterer();
         }
 
-        private readonly OdbcClient _odbc;
-        private readonly SteamReportFilterer _reportFilterer;
+
+        public Guid Identifier { get { return ChannelIdentifier; } }
+
+        public SteamChannelSettings Settings
+        {
+            get { return _settings; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _settings = value;
+            }
+        }
 
 
 
         public async Task<IEnumerable<IEvent>> GetEvents(EventRequest request)
         {
             var sessions = await GetGamingSessions(request);
-            var events = sessions.Select(ModelConverter.ToEvent).ToList();
+            var events = sessions.Where(x => Settings.SteamUserIDs.Contains(x.UserID))
+                                 .Select(ModelConverter.ToEvent)
+                                 .ToList();
             
-            var reports = await GetReports(request);
+            var reports = await ((IReportChannel) this).GetReports(request);
             var reportEvents = reports.Select(x => x.ToEvent()).ToList();
             
             var result = new List<IEvent>();
             result.AddRange(events);
             result.AddRange(reportEvents);
-            return events;
+            return result;
         }
 
 
@@ -62,38 +76,12 @@ namespace MyLife.Channels.SteamPoller
             return sessions;
         }
         
-        public async Task<IEnumerable<SteamReport>> GetReports(EventRequest request)
-        {
-            var sql = "SELECT * FROM Steam_Reports " +
-                      //"WHERE UserID = " + Settings.UserID;
-                      "WHERE StartTime >= ? AND EndTime <= ?";
-            var cmd = _odbc.CreateCommand();
-            cmd.CommandText = sql;
-            cmd.AddParam("@StartTime", request.StartTime);
-            cmd.AddParam("@EndTime", request.EndTime);
 
-            var dataTable = await cmd.ExecuteReader();
-            var rows = dataTable.Rows.ToList();
-            var dynamic = rows.Select(x => x.ToExpando()).ToList();
-            var reports = dynamic.Select(x =>
-            {
-                var report = x.To<SteamReport>();
-                //if (report != null)
-                //    report = await LoadReportExtraData(report);
-                return report;
-            });
-            return reports;
-        }
-
-
-        async Task<IEnumerable<IReport>> IReportChannel.GetReports(EventRequest request)
-        {
-            var reports = await GetReports(request);
-            return reports;
-        }
-        
         public async Task<SteamReport> GetReport(long id)
         {
+            if (id <= 0)
+                throw new ArgumentException("Invalid id", "id");
+
             var sql = "SELECT * FROM Steam_Reports " +
                       "WHERE ID = ?";
             var cmd = _odbc.CreateCommand();
@@ -109,6 +97,60 @@ namespace MyLife.Channels.SteamPoller
                 result = await LoadReportExtraData(result);
             return result;
         }
+
+        async Task<IReport> IReportChannel.GetReport(string publicID)
+        {
+            var id = SteamReport.ParsePublicID(publicID);
+            var report = await GetReport(id);
+            return report;
+        }
+
+
+        public async Task<IEnumerable<Task<SteamReport>>> GetReports(EventRequest request)
+        {
+            var sql = "SELECT * FROM Steam_Reports " +
+                      "WHERE ((StartTime BETWEEN ? AND ?) OR " +
+                      "       (EndTime BETWEEN ? AND ?) OR " +
+                      "       (? BETWEEN StartTime AND ?) OR " +
+                      "       (? BETWEEN ? AND EndTime))" +
+                      (Settings.MyLifeUserID > 0 ? " AND (UserID = ? OR UserID IS NULL)" : "");
+            var cmd = _odbc.CreateCommand();
+            cmd.CommandText = sql;
+            cmd.AddParam("@StartTime", request.StartTime);
+            cmd.AddParam("@EndTime", request.EndTime);
+
+            cmd.AddParam("@StartTime", request.StartTime);
+            cmd.AddParam("@EndTime", request.EndTime);
+
+            cmd.AddParam("@StartTime", request.StartTime);
+            cmd.AddParam("@EndTime", request.EndTime);
+
+            cmd.AddParam("@EndTime", request.EndTime);
+            cmd.AddParam("@StartTime", request.StartTime);
+
+            if (Settings.MyLifeUserID > 0)
+                cmd.AddParam("@UserID", Settings.MyLifeUserID);
+
+            var dataTable = await cmd.ExecuteReader();
+            var rows = dataTable.Rows.ToList();
+            var dynamic = rows.Select(x => x.ToExpando()).ToList();
+            var reports = dynamic.Select(async x =>
+            {
+                var report = x.To<SteamReport>();
+                if (report != null)
+                    report = await LoadReportExtraData(report);
+                return report;
+            });
+            return reports;
+        }
+        
+        async Task<IEnumerable<IReport>> IReportChannel.GetReports(EventRequest request)
+        {
+            var reportTasks = await GetReports(request);
+            var reports = await Task.WhenAll(reportTasks);
+            return reports;
+        }
+        
 
         private async Task<SteamReport> LoadReportExtraData(SteamReport report)
         {
@@ -148,10 +190,16 @@ namespace MyLife.Channels.SteamPoller
             return report;
         }
 
+
         public async Task<IReport> GenerateReport(IReportGenerationRequest request)
         {
-            var reportID = request.ID.SafeConvert<long>();
+            if (request.UserID <= 0)
+            {
+                throw new ArgumentException("UserID is required", "request");
+            }
+
             SteamReport report;
+            var reportID = SteamReport.ParsePublicID(request.PublicID);
             if (reportID > 0)
             {
                 report = await GetReport(reportID);
@@ -161,6 +209,7 @@ namespace MyLife.Channels.SteamPoller
             else
                 report = new SteamReport();
 
+            report.UserID = request.UserID;
             report.Name = request.Name;
             report.Description = request.Description;
             report.StartTime = request.StartTime;
@@ -205,8 +254,8 @@ namespace MyLife.Channels.SteamPoller
             {
                 // Create report
                 cmd = _odbc.CreateCommand();
-                sql = "INSERT INTO Steam_Reports(Name, Description, StartTime, EndTime, LastModified, LastGenerated) " +
-                      "VALUES (?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
+                sql = "INSERT INTO Steam_Reports(Name, UserID, Description, StartTime, EndTime, LastModified, LastGenerated) " +
+                      "VALUES (?, ?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
                 var reportIDParam = new OdbcParameter2
                 {
                     Name = "@ReportID",
@@ -214,6 +263,7 @@ namespace MyLife.Channels.SteamPoller
                 };
                 cmd.CommandText = sql;
                 cmd.AddParam("@Name", report.Name);
+                cmd.AddParam("@UserID", report.UserID);
                 cmd.AddParam("@Description", report.Description);
                 cmd.AddParam("@StartTime", report.StartTime);
                 cmd.AddParam("@EndTime", report.EndTime);
@@ -229,6 +279,7 @@ namespace MyLife.Channels.SteamPoller
                 cmd = _odbc.CreateCommand();
                 sql = "UPDATE Steam_Reports " +
                       "SET  Name = ?," +
+                      "     UserID = ?," +
                       "     Description = ?," +
                       "     StartTime = ?," +
                       "     EndTime = ?," +
@@ -237,6 +288,7 @@ namespace MyLife.Channels.SteamPoller
                       "WHERE ID = ?";
                 cmd.CommandText = sql;
                 cmd.AddParam("@Name", report.Name);
+                cmd.AddParam("@UserID", report.UserID);
                 cmd.AddParam("@Description", report.Description);
                 cmd.AddParam("@StartTime", report.StartTime);
                 cmd.AddParam("@EndTime", report.EndTime);

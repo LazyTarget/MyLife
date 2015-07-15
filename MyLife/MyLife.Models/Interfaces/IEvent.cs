@@ -15,6 +15,8 @@ namespace MyLife.Models
 
         DateTime EndTime { get; }
 
+        DateTime TimeCreated { get; }
+
 
         string ImageUri { get; }
 

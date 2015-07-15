@@ -7,6 +7,14 @@ namespace MyLife.Core
     public interface IReportChannel : IChannel
     {
         /// <summary>
+        /// Gets a report
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<IReport> GetReport(string id);
+
+
+        /// <summary>
         /// Creates or updates a report
         /// </summary>
         /// <param name="request"></param>

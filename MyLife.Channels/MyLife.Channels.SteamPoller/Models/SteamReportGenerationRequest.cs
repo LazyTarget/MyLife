@@ -10,7 +10,8 @@ namespace MyLife.Channels.SteamPoller
             Filters = new List<SteamReportFilter>();
         }
 
-        public string ID { get; set; }
+        public long UserID { get; set; }
+        public string PublicID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime StartTime { get; set; }

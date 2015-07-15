@@ -24,7 +24,8 @@ namespace MyLife.CoreClient
         private MyLifeClientFactory(string connectionString)
         {
             _odbc = new OdbcClient(connectionString);
-            _channelFactory = MyLifeChannelFactory.Instance;
+            //_channelFactory = MyLifeChannelFactory.Instance;
+            _channelFactory = new MyLifeChannelFactory(connectionString);
         }
 
 

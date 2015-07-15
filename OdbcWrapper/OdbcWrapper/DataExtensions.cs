@@ -50,6 +50,24 @@ namespace OdbcWrapper
             var dict = ((IDictionary<string, object>)expando);
             dict[key] = value;
         }
+        
+
+        public static bool Remove(this ExpandoObject expando, string key)
+        {
+            var dict = ((IDictionary<string, object>)expando);
+            var res = dict.Remove(key);
+            return res;
+        }
+
+
+        public static ExpandoObject Extend(this ExpandoObject expando, ExpandoObject additional)
+        {
+            foreach (var pair in additional)
+            {
+                expando.Set(pair.Key, pair.Value);
+            }
+            return expando;
+        }
 
 
 

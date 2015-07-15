@@ -8,6 +8,7 @@ namespace MyLife.Models
         {
             StartTime = DateTime.MinValue;
             EndTime = DateTime.MinValue;
+            TimeCreated = DateTime.MinValue;
         }
 
         public string ID { get; set; }
@@ -20,6 +21,8 @@ namespace MyLife.Models
         public DateTime StartTime { get; set; }
 
         public DateTime EndTime { get; set; }
+
+        public DateTime TimeCreated { get; set; }
 
         public string ImageUri { get; set; }
 
