@@ -5,11 +5,11 @@
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B0FE3DD9-2A47-4C9B-8276-05D84551452D}</ProjectGuid>
+    <ProjectGuid>{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLife.Channels.Odbc</RootNamespace>
-    <AssemblyName>MyLife.Channels.Odbc</AssemblyName>
+    <RootNamespace>MyLife.Channels.Strava</RootNamespace>
+    <AssemblyName>MyLife.Channels.Strava</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,11 +35,11 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\MyLife\MyLife.Core\MyLife.Core.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
       <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
       <Name>MyLife.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyLife\MyLife.Models\MyLife.Models.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife.Models\MyLife.Models.csproj">
       <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
       <Name>MyLife.Models</Name>
     </ProjectReference>
@@ -50,13 +50,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelConverter.cs" />
-    <Compile Include="OdbcChannelSettings.cs" />
-    <Compile Include="OdbcChannel.cs" />
+    <Compile Include="StravaChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="OdbcWrapper">
-      <HintPath>..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="com.strava.api">
+      <HintPath>..\..\packages\Strava.NET.3.2.0\com.strava.api.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

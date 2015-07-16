@@ -34,9 +34,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Calendar", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "CalendarCore\TestApp\TestApp.csproj", "{DE7759BB-1BFA-42E1-A2BE-8EC264D54DED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Strava", "MyLife.Channels.Strava\MyLife.Channels.Strava.csproj", "{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Strava", "MyLife.Channels\MyLife.Channels.Strava\MyLife.Channels.Strava.csproj", "{AC74C1EC-A67A-421E-9752-C3DE8B7E9E7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Odbc", "MyLife.Channels.Odbc\MyLife.Channels.Odbc.csproj", "{B0FE3DD9-2A47-4C9B-8276-05D84551452D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Channels.Odbc", "MyLife.Channels\MyLife.Channels.Odbc\MyLife.Channels.Odbc.csproj", "{B0FE3DD9-2A47-4C9B-8276-05D84551452D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D7DCF7C8-2A22-41EC-81CE-D78595780842} = {D7DCF7C8-2A22-41EC-81CE-D78595780842}
 	EndProjectSection
