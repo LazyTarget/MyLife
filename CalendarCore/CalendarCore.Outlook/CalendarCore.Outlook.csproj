@@ -53,7 +53,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife\MyLife.Core\MyLife.Core.csproj">
       <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
       <Name>MyLife.Core</Name>
     </ProjectReference>

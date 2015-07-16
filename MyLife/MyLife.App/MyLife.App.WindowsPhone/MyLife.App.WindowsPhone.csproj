@@ -81,11 +81,11 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\CalendarCore\CalendarCore.Outlook\CalendarCore.Outlook.csproj">
+    <ProjectReference Include="..\..\..\CalendarCore\CalendarCore.Outlook\CalendarCore.Outlook.csproj">
       <Project>{3C9A8C89-DB67-4E1E-990E-FB30FE7945AA}</Project>
       <Name>CalendarCore.Outlook</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\CalendarCore\CalendarCore\CalendarCore.csproj">
+    <ProjectReference Include="..\..\..\CalendarCore\CalendarCore\CalendarCore.csproj">
       <Project>{3F828AF9-4173-4C27-A038-1CC4A48C84E0}</Project>
       <Name>CalendarCore</Name>
     </ProjectReference>
@@ -105,7 +105,7 @@
       <Project>{514D5A44-7F8D-4D18-B96A-E40608D1E847}</Project>
       <Name>MyLife.Channels.Toggl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MyLife.CoreClient\MyLife.CoreClient.csproj">
+    <ProjectReference Include="..\..\MyLife\MyLife.CoreClient\MyLife.CoreClient.csproj">
       <Project>{4a6d6cb3-9285-4374-b765-80eceea80f7a}</Project>
       <Name>MyLife.CoreClient</Name>
     </ProjectReference>

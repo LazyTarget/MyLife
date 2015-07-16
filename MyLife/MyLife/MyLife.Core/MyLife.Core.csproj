@@ -5,11 +5,11 @@
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B0FE3DD9-2A47-4C9B-8276-05D84551452D}</ProjectGuid>
+    <ProjectGuid>{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLife.Channels.Odbc</RootNamespace>
-    <AssemblyName>MyLife.Channels.Odbc</AssemblyName>
+    <RootNamespace>MyLife.Core</RootNamespace>
+    <AssemblyName>MyLife.Core</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -34,30 +34,45 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\..\MyLife\MyLife.Core\MyLife.Core.csproj">
-      <Project>{b1a7e8c2-cbae-44b0-8db3-ca2e3244f594}</Project>
-      <Name>MyLife.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MyLife\MyLife.Models\MyLife.Models.csproj">
-      <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
-      <Name>MyLife.Models</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ModelConverter.cs" />
-    <Compile Include="OdbcChannelSettings.cs" />
-    <Compile Include="OdbcChannel.cs" />
+    <Compile Include="ChannelInfo.cs" />
+    <Compile Include="Interfaces\IChannelSettings.cs" />
+    <Compile Include="Http\HttpHelperResponseEventArgs.cs" />
+    <Compile Include="Interfaces\IChannel.cs" />
+    <Compile Include="Interfaces\IReportChannel.cs" />
+    <Compile Include="WebChannel.cs" />
+    <Compile Include="ChannelBase.cs" />
+    <Compile Include="MyLifeClient.cs" />
+    <Compile Include="Interfaces\IEventChannel.cs" />
+    <Compile Include="Http\HttpHelperBase.cs" />
+    <Compile Include="Http\HttpHelperRequest.cs" />
+    <Compile Include="Http\HttpHelperResponse.cs" />
+    <Compile Include="Http\IHttpHelper.cs" />
+    <Compile Include="Http\IHttpHelperRequest.cs" />
+    <Compile Include="Http\IHttpHelperResponse.cs" />
+    <Compile Include="Http\JsonExtensions.cs" />
+    <Compile Include="Http\JsonHttpHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="OdbcWrapper">
-      <HintPath>..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="OdbcWrapper">
+      <HintPath>..\..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyLife.Models\MyLife.Models.csproj">
+      <Project>{71a54605-d876-4530-a50c-6969f66448f4}</Project>
+      <Name>MyLife.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

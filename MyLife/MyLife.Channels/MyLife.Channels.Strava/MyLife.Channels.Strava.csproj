@@ -58,7 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="com.strava.api">
-      <HintPath>..\..\packages\Strava.NET.3.2.0\com.strava.api.dll</HintPath>
+      <HintPath>..\..\..\packages\Strava.NET.3.2.0\com.strava.api.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
