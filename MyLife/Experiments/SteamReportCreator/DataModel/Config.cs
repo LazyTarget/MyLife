@@ -1,4 +1,4 @@
-﻿namespace MyLife.CoreClient
+﻿namespace SteamReportCreator.DataModel
 {
     public static class Config
     {
