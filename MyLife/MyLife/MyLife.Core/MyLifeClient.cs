@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MyLife.Models;
 using OdbcWrapper;
+using SharedLib;
 
 namespace MyLife.Core
 {
@@ -41,8 +42,11 @@ namespace MyLife.Core
                 var days = 7;
                 request = new EventRequest
                 {
-                    StartTime = DateTime.Now.AddDays(-days),
-                    EndTime = DateTime.Now.AddDays(days)
+                    TimePeriod = new TimePeriod
+                    {
+                        StartTime = DateTime.Now.AddDays(-days),
+                        EndTime = DateTime.Now.AddDays(days),
+                    },
                 };
             }
 

@@ -7,12 +7,12 @@ namespace MyLife.Channels.SteamPoller
     {
         public SteamChannelSettings()
         {
-            SteamUserIDs = new List<long>();
+            SteamUserIDs = new List<long>().ToArray();
         }
 
         public long MyLifeUserID { get; set; }
 
-        public List<long> SteamUserIDs { get; set; }
+        public long[] SteamUserIDs { get; set; }
 
     }
 }

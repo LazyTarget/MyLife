@@ -8,7 +8,6 @@ using Windows.Storage;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using MyLife.Channels.SteamPoller;
-using SteamReportCreator.DataModel;
 
 // The data model defined by this file serves as a representative example of a strongly-typed
 // model.  The property names chosen coincide with data bindings in the standard item templates.
@@ -97,9 +96,9 @@ namespace SteamReportCreator.Data
             try
             {
                 var now = DateTime.UtcNow;
-                var steamChannel = new SteamChannel(Config.SteamChannelConnString);
+                //var steamChannel = new SteamChannel(Config.SteamChannelConnString);
 
-                var reportRequest = await steamChannel.GetReport(12);
+                //var reportRequest = await steamChannel.GetReport(12);
                 //var reportRequest = new SteamReportGenerationRequest
                 //{
                 //    ID = "12",
@@ -124,12 +123,12 @@ namespace SteamReportCreator.Data
                 //    Operator = FilterOperator.Equals,
                 //    Value = "730",
                 //});
-                reportRequest.UserID = 1;
+                //reportRequest.UserID = 1;
 
 
-                var report = await steamChannel.GenerateReport(reportRequest);
-                var steamReport = report as SteamReport;
-                var evt = report.ToEvent();
+                //var report = await steamChannel.GenerateReport(reportRequest);
+                //var steamReport = report as SteamReport;
+                //var evt = report.ToEvent();
             }
             catch (Exception ex)
             {

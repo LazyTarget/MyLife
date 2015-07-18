@@ -77,7 +77,6 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
     <Compile Include="Randomizer.cs" />
     <Compile Include="MyLifeChannelFactory.cs" />
     <Compile Include="MyLifeClientFactory.cs" />
@@ -91,6 +90,9 @@
     </Reference>
     <Reference Include="OdbcWrapper">
       <HintPath>..\..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="SharedLib">
+      <HintPath>..\..\..\Libraries\Shared\SharedLib\bin\Debug\SharedLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

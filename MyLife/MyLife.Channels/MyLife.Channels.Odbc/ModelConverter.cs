@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Dynamic;
 using MyLife.Models;
-using OdbcWrapper;
+using SharedLib;
 
 namespace MyLife.Channels.Odbc
 {

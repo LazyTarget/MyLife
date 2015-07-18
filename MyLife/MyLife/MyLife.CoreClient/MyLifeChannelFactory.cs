@@ -14,6 +14,7 @@ using MyLife.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OdbcWrapper;
+using SharedLib;
 
 namespace MyLife.CoreClient
 {
@@ -26,7 +27,7 @@ namespace MyLife.CoreClient
         private readonly Dictionary<Guid, Type> _channels; 
 
         public MyLifeChannelFactory()
-            : this(Config.OdbcConnectionString)
+            : this(Config.MyLifeConnectionString)
         {
             _channels = GetChannelTypes();
         }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MyLife.Core;
 using MyLife.Models;
 using OdbcWrapper;
+using SharedLib;
 
 namespace MyLife.CoreClient
 {
@@ -16,7 +17,7 @@ namespace MyLife.CoreClient
         private readonly MyLifeChannelFactory _channelFactory;
 
         public MyLifeClientFactory()
-            : this(Config.OdbcConnectionString)
+            : this(Config.MyLifeConnectionString)
         {
 
         }

@@ -49,24 +49,20 @@
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums.cs" />
     <Compile Include="ModelConverter.cs" />
-    <Compile Include="Models\SteamFilterCollection.cs" />
-    <Compile Include="Models\SteamReport.cs" />
-    <Compile Include="Models\SteamReportFilter.cs" />
-    <Compile Include="Interfaces\ISteamReportGenerationRequest.cs" />
-    <Compile Include="Models\SteamReportGenerationRequest.cs" />
-    <Compile Include="SteamReportFilterer.cs" />
     <Compile Include="SteamChannelSettings.cs" />
     <Compile Include="SteamChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="OdbcWrapper">
-      <HintPath>..\..\..\OdbcWrapper\OdbcWrapper\bin\Debug\OdbcWrapper.dll</HintPath>
+    <Reference Include="SharedLib">
+      <HintPath>..\..\..\Libraries\Shared\SharedLib\bin\Debug\SharedLib.dll</HintPath>
     </Reference>
-    <Reference Include="SteamPoller">
-      <HintPath>..\..\..\PollingEngine\Implementations\SteamPoller\bin\Debug\SteamPoller.dll</HintPath>
+    <Reference Include="SteamLib">
+      <HintPath>..\..\..\Libraries\Steam\SteamLib\bin\Debug\SteamLib.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamLib.Models">
+      <HintPath>..\..\..\Libraries\Steam\SteamLib.Models\bin\Debug\SteamLib.Models.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup />

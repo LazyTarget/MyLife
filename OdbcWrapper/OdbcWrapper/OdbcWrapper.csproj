@@ -49,6 +49,12 @@
     <Compile Include="OdbcClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Shared\SharedLib\SharedLib.csproj">
+      <Project>{9e2d95e7-b905-49a5-bfe3-b3dc4d511011}</Project>
+      <Name>SharedLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

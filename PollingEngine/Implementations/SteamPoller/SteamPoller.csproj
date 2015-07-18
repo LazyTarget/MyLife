@@ -55,18 +55,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\GamingSession.cs" />
-    <Compile Include="Settings\ISteamPollerSettings.cs" />
+    <Compile Include="Interfaces\ISteamReportPollerSettings.cs" />
+    <Compile Include="Interfaces\ISteamActivityPollerSettings.cs" />
     <Compile Include="Settings\SteamIDCollection.cs" />
-    <Compile Include="Settings\SteamPollerSettings.cs" />
-    <Compile Include="Settings\SteamPollerConfigSection.cs" />
+    <Compile Include="Settings\SteamReportPollerSettings.cs" />
+    <Compile Include="Settings\SteamReportPollerConfigSection.cs" />
+    <Compile Include="Settings\SteamActivityPollerSettings.cs" />
+    <Compile Include="Settings\SteamActivityPollerConfigSection.cs" />
     <Compile Include="Settings\SteamIDConfigElement.cs" />
-    <Compile Include="Settings\SteamPollerSettingsConfigElement.cs" />
-    <Compile Include="SteamPoller.cs" />
+    <Compile Include="Settings\SteamReportPollerSettingsConfigElement.cs" />
+    <Compile Include="Settings\SteamReportSettingsConfigElement.cs" />
+    <Compile Include="Settings\SteamActivityPollerSettingsConfigElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SteamPoller2.cs" />
+    <Compile Include="SteamReportPoller.cs" />
+    <Compile Include="SteamActivityPoller.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\Shared\SharedLib\SharedLib.csproj">
+      <Project>{9e2d95e7-b905-49a5-bfe3-b3dc4d511011}</Project>
+      <Name>SharedLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\Steam\SteamLib.Models\SteamLib.Models.csproj">
+      <Project>{59e5ee7d-ed24-4419-9e29-5e52fd09706f}</Project>
+      <Name>SteamLib.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Libraries\Steam\SteamLib\SteamLib.csproj">
+      <Project>{03c6f5f6-dff3-48bb-98e6-363f426b2604}</Project>
+      <Name>SteamLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\PollingEngine.Core\PollingEngine.Core.csproj">
       <Project>{e959066a-1d55-4dbd-b5bf-49a717272576}</Project>
       <Name>PollingEngine.Core</Name>

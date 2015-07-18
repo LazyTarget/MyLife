@@ -34,25 +34,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .NET Framework is automatically included -->
-  </ItemGroup>
-  <ItemGroup>
     <TargetPlatform Include="WindowsPhoneApp, Version=8.1" />
     <TargetPlatform Include="Windows, Version=8.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
-    <Compile Include="Interfaces\IReport.cs" />
     <Compile Include="Interfaces\IEventSource.cs" />
     <Compile Include="Interfaces\IEvent.cs" />
-    <Compile Include="Interfaces\IReportRequest.cs" />
-    <Compile Include="Models\TimePeriod.cs" />
     <Compile Include="Models\ModifiedEvent.cs" />
     <Compile Include="Models\Event.cs" />
     <Compile Include="Models\EventSource.cs" />
     <Compile Include="Models\EventRequest.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SharedLib">
+      <HintPath>..\..\..\Libraries\Shared\SharedLib\bin\Debug\SharedLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

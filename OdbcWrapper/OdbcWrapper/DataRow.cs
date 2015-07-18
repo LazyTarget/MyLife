@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using SharedLib;
 
 namespace OdbcWrapper
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using MyLife.Models;
-using SteamPoller.Models;
+using SteamLib.Models;
 
 namespace MyLife.Channels.SteamPoller
 {
@@ -36,6 +36,23 @@ namespace MyLife.Channels.SteamPoller
             var res = new Event
             {
                 ID = string.Format("gamingsession_{0}", obj.ID),
+                Text = text,
+                Description = desc,
+                StartTime = obj.StartTime,
+                EndTime = obj.EndTime,
+                Source = GetEventSource(),
+            };
+            return res;
+        }
+
+        public static IEvent ToEvent(ISteamReport obj)
+        {
+            var text = string.Format("Steam Report: '{0}' #{1}", obj.Name, obj.ID);
+            var desc = string.Format("Sessions: {0}", obj.Sessions.Count);
+
+            var res = new Event
+            {
+                ID = SteamReport.GetPublicID(obj.ID),
                 Text = text,
                 Description = desc,
                 StartTime = obj.StartTime,
