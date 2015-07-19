@@ -2,23 +2,21 @@
 
 namespace SteamLib.Models
 {
-    public interface IReportInfo
+    public interface ISteamReportTemplate
     {
         long ID { get; }
-        
+
         long UserID { get; }
 
         string Name { get; }
 
         string Description { get; }
         
-        DateTime StartTime { get; }
-
-        DateTime EndTime { get; }
-
         DateTime LastModified { get; }
 
-        DateTime LastGenerated { get; }
+        bool Deleted { get; }
+
+        ISteamReportFilterSet FilterSet { get; }
 
     }
 }

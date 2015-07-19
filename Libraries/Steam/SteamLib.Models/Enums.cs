@@ -19,8 +19,11 @@
     public enum ReportPeriodType
     {
         None,
+        Hourly,
+        Daily,
         Weekly,
         Monthly,
+        Quarterly,
         Yearly,
     }
 

@@ -18,13 +18,13 @@ namespace SteamLib
         }
         
 
-        public async Task<IEnumerable<GamingSession>> GetGamingSessions(TimePeriod request)
+        public async Task<IEnumerable<GamingSession>> GetGamingSessions(TimeRange request)
         {
             var sessions = await GetGamingSessions(request, null);
             return sessions;
         }
 
-        public async Task<IEnumerable<GamingSession>> GetGamingSessions(TimePeriod request, params long[] steamUserIDs)
+        public async Task<IEnumerable<GamingSession>> GetGamingSessions(TimeRange request, params long[] steamUserIDs)
         {
             var cmd = _odbc.CreateCommand();
             cmd.AddParam("@StartTime", request.StartTime);

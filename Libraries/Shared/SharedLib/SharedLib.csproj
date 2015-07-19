@@ -41,7 +41,9 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="Extensions\DataExtensions.cs" />
+    <Compile Include="Extensions\DateExtensions.cs" />
     <Compile Include="Models\TimePeriod.cs" />
+    <Compile Include="Models\TimeRange.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

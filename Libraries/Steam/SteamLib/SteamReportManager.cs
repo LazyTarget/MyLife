@@ -51,7 +51,7 @@ namespace SteamLib
         }
 
 
-        private async Task<IEnumerable<Task<SteamReport>>> _GetReports(TimePeriod request, long? userID)
+        private async Task<IEnumerable<Task<SteamReport>>> _GetReports(TimeRange request, long? userID)
         {
             var sql = "SELECT * FROM Steam_Reports " +
                       "WHERE ((StartTime BETWEEN ? AND ?) OR " +
@@ -90,29 +90,28 @@ namespace SteamLib
             return reports;
         }
         
-        public async Task<IEnumerable<ISteamReport>> GetReports(TimePeriod timePeriod)
+        public async Task<IEnumerable<ISteamReport>> GetReports(TimeRange timeRange)
         {
-            var reportTasks = await _GetReports(timePeriod, null);
+            var reportTasks = await _GetReports(timeRange, null);
             var reports = await Task.WhenAll(reportTasks);
             return reports;
         }
 
-        public async Task<IEnumerable<ISteamReport>> GetReports(TimePeriod timePeriod, long userID)
+        public async Task<IEnumerable<ISteamReport>> GetReports(TimeRange timeRange, long userID)
         {
-            var reportTasks = await _GetReports(timePeriod, userID);
+            var reportTasks = await _GetReports(timeRange, userID);
             var reports = await Task.WhenAll(reportTasks);
             return reports;
         }
-        
 
-        private async Task<SteamReport> LoadReportExtraData(SteamReport report)
+
+        private async Task<SteamReportFilterSet> LoadFilterSet(long filterSetID)
         {
-            // Load filters
             var sql = "SELECT * FROM Steam_ReportFilters " +
                       "WHERE SetID = ?";
             var cmd = _odbc.CreateCommand();
             cmd.CommandText = sql;
-            cmd.AddParam("@FilterSetID", report.FilterSetID);
+            cmd.AddParam("@FilterSetID", filterSetID);
 
             var dataTable = await cmd.ExecuteReader();
             var rows = dataTable.Rows.ToList();
@@ -120,31 +119,45 @@ namespace SteamLib
             var filters = dynamic.Select(x => x.To<SteamReportFilter>()).ToList();
             var filterSet = new SteamReportFilterSet
             {
-                ID = report.FilterSetID ?? 0,
+                ID = filterSetID,
                 Filters = filters,
             };
-            report.FilterSet = filterSet;
+            return filterSet;
+        }
 
-
-            // Load sessions
-            sql = "SELECT * FROM Steam_ReportSessions " +
-                  "WHERE ReportID = ?";
-            cmd = _odbc.CreateCommand();
+        private async Task<IEnumerable<GamingSession>> LoadReportSessions(SteamReport report)
+        {
+            var sql = "SELECT * FROM Steam_ReportSessions " +
+                      "WHERE ReportID = ?";
+            var cmd = _odbc.CreateCommand();
             cmd.CommandText = sql;
             cmd.AddParam("@ReportID", report.ID);
 
-            dataTable = await cmd.ExecuteReader();
-            rows = dataTable.Rows.ToList();
-            dynamic = rows.Select(x => x.ToExpando()).ToList();
-            var sessionIDs = dynamic.Select(x => x.Get<long>("SessionID")).ToList();
-            var allSessions = await _activityManager.GetGamingSessions(new TimePeriod
-            {
-                StartTime = report.StartTime,
-                EndTime = report.EndTime,
-            }, report.UserID);
-            var sessions = allSessions.Where(x => sessionIDs.Contains(x.ID)).ToList();
-            report.Sessions = sessions;
+            var dataTable = await cmd.ExecuteReader();
+            var rows = dataTable.Rows.ToList();
+            var dynamic = rows.Select(x => x.ToExpando()).ToList();
 
+            var sessions = new List<GamingSession>();
+            var sessionIDs = dynamic.Select(x => x.Get<long>("SessionID")).ToList();
+            if (sessionIDs.Any())
+            {
+                var allSessions = await _activityManager.GetGamingSessions(new TimeRange
+                {
+                    StartTime = report.StartTime,
+                    EndTime = report.EndTime,
+                });
+                sessions = allSessions.Where(x => sessionIDs.Contains(x.ID)).ToList();
+            }
+            return sessions;
+        }
+        
+        private async Task<SteamReport> LoadReportExtraData(SteamReport report)
+        {
+            if (report.FilterSetID.HasValue)
+                report.FilterSet = await LoadFilterSet(report.FilterSetID.Value);
+
+            var sessions = await LoadReportSessions(report);
+            report.Sessions = sessions.ToList();
             return report;
         }
 
@@ -174,29 +187,22 @@ namespace SteamLib
             report.StartTime = request.StartTime;
             report.EndTime = request.EndTime;
             report.LastModified = DateTime.UtcNow;
+            report.SubscriptionID = request.SubscriptionID;
+            report.Enabled = request.Enabled;
+
             // todo: report.EventFormatting
-
-            await StoreReport(report);
-
-
+            
             if (request.FilterSet != null)
             {
                 await StoreFilterSet(request.FilterSet);
                 report.FilterSet = request.FilterSet;
+                report.FilterSetID = report.FilterSet.ID;
             }
 
+            await StoreReport(report);
 
-            var sessions = (await _activityManager.GetGamingSessions(new TimePeriod
-            {
-                StartTime = report.StartTime,
-                EndTime = report.EndTime,
-            }, report.UserID)).ToList();
-            var result = _reportFilterer.GetFilterSessions(sessions, report.FilterSet);
 
-            report.Sessions = result;
-
-            await StoreReportSessions(report);
-            
+            await _RefreshReport(report);
             return report;
         }
 
@@ -205,6 +211,98 @@ namespace SteamLib
             var report = await _GenerateReport(request);
             return report;
         }
+
+
+        private async Task _RefreshReport(SteamReport report)
+        {
+            var sessions = (await _activityManager.GetGamingSessions(new TimeRange
+            {
+                StartTime = report.StartTime,
+                EndTime = report.EndTime,
+            })).ToList();
+            var result = _reportFilterer.GetFilterSessions(sessions, report.FilterSet);
+
+            report.Sessions = result;
+
+            await StoreReportSessions(report);
+        }
+
+        public async Task RefreshReport(long id)
+        {
+            var report = await _GetReport(id);
+            if (report == null)
+                throw new Exception("Report could not be found");
+            await _RefreshReport(report);
+        }
+
+        public async Task RefreshReport(ISteamReport report)
+        {
+            if (report == null)
+                throw new ArgumentNullException("report");
+
+            if (report is SteamReport)
+            {
+                var steamReport = (SteamReport) report;
+                await _RefreshReport(steamReport);
+                return;
+            }
+            await RefreshReport(report.ID);
+        }
+
+        public async Task<SteamReportTemplate> _GetReportTemplate(long id)
+        {
+            var sql = "SELECT * FROM Steam_ReportTemplates " +
+                      "WHERE ID = ?";
+            var cmd = _odbc.CreateCommand();
+            cmd.CommandText = sql;
+            cmd.AddParam("@TemplateID", id);
+
+            var dataTable = await cmd.ExecuteReader();
+            var rows = dataTable.Rows.ToList();
+            var dynamic = rows.Select(x => x.ToExpando()).ToList();
+            var templates = dynamic.Select(x => x.To<SteamReportTemplate>());
+            var template = templates.FirstOrDefault();
+            if (template != null && template.FilterSetID.HasValue)
+                template.FilterSet = await LoadFilterSet(template.FilterSetID.Value);
+            return template;
+        }
+
+        public async Task<ISteamReportTemplate> GetReportTemplate(long id)
+        {
+            var template = await _GetReportTemplate(id);
+            return template;
+        }
+
+
+        private async Task<IEnumerable<SteamReportSubscription>> _GetReportSubscriptions(long? userID)
+        {
+            var sql = "SELECT * FROM Steam_ReportSubscriptions " +
+                      (userID.HasValue ? " WHERE (UserID = ?)" : "");
+            var cmd = _odbc.CreateCommand();
+            cmd.CommandText = sql;
+            if (userID.HasValue)
+                cmd.AddParam("@UserID", userID.Value);
+
+            var dataTable = await cmd.ExecuteReader();
+            var rows = dataTable.Rows.ToList();
+            var dynamic = rows.Select(x => x.ToExpando()).ToList();
+            var subscriptions = dynamic.Select(x => x.To<SteamReportSubscription>());
+            return subscriptions;
+        }
+
+        public async Task<IEnumerable<ISteamReportSubscription>> GetReportSubscriptions()
+        {
+            var reports = await _GetReportSubscriptions(null);
+            return reports;
+        }
+
+        public async Task<IEnumerable<ISteamReportSubscription>> GetReportSubscriptions(long userID)
+        {
+            var reports = await _GetReportSubscriptions(userID);
+            return reports;
+        }
+        
+
 
 
 
@@ -219,8 +317,8 @@ namespace SteamLib
             {
                 // Create report
                 cmd = _odbc.CreateCommand();
-                sql = "INSERT INTO Steam_Reports(Name, FilterSetID, UserID, Description, StartTime, EndTime, LastModified, LastGenerated) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
+                sql = "INSERT INTO Steam_Reports(Name, Description, FilterSetID, UserID, SubscriptionID, StartTime, EndTime, LastModified, LastGenerated, Enabled) " +
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
                 var reportIDParam = new OdbcParameter2
                 {
                     Name = "@ReportID",
@@ -228,15 +326,19 @@ namespace SteamLib
                 };
                 cmd.CommandText = sql;
                 cmd.AddParam("@Name", report.Name);
+                cmd.AddParam("@Description", report.Description);
                 cmd.AddParam("@FilterSetID", report.FilterSetID);
                 cmd.AddParam("@UserID", report.UserID);
-                cmd.AddParam("@Description", report.Description);
+                cmd.AddParam("@SubscriptionID", report.SubscriptionID > 0 ? report.SubscriptionID : (object)DBNull.Value);
                 cmd.AddParam("@StartTime", report.StartTime);
                 cmd.AddParam("@EndTime", report.EndTime);
                 cmd.AddParam("@LastModified", report.LastModified);
                 cmd.AddParam("@LastGenerated", report.LastGenerated);
+                cmd.AddParam("@Enabled", report.Enabled);
                 cmd.Parameters.Add(reportIDParam);
                 changes += await cmd.ExecuteNonQuery();
+                if (changes <= 0)
+                    throw new InvalidOperationException("Error creating report");
                 report.ID = reportIDParam.Value.SafeConvert<long>();
             }
             else
@@ -245,26 +347,32 @@ namespace SteamLib
                 cmd = _odbc.CreateCommand();
                 sql = "UPDATE Steam_Reports " +
                       "SET  Name = ?," +
+                      "     Description = ?," +
                       (report.FilterSetID.HasValue ? "     FilterSetID = ?," : "") +
                       "     UserID = ?," +
-                      "     Description = ?," +
+                      "     SubscriptionID = ?," +
                       "     StartTime = ?," +
                       "     EndTime = ?," +
                       "     LastModified = ?," +
-                      "     LastGenerated = ? " +
+                      "     LastGenerated = ?," +
+                      "     Enabled = ? " +
                       "WHERE ID = ?";
                 cmd.CommandText = sql;
                 cmd.AddParam("@Name", report.Name);
+                cmd.AddParam("@Description", report.Description);
                 if (report.FilterSetID.HasValue)
                     cmd.AddParam("@FilterSetID", report.FilterSetID);
                 cmd.AddParam("@UserID", report.UserID);
-                cmd.AddParam("@Description", report.Description);
+                cmd.AddParam("@SubscriptionID", report.SubscriptionID > 0 ? report.SubscriptionID : (object)DBNull.Value);
                 cmd.AddParam("@StartTime", report.StartTime);
                 cmd.AddParam("@EndTime", report.EndTime);
                 cmd.AddParam("@LastModified", report.LastModified);
                 cmd.AddParam("@LastGenerated", report.LastGenerated);
+                cmd.AddParam("@Enabled", report.Enabled);
                 cmd.AddParam("@ReportID", report.ID);
                 changes += await cmd.ExecuteNonQuery();
+                if (changes <= 0)
+                    throw new InvalidOperationException("Error updating report");
             }
         }
 
@@ -285,13 +393,14 @@ namespace SteamLib
                     cmd.CommandText = sql;
                     cmd.AddParam("@SetID", filterSet.ID);
                     changes += await cmd.ExecuteNonQuery();
+                    filterSet.Filters.ToList().ForEach(x => x.ID = 0);
                 }
                 else
                 {
                     object tag = DBNull.Value;
                     cmd = _odbc.CreateCommand();
                     sql = "INSERT INTO Steam_ReportFilterSets(Tag) " +
-                          "VALUES (?)";
+                          "VALUES (?); SELECT ? = @@IDENTITY";
                     cmd.CommandText = sql;
                     var filterSetIDParam = new OdbcParameter2
                     {
@@ -299,8 +408,10 @@ namespace SteamLib
                         IsOutput = true,
                     };
                     cmd.AddParam("@Tag", tag);
+                    cmd.Parameters.Add(filterSetIDParam);
                     changes += await cmd.ExecuteNonQuery();
                     filterSet.ID = filterSetIDParam.Value.SafeConvert<long>();
+                    filterSet.Filters.ToList().ForEach(x => x.ID = 0);
                 }
 
 
@@ -354,9 +465,9 @@ namespace SteamLib
                         }
                     }
 
-                    //report.LastModified = DateTime.UtcNow;
                 }
             }
+            
         }
         
         private async Task StoreReportSessions(SteamReport report)

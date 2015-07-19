@@ -104,6 +104,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{EF81AD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLib", "Libraries\Shared\SharedLib\SharedLib.csproj", "{9E2D95E7-B905-49A5-BFE3-B3DC4D511011}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLib.Tests", "SharedLib.Tests\SharedLib.Tests.csproj", "{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		MyLife\MyLife.App\MyLife.App.Shared\MyLife.App.Shared.projitems*{4ebb3138-2b46-45ff-84fb-d856719e0776}*SharedItemsImports = 13
@@ -403,6 +405,16 @@ Global
 		{9E2D95E7-B905-49A5-BFE3-B3DC4D511011}.Release|ARM.ActiveCfg = Release|Any CPU
 		{9E2D95E7-B905-49A5-BFE3-B3DC4D511011}.Release|x64.ActiveCfg = Release|Any CPU
 		{9E2D95E7-B905-49A5-BFE3-B3DC4D511011}.Release|x86.ActiveCfg = Release|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -439,5 +451,6 @@ Global
 		{59E5EE7D-ED24-4419-9E29-5E52FD09706F} = {870B0FC1-1F8C-45C0-AC38-8379759B95EA}
 		{EF81AD81-63BB-46B4-BF3A-6F74DD4FAFFA} = {AC53BBA0-DEFA-4693-ADA1-2D894641EB71}
 		{9E2D95E7-B905-49A5-BFE3-B3DC4D511011} = {EF81AD81-63BB-46B4-BF3A-6F74DD4FAFFA}
+		{0F7E55E9-3A8C-4A33-A93E-0EBC3370B68D} = {EF81AD81-63BB-46B4-BF3A-6F74DD4FAFFA}
 	EndGlobalSection
 EndGlobal

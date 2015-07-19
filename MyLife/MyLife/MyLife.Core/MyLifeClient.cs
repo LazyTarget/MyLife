@@ -42,7 +42,7 @@ namespace MyLife.Core
                 var days = 7;
                 request = new EventRequest
                 {
-                    TimePeriod = new TimePeriod
+                    TimeRange = new TimeRange
                     {
                         StartTime = DateTime.Now.AddDays(-days),
                         EndTime = DateTime.Now.AddDays(days),

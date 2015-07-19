@@ -17,6 +17,8 @@ namespace SteamLib.Models
         public long UserID { get; set; }
         public long ID { get; set; }
         public long? FilterSetID { get; set; }
+        public long SubscriptionID { get; set; }
+        public bool Enabled { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime StartTime { get; set; }
@@ -25,7 +27,6 @@ namespace SteamLib.Models
         public DateTime LastGenerated { get; set; }
 
         public ISteamReportFilterSet FilterSet { get; set; }
-
         public IList<GamingSession> Sessions { get; set; }
 
 

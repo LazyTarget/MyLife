@@ -45,14 +45,14 @@ namespace MyLife.Channels.SteamPoller
 
             if (_steamManager.ActivityManager != null)
             {
-                var sessions = await _steamManager.ActivityManager.GetGamingSessions(request.TimePeriod, Settings.SteamUserIDs);
+                var sessions = await _steamManager.ActivityManager.GetGamingSessions(request.TimeRange, Settings.SteamUserIDs);
                 var events = sessions.Select(ModelConverter.ToEvent).ToList();
                 result.AddRange(events);
             }
 
             if (_steamManager.ReportManager != null)
             {
-                var reports = await _steamManager.ReportManager.GetReports(request.TimePeriod, Settings.MyLifeUserID);
+                var reports = await _steamManager.ReportManager.GetReports(request.TimeRange, Settings.MyLifeUserID);
                 var reportEvents = reports.Select(ModelConverter.ToEvent).ToList();
                 result.AddRange(reportEvents);
             }

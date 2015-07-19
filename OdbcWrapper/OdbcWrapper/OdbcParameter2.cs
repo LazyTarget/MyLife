@@ -23,6 +23,10 @@ namespace OdbcWrapper
                     else if (d == DateTime.MaxValue)
                         _value = System.Data.SqlTypes.SqlDateTime.MaxValue.Value;
                 }
+                else if (value == null)
+                {
+                    _value = DBNull.Value;
+                }
             }
         }
 

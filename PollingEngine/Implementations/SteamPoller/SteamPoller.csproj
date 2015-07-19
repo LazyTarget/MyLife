@@ -64,7 +64,6 @@
     <Compile Include="Settings\SteamActivityPollerConfigSection.cs" />
     <Compile Include="Settings\SteamIDConfigElement.cs" />
     <Compile Include="Settings\SteamReportPollerSettingsConfigElement.cs" />
-    <Compile Include="Settings\SteamReportSettingsConfigElement.cs" />
     <Compile Include="Settings\SteamActivityPollerSettingsConfigElement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamReportPoller.cs" />

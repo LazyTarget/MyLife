@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="Enums.cs" />
     <Compile Include="Interfaces\IReportInfo.cs" />
+    <Compile Include="Interfaces\ISteamReportSubscription.cs" />
+    <Compile Include="Interfaces\ISteamReportTemplate.cs" />
     <Compile Include="Interfaces\ISteamReport.cs" />
     <Compile Include="Interfaces\ISteamReportGenerationRequest.cs" />
     <Compile Include="Interfaces\ISteamManager.cs" />
@@ -48,6 +50,8 @@
     <Compile Include="Interfaces\ISteamReportManager.cs" />
     <Compile Include="Interfaces\ISteamReportFilterSet.cs" />
     <Compile Include="Models\GamingSession.cs" />
+    <Compile Include="Models\SteamReportSubscription.cs" />
+    <Compile Include="Models\SteamReportTemplate.cs" />
     <Compile Include="Models\SteamReport.cs" />
     <Compile Include="Models\SteamReportFilterSet.cs" />
     <Compile Include="Models\SteamReportFilter.cs" />

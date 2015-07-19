@@ -6,7 +6,9 @@ namespace SteamLib.Models
     {
         long ID { get; }
 
-        long UserID { get; set; }
+        long UserID { get; }
+
+        long SubscriptionID { get; }
 
         string Name { get; }
 
@@ -16,7 +18,9 @@ namespace SteamLib.Models
         
         DateTime EndTime { get; }
 
-        SteamReportFilterSet FilterSet { get; } 
+        bool Enabled { get; }
+
+        SteamReportFilterSet FilterSet { get; }
 
     }
 }

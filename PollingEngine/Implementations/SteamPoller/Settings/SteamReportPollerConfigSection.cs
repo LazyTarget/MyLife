@@ -7,7 +7,7 @@ namespace SteamPoller
     {
         public static SteamReportPollerConfigSection LoadFromConfig()
         {
-            var settings = ConfigurationManager.GetSection("SteamPoller") as SteamReportPollerConfigSection;
+            var settings = ConfigurationManager.GetSection("SteamReportPoller") as SteamReportPollerConfigSection;
             if (settings == null)
                 throw new ApplicationException("Could not load settings");
             return settings;

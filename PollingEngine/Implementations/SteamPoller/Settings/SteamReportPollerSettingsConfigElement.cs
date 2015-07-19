@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Globalization;
 
 namespace SteamPoller
 {
@@ -20,6 +21,20 @@ namespace SteamPoller
         {
             get { return (string)this["ConnString"]; }
             set { this["ConnString"] = value; }
+        }
+
+        [ConfigurationProperty("CultureInfo", DefaultValue = "sv-SE")]
+        public CultureInfo CultureInfo
+        {
+            get { return (CultureInfo)this["CultureInfo"]; }
+            set { this["CultureInfo"] = value.Name; }
+        }
+
+        [ConfigurationProperty("FirstDayOfWeek", DefaultValue = "Monday")]
+        public DayOfWeek FirstDayOfWeek
+        {
+            get { return (DayOfWeek)this["FirstDayOfWeek"]; }
+            set { this["FirstDayOfWeek"] = value; }
         }
     }
 }

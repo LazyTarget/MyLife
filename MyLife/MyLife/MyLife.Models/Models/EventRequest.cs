@@ -5,6 +5,6 @@ namespace MyLife.Models
 {
     public class EventRequest
     {
-        public TimePeriod TimePeriod { get; set; }
+        public TimeRange TimeRange { get; set; }
     }
 }

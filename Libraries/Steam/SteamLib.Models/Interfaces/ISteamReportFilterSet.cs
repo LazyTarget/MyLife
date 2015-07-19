@@ -6,6 +6,6 @@ namespace SteamLib.Models
     {
         long ID { get; }
 
-        IList<SteamReportFilter> Filters { get; } 
+        IList<SteamReportFilter> Filters { get; }
     }
 }
