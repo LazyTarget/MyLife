@@ -21,7 +21,7 @@ namespace ProcessPoller
 
         public async Task OnInterval(PollingContext context)
         {
-            Console.WriteLine("Polling processes");
+            Log("Polling processes");
             var time = DateTime.Now;
             var processes = Process.GetProcesses();
 
@@ -101,8 +101,8 @@ namespace ProcessPoller
             try
             {
                 var msg = string.Format("{0} has started, duration: {1}", processRunInfo.ProcessName, TimeSpanToString(processRunInfo.Duration));
-                Console.WriteLine(msg);
-                
+                Log(msg);
+
 
                 //var machineName = processRunInfo.MachineName != "."
                 //    ? processRunInfo.MachineName
@@ -134,7 +134,7 @@ namespace ProcessPoller
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                Log("Failed to create odbc entry, Error: " + ex.Message);
                 throw;
             }
         }
@@ -145,22 +145,21 @@ namespace ProcessPoller
             try
             {
                 var msg = string.Format("{0} has exited, duration: {1}", processRunInfo.ProcessName, TimeSpanToString(processRunInfo.Duration));
-                Console.WriteLine(msg);
-
+                Log(msg);
 
 
                 var machineName = processRunInfo.MachineName != "."
                     ? processRunInfo.MachineName
                     : Environment.MachineName;
                 
-                Debug.WriteLine("Begin creating odbc entry");
+                Log("Begin creating odbc entry");
 
                 var connectionString = ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
                 var cn = new OdbcConnection(connectionString);
                 if (cn.State != ConnectionState.Open)
                     cn.Open();
 
-                var sql = "INSERT INTO ProcessEvents(ProcessID, ProcessName, MachineName, HasExited, StartTime, ExitTime, ExitCode, MainWindowTitle, ModuleName, FileName) " +
+                var sql = "INSERT INTO Process_Events(ProcessID, ProcessName, MachineName, HasExited, StartTime, ExitTime, ExitCode, MainWindowTitle, ModuleName, FileName) " +
                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 var cmd = new OdbcCommand(sql, cn);
                 cmd.Parameters.AddWithValue("@ProcessID", processRunInfo.ProcessID);
@@ -176,15 +175,23 @@ namespace ProcessPoller
 
                 var changes = cmd.ExecuteNonQuery();
                 if (changes > 0)
-                    Console.WriteLine("Created odbc event: '{0}'", processRunInfo);
+                {
+                    Log(String.Format("Created odbc event: '{0}'", processRunInfo));
+                }
                 else
-                    Console.WriteLine("No changes commited when creating odbc entry: " + processRunInfo);
+                    Log("No changes commited when creating odbc entry: " + processRunInfo);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to create odbc entry, Error: " + ex.Message);
+                Log("Failed to create odbc entry, Error: " + ex.Message);
                 throw;
             }
+        }
+
+        private void Log(string message)
+        {
+            Console.WriteLine(message);
+            Trace.WriteLine(message);
         }
 
 

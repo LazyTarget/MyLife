@@ -21,6 +21,7 @@ namespace PollingEngine.Core
 
         public void Start()
         {
+            _shouldExit = false;
             foreach (var ctx in _contexts)
             {
                 ctx.State = State.Starting;
