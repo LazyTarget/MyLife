@@ -17,6 +17,22 @@ namespace ProcessPoller
 
         public async Task OnStarting(PollingContext context)
         {
+            try
+            {
+                var uri = new Uri("http://localhost:5227/api");
+                var client = new Simple.OData.Client.ODataClient(uri);
+                var t = client.For<ProcessLib.Models.Process>().Top(5);
+                var task = t.ExecuteAsEnumerableAsync();
+                task.Wait(10 * 1000);
+                var r = task.Result;
+                var s = r.ToList();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+
             _preList = LoadProcesses().ToList();
         }
 
@@ -109,7 +125,7 @@ namespace ProcessPoller
                 catch (Exception ex)
                 {
                     // process is not found (has exited)
-                    process.ProcessInfo.HasExited = true;
+                    //process.ProcessInfo.HasExited = true;
                 }
                 
 
@@ -142,8 +158,10 @@ namespace ProcessPoller
                 res += string.Format("{0}s", duration.Seconds);
             else if (duration.TotalHours < 1)
                 res += string.Format("{0}m {1}s", duration.Minutes, duration.Seconds);
-            else
+            else if (duration.TotalDays < 1)
                 res += string.Format("{0}h {1}m", duration.Hours, duration.Minutes);
+            else
+                res += string.Format("{0}d {1}h {2}m", duration.Days, duration.Hours, duration.Minutes);
             return res;
         }
 

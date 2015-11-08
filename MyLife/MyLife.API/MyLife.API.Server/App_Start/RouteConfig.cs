@@ -13,6 +13,8 @@ namespace MyLife.API.Server
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            
+            //MapRoute for controllers inheriting from standard Controller
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
