@@ -21,28 +21,28 @@ namespace MyLife.API.Server.Controllers
         {
             try
             {
-                var proc = new Process
-                {
-                    FileName = "QWERTY.exe",
-                    Title = new ProcessTitle
-                    {
-                        Title = "test",
-                    },
-                };
+                //var proc = new Process
+                //{
+                //    FileName = "QWERTY.exe",
+                //    Title = new ProcessTitle
+                //    {
+                //        Title = "test",
+                //    },
+                //};
 
-                var sut = new ProcessController();
-                var res = sut.Post(proc);
+                //var sut = new ProcessController();
+                //var res = sut.Post(proc);
 
-                var t = sut.GetProcess(proc.ID);
-                proc = t.Queryable.FirstOrDefault();
+                //var t = sut.GetProcess(proc.ID);
+                //proc = t.Queryable.FirstOrDefault();
                 
-                //proc.TitleID = 0;
-                proc.Title = new ProcessTitle
-                {
-                    //ID = 0,
-                    //ProcessID = proc.ID,
-                    Title = "My title #2",
-                };
+                ////proc.TitleID = 0;
+                //proc.Title = new ProcessTitle
+                //{
+                //    //ID = 0,
+                //    //ProcessID = proc.ID,
+                //    Title = "My title #2",
+                //};
                 
             }
             catch (Exception ex)

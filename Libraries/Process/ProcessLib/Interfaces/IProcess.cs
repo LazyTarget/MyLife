@@ -10,7 +10,6 @@ namespace ProcessLib.Interfaces
         string ModuleName { get; }
         string FileName { get; }
         //string MainWindowTitle { get; }
-        long? TitleID { get; }
         bool HasExited { get; }
         int? ExitCode { get; set; }
         DateTime StartTime { get; }
@@ -18,6 +17,6 @@ namespace ProcessLib.Interfaces
         TimeSpan TotalProcessorTime { get; }
         TimeSpan UserProcessorTime { get; }
         TimeSpan PrivilegedProcessorTime { get; }
-        TimeSpan Duration { get; }
+        //TimeSpan Duration { get; }
     }
 }

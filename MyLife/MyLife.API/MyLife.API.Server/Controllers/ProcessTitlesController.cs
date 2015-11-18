@@ -22,30 +22,30 @@ namespace MyLife.API.Server.Controllers
     using System.Web.Http.OData.Extensions;
     using ProcessLib.Models;
     ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-    builder.EntitySet<Process>("Process");
-    builder.EntitySet<ProcessTitle>("ProcessTitles"); 
+    builder.EntitySet<ProcessTitle>("ProcessTitles");
+    builder.EntitySet<Process>("Processes"); 
     config.Routes.MapODataServiceRoute("odata", "odata", builder.GetEdmModel());
     */
-    public class ProcessController : ODataController
+    public class ProcessTitlesController : ODataController
     {
-        private readonly ProcessDataContext db = new ProcessDataContext();
+        private ProcessDataContext db = new ProcessDataContext();
 
-        // GET: odata/Process
+        // GET: odata/ProcessTitles
         [EnableQuery]
-        public IQueryable<Process> GetProcess()
+        public IQueryable<ProcessTitle> GetProcessTitles()
         {
-            return db.Processes;
+            return db.ProcessTitles;
         }
 
-        // GET: odata/Process(5)
+        // GET: odata/ProcessTitles(5)
         [EnableQuery]
-        public SingleResult<Process> GetProcess([FromODataUri] long key)
+        public SingleResult<ProcessTitle> GetProcessTitle([FromODataUri] long key)
         {
-            return SingleResult.Create(db.Processes.Where(process => process.ID == key));
+            return SingleResult.Create(db.ProcessTitles.Where(processTitle => processTitle.ID == key));
         }
 
-        // PUT: odata/Process(5)
-        public IHttpActionResult Put([FromODataUri] long key, Delta<Process> patch)
+        // PUT: odata/ProcessTitles(5)
+        public IHttpActionResult Put([FromODataUri] long key, Delta<ProcessTitle> patch)
         {
             Validate(patch.GetEntity());
 
@@ -54,13 +54,13 @@ namespace MyLife.API.Server.Controllers
                 return BadRequest(ModelState);
             }
 
-            Process process = db.Processes.Find(key);
-            if (process == null)
+            ProcessTitle processTitle = db.ProcessTitles.Find(key);
+            if (processTitle == null)
             {
                 return NotFound();
             }
 
-            patch.Put(process);
+            patch.Put(processTitle);
 
             try
             {
@@ -68,7 +68,7 @@ namespace MyLife.API.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProcessExists(key))
+                if (!ProcessTitleExists(key))
                 {
                     return NotFound();
                 }
@@ -78,26 +78,41 @@ namespace MyLife.API.Server.Controllers
                 }
             }
 
-            return Updated(process);
+            return Updated(processTitle);
         }
 
-        // POST: odata/Process
-        public IHttpActionResult Post(Process process)
+        // POST: odata/ProcessTitles
+        public IHttpActionResult Post(ProcessTitle processTitle)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Processes.Add(process);
-            db.SaveChanges();
+            db.ProcessTitles.Add(processTitle);
 
-            return Created(process);
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                if (ProcessTitleExists(processTitle.ID))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Created(processTitle);
         }
 
-        // PATCH: odata/Process(5)
+        // PATCH: odata/ProcessTitles(5)
         [AcceptVerbs("PATCH", "MERGE")]
-        public IHttpActionResult Patch([FromODataUri] long key, Delta<Process> patch)
+        public IHttpActionResult Patch([FromODataUri] long key, Delta<ProcessTitle> patch)
         {
             Validate(patch.GetEntity());
 
@@ -106,13 +121,13 @@ namespace MyLife.API.Server.Controllers
                 return BadRequest(ModelState);
             }
 
-            Process process = db.Processes.Find(key);
-            if (process == null)
+            ProcessTitle processTitle = db.ProcessTitles.Find(key);
+            if (processTitle == null)
             {
                 return NotFound();
             }
 
-            patch.Patch(process);
+            patch.Patch(processTitle);
 
             try
             {
@@ -120,7 +135,7 @@ namespace MyLife.API.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProcessExists(key))
+                if (!ProcessTitleExists(key))
                 {
                     return NotFound();
                 }
@@ -130,29 +145,29 @@ namespace MyLife.API.Server.Controllers
                 }
             }
 
-            return Updated(process);
+            return Updated(processTitle);
         }
 
-        // DELETE: odata/Process(5)
+        // DELETE: odata/ProcessTitles(5)
         public IHttpActionResult Delete([FromODataUri] long key)
         {
-            Process process = db.Processes.Find(key);
-            if (process == null)
+            ProcessTitle processTitle = db.ProcessTitles.Find(key);
+            if (processTitle == null)
             {
                 return NotFound();
             }
 
-            db.Processes.Remove(process);
+            db.ProcessTitles.Remove(processTitle);
             db.SaveChanges();
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // GET: odata/Processes(5)/Titles
+        // GET: odata/ProcessTitles(5)/Process
         [EnableQuery]
-        public IQueryable<ProcessTitle> GetTitles([FromODataUri] long key)
+        public SingleResult<Process> GetProcess([FromODataUri] long key)
         {
-            return db.Processes.Where(m => m.ID == key).SelectMany(m => m.Titles);
+            return SingleResult.Create(db.ProcessTitles.Where(m => m.ID == key).Select(m => m.Process));
         }
 
         protected override void Dispose(bool disposing)
@@ -164,9 +179,9 @@ namespace MyLife.API.Server.Controllers
             base.Dispose(disposing);
         }
 
-        private bool ProcessExists(long key)
+        private bool ProcessTitleExists(long key)
         {
-            return db.Processes.Any(e => e.ID == key);
+            return db.ProcessTitles.Any(e => e.ID == key);
         }
     }
 }

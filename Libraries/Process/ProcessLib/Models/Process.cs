@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ProcessLib.Interfaces;
 
 namespace ProcessLib.Models
@@ -14,8 +15,7 @@ namespace ProcessLib.Models
         public string FileName { get; set; }
 
         //public string MainWindowTitle { get; set; }
-        public long? TitleID { get; set; }
-        public virtual ProcessTitle Title { get; set; }
+        public virtual IList<ProcessTitle> Titles { get; set; }
 
         public bool HasExited { get; set; }
         public int? ExitCode { get; set; }
@@ -25,19 +25,19 @@ namespace ProcessLib.Models
         public TimeSpan UserProcessorTime { get; set; }
         public TimeSpan PrivilegedProcessorTime { get; set; }
 
-        public TimeSpan Duration
-        {
-            get
-            {
-                TimeSpan diff;
-                //if (HasExited)
-                if (ExitTime != DateTime.MinValue)
-                    diff = ExitTime.Subtract(StartTime);
-                else
-                    diff = DateTime.Now.Subtract(StartTime);
-                return diff;
-            }
-        }
+        //public TimeSpan Duration
+        //{
+        //    get
+        //    {
+        //        TimeSpan diff;
+        //        //if (HasExited)
+        //        if (ExitTime != DateTime.MinValue)
+        //            diff = ExitTime.Subtract(StartTime);
+        //        else
+        //            diff = DateTime.Now.Subtract(StartTime);
+        //        return diff;
+        //    }
+        //}
 
         public override string ToString()
         {

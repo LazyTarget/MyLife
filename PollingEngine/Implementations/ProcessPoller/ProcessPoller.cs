@@ -5,8 +5,12 @@ using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using PollingEngine.Core;
+using ProcessLib.Models;
+using Simple.OData.Client;
+using Process = System.Diagnostics.Process;
 
 namespace ProcessPoller
 {
@@ -17,15 +21,66 @@ namespace ProcessPoller
 
         public async Task OnStarting(PollingContext context)
         {
+            Task task;
+            ProcessLib.Models.Process proc;
             try
             {
                 var uri = new Uri("http://localhost:5227/api");
                 var client = new Simple.OData.Client.ODataClient(uri);
-                var t = client.For<ProcessLib.Models.Process>().Top(5);
-                var task = t.ExecuteAsEnumerableAsync();
-                task.Wait(10 * 1000);
-                var r = task.Result;
-                var s = r.ToList();
+
+                var start = DateTime.UtcNow;
+                var init = true;
+                if (init)
+                {
+                    proc = new ProcessLib.Models.Process
+                    {
+                        StartTime = start,
+                        ProcessID = 22022,
+                        MachineName = Environment.MachineName,
+                        FileName = "QWERTY.exe",
+                    };
+
+                    var task3 = client.For<ProcessLib.Models.Process>()
+                        .Set(proc)
+                        .InsertEntryAsync(true);
+                    task = task3;
+                    var procRes = await task3;
+
+
+                    var title = new ProcessTitle
+                    {
+                        Title = "Qwerty - Dashboard",
+                        StartTime = start,
+                        ProcessID = procRes.ID,
+                    };
+                    var task4 = client.For<ProcessLib.Models.ProcessTitle>()
+                        .Set(title)
+                        .InsertEntryAsync(true);
+                    task = task4;
+                    var titleRes = await task4;
+                }
+
+                var t = client.For<ProcessLib.Models.Process>()
+                    .Top(5)
+                    .Expand(x => x.Titles)
+                    .FindEntriesAsync();
+                task = t;
+                var processes = (await t).ToList();
+
+                proc = processes.First();
+                proc.Titles = proc.Titles ?? new List<ProcessTitle>();
+                proc.Titles.Add(new ProcessTitle
+                {
+                    Title = "Qwerty - Dashboard #2",
+                    ProcessID = proc.ID,
+                    StartTime = DateTime.UtcNow,
+                });
+
+                var task5 = client.For<ProcessLib.Models.Process>()
+                    .Set(proc)
+                    .UpdateEntryAsync();
+                task = task5;
+                var proc2 = await task5;
             }
             catch (Exception ex)
             {

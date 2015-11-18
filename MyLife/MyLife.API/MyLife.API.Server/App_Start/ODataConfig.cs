@@ -16,7 +16,7 @@ namespace MyLife.API.Server
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
 
             builder.EntitySet<Process>("process");
-            //builder.EntitySet<ProcessTitle>("processtitles");
+            builder.EntitySet<ProcessTitle>("processtitles");
 
 
             config.Routes.MapODataServiceRoute("ODataRoute", "api", builder.GetEdmModel());

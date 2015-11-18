@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Threading;
 using System.Threading.Tasks;
 using ProcessLib.Models;
@@ -22,14 +21,15 @@ namespace ProcessLib.Data
         {
             modelBuilder.Entity<Process>()
                 .ToTable("Process_Processes")
-                .HasOptional(x => x.Title)
+                .HasKey(x => x.ID)
+                .HasMany(x => x.Titles)
                 .WithRequired(x => x.Process)
+                .HasForeignKey(x => x.ProcessID)
                 .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<ProcessTitle>()
                 .ToTable("Process_Titles")
-                .HasRequired(x => x.Process)
-                .WithOptional(x => x.Title);
+                .HasKey(x => x.ID);
 
 
             base.OnModelCreating(modelBuilder);
