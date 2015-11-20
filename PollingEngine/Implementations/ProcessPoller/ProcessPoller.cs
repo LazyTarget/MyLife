@@ -63,12 +63,14 @@ namespace ProcessPoller
                 var t = client.For<ProcessLib.Models.Process>()
                     .Top(5)
                     .Expand(x => x.Titles)
+                    //.FindEntryAsync();
                     .FindEntriesAsync();
                 task = t;
                 var processes = (await t).ToList();
+                //var processes = new List<ProcessLib.Models.Process> {(await  t)};
 
                 proc = processes.First();
-                proc.Titles = proc.Titles ?? new List<ProcessTitle>();
+                proc.Titles = new List<ProcessTitle>(proc.Titles ?? new List<ProcessTitle>());
                 proc.Titles.Add(new ProcessTitle
                 {
                     Title = "Qwerty - Dashboard #2",
