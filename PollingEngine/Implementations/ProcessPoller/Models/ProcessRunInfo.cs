@@ -7,7 +7,7 @@ using System.Management;
 
 namespace ProcessPoller
 {
-    public class ProcessRunInfo
+    public class ProcessRunInfo : IDisposable
     {
         private Process _process;
         private DateTime _exitTime;
@@ -86,6 +86,8 @@ namespace ProcessPoller
             {
                 try
                 {
+                    if (_process == null)
+                        return null;
                     if (HasExited)
                         return _process.ExitCode;
                 }
@@ -108,6 +110,8 @@ namespace ProcessPoller
             {
                 try
                 {
+                    if (_process == null)
+                        return DateTime.MinValue;
                     if (HasExited)
                         return _process.ExitTime;
                 }
@@ -152,5 +156,22 @@ namespace ProcessPoller
         {
             return string.Format("#{0} {1}", ProcessID, ProcessName);
         }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (_process != null)
+                {
+                    _process.Dispose();
+                    _process = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                
+            }
+        }
+
     }
 }

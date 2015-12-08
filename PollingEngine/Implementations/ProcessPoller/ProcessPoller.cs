@@ -14,6 +14,7 @@ namespace ProcessPoller
     {
         private readonly Dictionary<DateTime, List<ProcessRunInfo>> _rawData = new Dictionary<DateTime, List<ProcessRunInfo>>();
 
+
         public async Task OnStarting(PollingContext context)
         {
             
@@ -29,6 +30,26 @@ namespace ProcessPoller
             var curList = new List<ProcessRunInfo>();
             curList.AddRange(processes.Select(ProcessRunInfo.FromProcess).Where(x => x != null));
 
+            try
+            {
+                while (_rawData.Count > 0)
+                {
+                    var k = _rawData.OrderBy(x => x.Key).Select(x => x.Key).First();
+                    var l = _rawData[k];
+                    while (l.Count > 0)
+                    {
+                        var index = 0;
+                        var p = l[index];
+                        l.RemoveAt(index);
+                        p.Dispose();
+                    }
+                    _rawData.Remove(k);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("Error disposing old PorcessRunInfo. Error: " + ex);
+            }
             
 
             // "merge" + "diff" logic...
