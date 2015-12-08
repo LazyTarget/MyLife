@@ -7,7 +7,7 @@ using System.Management;
 
 namespace ProcessPoller
 {
-    public class ProcessRunInfo : IProcessRunInfo
+    public class ProcessRunInfo
     {
         private Process _process;
         private DateTime _exitTime;

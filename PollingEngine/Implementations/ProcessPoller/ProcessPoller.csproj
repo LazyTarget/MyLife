@@ -41,9 +41,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\CustomProcessRunInfo.cs" />
-    <Compile Include="Models\IProcessRunInfo.cs" />
-    <Compile Include="Models\ProcessEntity.cs" />
     <Compile Include="ProcessPoller.cs" />
     <Compile Include="Models\ProcessRunInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
