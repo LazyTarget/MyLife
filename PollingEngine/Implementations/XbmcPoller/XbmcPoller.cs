@@ -273,15 +273,17 @@ namespace XbmcPoller
             
             bool isDiff;
             bool ended = false;
+            double playbackSpeed = 0;
             VideoItemInfo videoItemInfo = null;
             try
             {
-                videoItemInfo = await GetItemInfo();
+                videoItemInfo = await GetItemInfo(out playbackSpeed);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error getting item info: {0}", ex.Message);
             }
+            var paused = (playbackSpeed == 0);
 
             //await GetPlaybackInfo();
 
@@ -333,6 +335,12 @@ namespace XbmcPoller
                         diffType = DiffType.StillWatching;
 
                         _sessionInfo.ActiveVideo.Active = true;
+                        if (_sessionInfo.ActiveVideo.Paused && paused)
+                        {
+                            var intervalDiff = time.Subtract(_sessionInfo.LastPollTime);
+                            _sessionInfo.ActiveVideo.TimePaused = _sessionInfo.ActiveVideo.TimePaused.Add(intervalDiff);
+                        }
+                        _sessionInfo.ActiveVideo.Paused = paused;
                         _sessionInfo.ActiveVideo.EndTime = time;
                         await StoreSessionVideo(_sessionInfo.ActiveVideo);        // todo: optimize number of requests
                     }
@@ -395,6 +403,7 @@ namespace XbmcPoller
                         if (sessionVideo == _sessionInfo.ActiveVideo)
                             continue;
                         sessionVideo.Active = false;
+                        sessionVideo.Paused = false;
                         sessionVideo.EndTime = time;
                         await StoreSessionVideo(sessionVideo);            // todo: optimize number of requests?
                     }
@@ -403,6 +412,7 @@ namespace XbmcPoller
                     if (_sessionInfo.ActiveVideo.Active)
                     {
                         _sessionInfo.ActiveVideo.Active = false;
+                        _sessionInfo.ActiveVideo.Paused = false;
                         _sessionInfo.ActiveVideo.EndTime = time;
                         await StoreSessionVideo(_sessionInfo.ActiveVideo);
                     }
@@ -471,6 +481,7 @@ namespace XbmcPoller
                 if (sessionVideo.Active)
                     sessionVideo.EndTime = time;        // correct?
                 sessionVideo.Active = false;
+                sessionVideo.Paused = false;
 
                 var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
                 if (_settings.MinVideoLength > TimeSpan.Zero &&
@@ -544,8 +555,10 @@ namespace XbmcPoller
         }
 
 
-        private async Task<VideoItemInfo> GetItemInfo()
+        private async Task<VideoItemInfo> GetItemInfo(out double playbackSpeed)
         {
+            playbackSpeed = 0;      // todo!!
+
             var uri = "";
             var obj = new Dictionary<string, object>
             {
@@ -800,6 +813,8 @@ namespace XbmcPoller
                                 var cStartTime2 = reader2.GetOrdinal("StartTime");
                                 var cEndTime2 = reader2.GetOrdinal("EndTime");
                                 var cActive2 = reader2.GetOrdinal("Active");
+                                var cPaused2 = reader2.GetOrdinal("Paused");
+                                var cTimePaused2 = reader2.GetOrdinal("TimePaused");
                                 foreach (IDataRecord record2 in reader2)
                                 {
                                     var sessionVideo = new CrSessionVideo();
@@ -809,6 +824,10 @@ namespace XbmcPoller
                                     sessionVideo.Active = record2.GetBoolean(cActive2);
                                     sessionVideo.StartTime = record2.GetDateTime(cStartTime2);
                                     sessionVideo.EndTime = record2.GetDateTime(cEndTime2);
+                                    if (!record2.IsDBNull(cPaused2))
+                                        sessionVideo.Paused = record2.GetBoolean(cPaused2);
+                                    if (!record2.IsDBNull(cTimePaused2))
+                                        sessionVideo.TimePaused = TimeSpan.FromSeconds(record2.GetInt32(cTimePaused2));
                                     sessionVideo.ID = record2.GetInt64(cCrSessionVideoID);
                                     session.Videos.Add(sessionVideo);
                                     session.ActiveVideo = sessionVideo;
@@ -946,8 +965,8 @@ namespace XbmcPoller
                 if (sessionVideo.ID <= 0)
                 {
                     // Add CrSessionVideo
-                    sql = "INSERT INTO Kodi_CrSessionVideos(SessionID, VideoID, StartTime, EndTime, Active) " +
-                          "VALUES (?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
+                    sql = "INSERT INTO Kodi_CrSessionVideos(SessionID, VideoID, StartTime, EndTime, Active, Paused, TimePaused) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, ?); SELECT ? = @@IDENTITY";
                     var crSessionVideoIDParam = new OdbcParameter("@CrSessionVideoID", OdbcType.BigInt, 4)
                     {
                         Direction = ParameterDirection.Output,
@@ -959,6 +978,8 @@ namespace XbmcPoller
                     cmd.Parameters.AddWithValue("@StartTime", sessionVideo.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
                     cmd.Parameters.AddWithValue("@Active", sessionVideo.Active);
+                    cmd.Parameters.AddWithValue("@Paused", sessionVideo.Paused);
+                    cmd.Parameters.AddWithValue("@TimePaused", sessionVideo.TimePaused.TotalSeconds);
                     cmd.Parameters.Add(crSessionVideoIDParam);
                     changes += cmd.ExecuteNonQuery();
                     sessionVideo.ID = (long) crSessionVideoIDParam.Value;
@@ -969,7 +990,9 @@ namespace XbmcPoller
                     sql = "UPDATE Kodi_CrSessionVideos " +
                           "SET StartTime = ?, " +
                           "    EndTime = ?, " +
-                          "    Active = ? " +
+                          "    Active = ?, " +
+                          "    Paused = ?, " +
+                          "    TimePaused = ? " +
                           //"WHERE SessionID = ? AND VideoID = ?";
                           "WHERE ID = ?";
                     cmd = odbc.CreateCommand();
@@ -977,6 +1000,8 @@ namespace XbmcPoller
                     cmd.Parameters.AddWithValue("@StartTime", sessionVideo.StartTime);
                     cmd.Parameters.AddWithValue("@EndTime", sessionVideo.EndTime);
                     cmd.Parameters.AddWithValue("@Active", sessionVideo.Active);
+                    cmd.Parameters.AddWithValue("@Paused", sessionVideo.Paused);
+                    cmd.Parameters.AddWithValue("@TimePaused", sessionVideo.TimePaused);
                     //cmd.Parameters.AddWithValue("@SessionID", sessionVideo.SessionID);
                     //cmd.Parameters.AddWithValue("@VideoID", sessionVideo.ViewedVideoID);
                     cmd.Parameters.AddWithValue("@ID", sessionVideo.ID);

@@ -66,6 +66,10 @@ namespace XbmcPoller
             c = string.Compare(a.Label, b.Label);
             if (c != 0)
                 return c;
+
+            c = TimeSpan.Compare(a.Runtime, b.Runtime);
+            if (c != 0)
+                return c;
             return 0;
         }
 

@@ -13,6 +13,10 @@ namespace XbmcPoller
 
         public DateTime EndTime { get; set; }
 
+        public TimeSpan TimePaused { get; set; }
+
+        public bool Paused { get; set; }
+
         public bool Active { get; set; }
     }
 }
