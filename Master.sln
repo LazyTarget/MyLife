@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.Core", "MyLife\MyLife\MyLife.Core\MyLife.Core.csproj", "{B1A7E8C2-CBAE-44B0-8DB3-CA2E3244F594}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -119,6 +119,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Process", "Process", "{E215F27C-931F-426C-830B-EDE1DE30F71F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessLib", "Libraries\Process\ProcessLib\ProcessLib.csproj", "{B9D4F084-94E3-40C6-8C8B-0F256499E444}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLife.API.Client", "MyLife.API.Client\MyLife.API.Client.csproj", "{A73C9410-7EA0-4419-A714-973F7D007843}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -493,6 +495,22 @@ Global
 		{B9D4F084-94E3-40C6-8C8B-0F256499E444}.Release|x64.Build.0 = Release|Any CPU
 		{B9D4F084-94E3-40C6-8C8B-0F256499E444}.Release|x86.ActiveCfg = Release|Any CPU
 		{B9D4F084-94E3-40C6-8C8B-0F256499E444}.Release|x86.Build.0 = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|ARM.Build.0 = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|x64.Build.0 = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Debug|x86.Build.0 = Debug|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|ARM.ActiveCfg = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|ARM.Build.0 = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|x64.ActiveCfg = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|x64.Build.0 = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|x86.ActiveCfg = Release|Any CPU
+		{A73C9410-7EA0-4419-A714-973F7D007843}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -537,5 +555,6 @@ Global
 		{9726AAFB-477F-4AFF-9CEC-67EF5F454064} = {F22E38B2-C84C-4D89-BDA7-7DE0CE299544}
 		{E215F27C-931F-426C-830B-EDE1DE30F71F} = {AC53BBA0-DEFA-4693-ADA1-2D894641EB71}
 		{B9D4F084-94E3-40C6-8C8B-0F256499E444} = {E215F27C-931F-426C-830B-EDE1DE30F71F}
+		{A73C9410-7EA0-4419-A714-973F7D007843} = {FC867E47-8226-4007-AC56-8EACD9827160}
 	EndGlobalSection
 EndGlobal

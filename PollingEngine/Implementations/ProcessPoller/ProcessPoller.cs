@@ -7,9 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using MyLife.API.Client;
 using PollingEngine.Core;
 using ProcessLib.Models;
-using Simple.OData.Client;
 using Process = System.Diagnostics.Process;
 
 namespace ProcessPoller
@@ -27,11 +27,13 @@ namespace ProcessPoller
             {
                 var uri = new Uri("http://localhost:5227/api");
                 var client = new Simple.OData.Client.ODataClient(uri);
+                var manager = new ProcessManager(client);
 
-                var start = DateTime.UtcNow;
-                var init = true;
+
+                var init = context != null;
                 if (init)
                 {
+                    var start = DateTime.UtcNow;
                     proc = new ProcessLib.Models.Process
                     {
                         StartTime = start,
@@ -39,50 +41,41 @@ namespace ProcessPoller
                         MachineName = Environment.MachineName,
                         FileName = "QWERTY.exe",
                     };
-
-                    var task3 = client.For<ProcessLib.Models.Process>()
-                        .Set(proc)
-                        .InsertEntryAsync(true);
-                    task = task3;
-                    var procRes = await task3;
+                    proc.Titles = new List<ProcessTitle>(proc.Titles ?? new List<ProcessTitle>());
 
 
-                    var title = new ProcessTitle
+                    var title2 = new ProcessTitle
                     {
-                        Title = "Qwerty - Dashboard",
+                        Title = "Qwerty - Starting up...",
                         StartTime = start,
-                        ProcessID = procRes.ID,
                     };
-                    var task4 = client.For<ProcessLib.Models.ProcessTitle>()
-                        .Set(title)
-                        .InsertEntryAsync(true);
-                    task = task4;
-                    var titleRes = await task4;
+                    proc.Titles.Add(title2);
+
+
+                    proc = await manager.UpdateProcess(proc);
+                }
+                else
+                {
+                    var t = client.For<ProcessLib.Models.Process>()
+                        .Top(5)
+                        .Expand(x => x.Titles)
+                        //.FindEntryAsync();
+                        .FindEntriesAsync();
+                    task = t;
+                    var processes = (await t).ToList();
+                    //var processes = new List<ProcessLib.Models.Process> {(await  t)};
+
+                    proc = processes.First();
+                    proc.Titles = new List<ProcessTitle>(proc.Titles ?? new List<ProcessTitle>());
                 }
 
-                var t = client.For<ProcessLib.Models.Process>()
-                    .Top(5)
-                    .Expand(x => x.Titles)
-                    //.FindEntryAsync();
-                    .FindEntriesAsync();
-                task = t;
-                var processes = (await t).ToList();
-                //var processes = new List<ProcessLib.Models.Process> {(await  t)};
-
-                proc = processes.First();
-                proc.Titles = new List<ProcessTitle>(proc.Titles ?? new List<ProcessTitle>());
                 proc.Titles.Add(new ProcessTitle
                 {
-                    Title = "Qwerty - Dashboard #2",
-                    ProcessID = proc.ID,
+                    Title = $"Qwerty - Title @{DateTime.UtcNow}",
                     StartTime = DateTime.UtcNow,
                 });
 
-                var task5 = client.For<ProcessLib.Models.Process>()
-                    .Set(proc)
-                    .UpdateEntryAsync();
-                task = task5;
-                var proc2 = await task5;
+                proc = await manager.UpdateProcess(proc);
             }
             catch (Exception ex)
             {

@@ -84,6 +84,8 @@ namespace MyLife.API.Server.Controllers
         // POST: odata/Process
         public IHttpActionResult Post(Process process)
         {
+            Validate(process);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

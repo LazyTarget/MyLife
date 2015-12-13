@@ -13,7 +13,7 @@ namespace ProcessLib.Interfaces
         bool HasExited { get; }
         int? ExitCode { get; set; }
         DateTime StartTime { get; }
-        DateTime ExitTime { get; set; }
+        DateTime? ExitTime { get; set; }
         TimeSpan TotalProcessorTime { get; }
         TimeSpan UserProcessorTime { get; }
         TimeSpan PrivilegedProcessorTime { get; }
