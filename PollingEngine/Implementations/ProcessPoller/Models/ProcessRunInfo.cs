@@ -7,7 +7,7 @@ using System.Management;
 
 namespace ProcessPoller
 {
-    public class ProcessRunInfo : IDisposable
+    public class ProcessRunInfo : IProcessRunInfo, IDisposable
     {
         private Process _process;
         private DateTime _exitTime;
@@ -169,7 +169,7 @@ namespace ProcessPoller
             }
             catch (Exception ex)
             {
-                
+
             }
         }
 
