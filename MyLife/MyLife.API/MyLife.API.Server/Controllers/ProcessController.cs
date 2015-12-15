@@ -47,14 +47,17 @@ namespace MyLife.API.Server.Controllers
         // PUT: odata/Process(5)
         public IHttpActionResult Put([FromODataUri] long key, Delta<Process> patch)
         {
-            Validate(patch.GetEntity());
+            var now = DateTime.UtcNow;
+            var process = patch.GetEntity();
+            process.TimeUpdated = now;
 
+            Validate(process);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Process process = db.Processes.Find(key);
+            process = db.Processes.Find(key);
             if (process == null)
             {
                 return NotFound();
@@ -84,8 +87,11 @@ namespace MyLife.API.Server.Controllers
         // POST: odata/Process
         public IHttpActionResult Post(Process process)
         {
-            Validate(process);
+            var now = DateTime.UtcNow;
+            process.TimeAdded = now;
+            process.TimeUpdated = now;
 
+            Validate(process);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -101,14 +107,17 @@ namespace MyLife.API.Server.Controllers
         [AcceptVerbs("PATCH", "MERGE")]
         public IHttpActionResult Patch([FromODataUri] long key, Delta<Process> patch)
         {
-            Validate(patch.GetEntity());
+            var now = DateTime.UtcNow;
+            var process = patch.GetEntity();
+            process.TimeUpdated = now;
 
+            Validate(process);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Process process = db.Processes.Find(key);
+            process = db.Processes.Find(key);
             if (process == null)
             {
                 return NotFound();

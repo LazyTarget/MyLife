@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -7,69 +8,15 @@ using System.Management;
 
 namespace ProcessPoller
 {
-    public class ProcessRunInfo : IProcessRunInfo
+    public class ProcessRunInfo //: ProcessLib.Interfaces.IProcess //IProcessRunInfo
     {
         private Process _process;
-        private DateTime _exitTime;
+        private DateTime? _exitTime;
         private int? _exitCode;
 
-        public static ProcessRunInfo FromProcess(Process proc)
-        {
-            try
-            {
-                var res = new ProcessRunInfo();
-                res._process = proc;
-                res.ProcessID = proc.Id;
-                res.ProcessName = proc.ProcessName;
-                res.MachineName = proc.MachineName;
-                if (res.HasExited)
-                {
-                    res.ExitCode = proc.ExitCode;
-                    res.ExitTime = proc.ExitTime;
-                }
-                else
-                    res.ExitTime = DateTime.Now;
-                res.StartTime = proc.StartTime;
-                res.TotalProcessorTime = proc.TotalProcessorTime;
-                res.UserProcessorTime = proc.UserProcessorTime;
-                res.PrivilegedProcessorTime = proc.PrivilegedProcessorTime;
 
-                try
-                {
-                    res.MainWindowTitle = proc.MainWindowTitle;
-                    res.ModuleName = proc.MainModule.ModuleName;
-                    res.FileName = proc.MainModule.FileName;
-                }
-                catch (Win32Exception ex)
-                {
-                    var wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + proc.Id;
-                    using (var searcher = new ManagementObjectSearcher(wmiQueryString))
-                    using (var results = searcher.Get())
-                    {
-                        var mo = results.Cast<ManagementObject>().FirstOrDefault();
-                        if (mo != null)
-                        {
-                            res.FileName = mo["ExecutablePath"].ToString();
-                            res.ModuleName = Path.GetFileName(res.FileName);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
-
-                return res;
-            }
-            catch (Exception ex)
-            {
-                //throw;
-                return null;
-            }
-        }
-
-
-
+        
+        public long ID { get; }
         public int ProcessID { get; private set; }
         public string ProcessName { get; private set; }
         public string MachineName { get; private set; }
@@ -78,7 +25,7 @@ namespace ProcessPoller
         public string MainWindowTitle { get; private set; }
         public bool HasExited
         {
-            get { return _process.HasExited; }
+            get { return _process != null && _process.HasExited; }
         }
         public int? ExitCode
         {
@@ -102,20 +49,23 @@ namespace ProcessPoller
 
         public DateTime StartTime { get; private set; }
 
-        public DateTime ExitTime
+        public DateTime? ExitTime
         {
             get
             {
                 try
                 {
-                    if (HasExited)
+                    if (_exitTime.HasValue)
+                        return _exitTime.Value;
+                    if (HasExited && _process != null)
                         return _process.ExitTime;
+                    return null;
                 }
                 catch (Exception ex)
                 {
                     
                 }
-                return _exitTime;
+                return null;
             }
             set { _exitTime = value; }
         }
@@ -123,6 +73,7 @@ namespace ProcessPoller
         public TimeSpan TotalProcessorTime { get; private set; }
         public TimeSpan UserProcessorTime { get; private set; }
         public TimeSpan PrivilegedProcessorTime { get; private set; }
+        public IList<ProcessLib.Interfaces.IProcessTitle> Titles { get; set; }
 
 
         public TimeSpan Duration
@@ -131,8 +82,8 @@ namespace ProcessPoller
             {
                 TimeSpan diff;
                 //if (HasExited)
-                if (ExitTime != DateTime.MinValue)
-                    diff = ExitTime.Subtract(StartTime);
+                if (ExitTime.HasValue)
+                    diff = ExitTime.Value.Subtract(StartTime);
                 else
                     diff = DateTime.Now.Subtract(StartTime);
                 return diff;
@@ -151,6 +102,60 @@ namespace ProcessPoller
         public override string ToString()
         {
             return string.Format("#{0} {1}", ProcessID, ProcessName);
+        }
+
+
+
+        public void ApplyFromProcess(Process proc)
+        {
+            try
+            {
+                _process = proc;
+                ProcessID = proc.Id;
+                ProcessName = proc.ProcessName;
+                MachineName = proc.MachineName;
+                if (HasExited)
+                {
+                    ExitCode = proc.ExitCode;
+                    ExitTime = proc.ExitTime;
+                }
+                else
+                    ExitTime = DateTime.Now;
+                StartTime = proc.StartTime;
+                TotalProcessorTime = proc.TotalProcessorTime;
+                UserProcessorTime = proc.UserProcessorTime;
+                PrivilegedProcessorTime = proc.PrivilegedProcessorTime;
+
+
+                try
+                {
+                    MainWindowTitle = proc.MainWindowTitle;
+                    ModuleName = proc.MainModule.ModuleName;
+                    FileName = proc.MainModule.FileName;
+                }
+                catch (Win32Exception ex)
+                {
+                    var wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + proc.Id;
+                    using (var searcher = new ManagementObjectSearcher(wmiQueryString))
+                    using (var results = searcher.Get())
+                    {
+                        var mo = results.Cast<ManagementObject>().FirstOrDefault();
+                        if (mo != null)
+                        {
+                            FileName = mo["ExecutablePath"].ToString();
+                            ModuleName = Path.GetFileName(FileName);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                //throw;
+            }
         }
     }
 }

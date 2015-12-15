@@ -47,14 +47,15 @@ namespace MyLife.API.Server.Controllers
         // PUT: odata/ProcessTitles(5)
         public IHttpActionResult Put([FromODataUri] long key, Delta<ProcessTitle> patch)
         {
-            Validate(patch.GetEntity());
+            var processTitle = patch.GetEntity();
 
+            Validate(processTitle);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            ProcessTitle processTitle = db.ProcessTitles.Find(key);
+            processTitle = db.ProcessTitles.Find(key);
             if (processTitle == null)
             {
                 return NotFound();
@@ -85,13 +86,34 @@ namespace MyLife.API.Server.Controllers
         public IHttpActionResult Post(ProcessTitle processTitle)
         {
             Validate(processTitle);
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.ProcessTitles.Add(processTitle);
+            var temp = processTitle.ID <= 0
+                ? db.ProcessTitles
+                    .OrderByDescending(x => x.StartTime)
+                    .FirstOrDefault(x => x.ProcessID == processTitle.ProcessID && x.Title == processTitle.Title)
+                : null;
+            if (temp != null)
+            {
+                //var delta = new Delta<ProcessTitle>();
+                //delta.Patch(processTitle);
+                //return Put(temp.ID, delta);
+
+                temp.StartTime = processTitle.StartTime;
+                temp.EndTime = processTitle.EndTime;
+                temp.Title = processTitle.Title;
+                temp.ProcessID = processTitle.ProcessID;
+                processTitle = temp;
+
+                //return BadRequest("Invalid id");
+            }
+            else
+            {
+                db.ProcessTitles.Add(processTitle);
+            }
 
             try
             {
@@ -116,14 +138,15 @@ namespace MyLife.API.Server.Controllers
         [AcceptVerbs("PATCH", "MERGE")]
         public IHttpActionResult Patch([FromODataUri] long key, Delta<ProcessTitle> patch)
         {
-            Validate(patch.GetEntity());
+            var processTitle = patch.GetEntity();
 
+            Validate(processTitle);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            ProcessTitle processTitle = db.ProcessTitles.Find(key);
+            processTitle = db.ProcessTitles.Find(key);
             if (processTitle == null)
             {
                 return NotFound();

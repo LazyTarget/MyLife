@@ -20,6 +20,17 @@ namespace ProcessLib.Models
             return Title;
         }
 
+        public void CopyFrom(IProcessTitle title)
+        {
+            if (title == null)
+                return;
+            ID = title.ID;
+            ProcessID = title.ProcessID;
+            StartTime = title.StartTime;
+            EndTime = title.EndTime;
+            Title = title.Title;
+        }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (ProcessID <= 0)

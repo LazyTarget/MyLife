@@ -2,7 +2,7 @@
 {
     public class ProcessEntity
     {
-        public long ID { get; set; }
+        public long ID { get { return ProcessInfo?.ID ?? 0; } }
 
         //public IProcessRunInfo ProcessInfo { get; set; }
 
