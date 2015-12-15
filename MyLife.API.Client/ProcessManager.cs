@@ -49,6 +49,8 @@ namespace MyLife.API.Client
                         processTitle.ProcessID = process.ID;
                     if (processTitle.ProcessID != process.ID)
                         continue;
+                    if (i == 0 && process.HasExited && !processTitle.EndTime.HasValue)
+                        processTitle.EndTime = process.ExitTime;
                     var prevTitle = titles.ElementAtOrDefault(i + 1);
                     if (prevTitle != null && !prevTitle.EndTime.HasValue)
                     {

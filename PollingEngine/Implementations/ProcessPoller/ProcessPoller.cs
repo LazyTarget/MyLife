@@ -21,12 +21,38 @@ namespace ProcessPoller
         private List<ProcessLib.Interfaces.IProcess> _preList = new List<ProcessLib.Interfaces.IProcess>();
         private readonly Simple.OData.Client.ODataClient _client;
         private readonly ProcessManager _manager;
+        private Func<Process, bool> _processFilter; 
 
         public ProcessPoller()
         {
             var uri = new Uri("http://localhost:5227/api");
             _client = new Simple.OData.Client.ODataClient(uri);
             _manager = new ProcessManager(_client);
+            _processFilter = process =>
+            {
+                var res = true;
+                try
+                {
+                    if (process.Id <= 0)
+                        res = false;
+#if DEBUG
+                    else if (string.IsNullOrWhiteSpace(process.MainWindowTitle))
+                        res = false;
+#endif
+
+                    if (process.ProcessName.ToLower() == "explorer")
+                        res = true;
+                }
+                catch (Exception ex)
+                {
+
+                }
+                finally
+                {
+                    
+                }
+                return res;
+            };
         }
 
 
@@ -71,17 +97,22 @@ namespace ProcessPoller
                     var processes = (await t).ToList();
                     //var processes = new List<ProcessLib.Models.Process> {(await  t)};
 
-                    proc = processes.First();
-                    proc.Titles = new List<ProcessLib.Models.ProcessTitle>(proc.Titles ?? new List<ProcessLib.Models.ProcessTitle>());
+                    proc = processes.FirstOrDefault();
                 }
 
-                proc.Titles.Add(new ProcessLib.Models.ProcessTitle
-                {
-                    Title = $"Qwerty - Title @{DateTime.UtcNow}",
-                    StartTime = DateTime.UtcNow,
-                });
 
-                proc = await _manager.UpdateProcess(proc);
+
+                if (proc != null)
+                {
+                    proc.Titles = new List<ProcessLib.Models.ProcessTitle>(proc.Titles ?? new List<ProcessLib.Models.ProcessTitle>());
+                    proc.Titles.Add(new ProcessLib.Models.ProcessTitle
+                    {
+                        Title = $"Qwerty - Title @{DateTime.UtcNow}",
+                        StartTime = DateTime.UtcNow,
+                    });
+
+                    proc = await _manager.UpdateProcess(proc);
+                }
             }
             catch (Exception ex)
             {
@@ -96,57 +127,103 @@ namespace ProcessPoller
         public async Task OnInterval(PollingContext context)
         {
             Log("Polling processes");
-            var processes = Process.GetProcesses();
+            //var processes = Process.GetProcesses();
+            var processes2 = Process.GetProcesses().ToDictionary(x => x.Id, x => x);
+            var processes = Process.GetProcesses().Where(_processFilter).ToDictionary(x => x.Id, x => x);
 
             var now = DateTime.UtcNow;
             var preList = _preList;
-            var curList = new List<ProcessLib.Interfaces.IProcess>();
+            //var curList = new List<ProcessLib.Interfaces.IProcess>();
             
-            curList.AddRange(processes.Select(proc =>
-            {
-                var process = new ProcessLib.Models.Process();
-                ApplyProcess(process, proc, now);
-                process.TimeUpdated = now;
-                return process;
-            }));
+            //curList.AddRange(processes.Select(proc =>
+            //{
+            //    var process = new ProcessLib.Models.Process();
+            //    ApplyProcess(process, proc, now);
+            //    process.TimeUpdated = now;
+            //    return process;
+            //}));
+
             
 
             var resList = new List<ProcessLib.Interfaces.IProcess>();
-            foreach (var processRunInfo in curList)
+            //foreach (var processRunInfo in curList)
+            //{
+            //    var proc = _preList.FirstOrDefault(x => x.ProcessID == processRunInfo.ProcessID &&
+            //                                            x.ProcessName == processRunInfo.ProcessName);
+            //    if (proc == null)
+            //    {
+            //        // Started
+            //        proc = processRunInfo;
+            //        await OnProcessStarted(proc);
+            //    }
+            //    else
+            //    {
+            //        // Continue or Exit
+            //        //proc.ProcessInfo = processRunInfo;      // update data
+            //        processRunInfo.ID = proc.ID;
+            //        processRunInfo.TimeAdded = proc.TimeAdded;
+            //        if (proc.Titles != null && processRunInfo.Titles != null)
+            //        {
+            //            proc.Titles.Where(x => processRunInfo.Titles.All(y => y.ID <= 0 || y.ID != x.ID)).ToList().ForEach(x =>
+            //            {
+            //                processRunInfo.Titles.Add(x);
+            //            });
+            //            processRunInfo.Titles = processRunInfo.Titles.OrderBy(x => x.StartTime).ThenBy(x => x.ID).ToList();
+            //        }
+            //        proc.CopyFrom(processRunInfo);
+
+            //        if (proc.HasExited)
+            //        {
+            //            await OnProcessExited(proc);
+            //            //continue;
+            //        }
+            //        else
+            //            await StoreProcess(proc);
+            //    }
+            //    resList.Add(proc);
+            //}
+            
+            foreach (var proc in processes.Values)
             {
-                var proc = _preList.FirstOrDefault(x => x.ProcessID == processRunInfo.ProcessID &&
-                                                        x.ProcessName == processRunInfo.ProcessName);
-                if (proc == null)
+                var process = _preList.FirstOrDefault(x => x.ProcessID == proc.Id &&
+                                                           x.ProcessName == proc.ProcessName);
+                var newProcess = process == null || process.ID <= 0;
+                if (newProcess)
                 {
                     // Started
-                    proc = processRunInfo;
-                    await OnProcessStarted(proc);
+                    //process = new ProcessLib.Models.Process();
+                    process = new ProcessRunInfo(proc);
+                    ApplyProcess(process, proc, now);
+                    process.TimeAdded = process.TimeUpdated = now;
+
+                    if (process.HasExited)
+                    {
+                        // the start wasn't tracked, skip process
+                        if (!process.StartTime.HasValue)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            await OnProcessExited(process);
+                        }
+                    }
+                    else
+                    {
+                        await OnProcessStarted(process);
+                    }
                 }
                 else
                 {
-                    // Continue or Exit
-                    //proc.ProcessInfo = processRunInfo;      // update data
-                    processRunInfo.ID = proc.ID;
-                    processRunInfo.TimeAdded = proc.TimeAdded;
-                    if (proc.Titles != null && processRunInfo.Titles != null)
-                    {
-                        proc.Titles.Where(x => processRunInfo.Titles.All(y => y.ID <= 0 || y.ID != x.ID)).ToList().ForEach(x =>
-                        {
-                            processRunInfo.Titles.Add(x);
-                        });
-                        processRunInfo.Titles = processRunInfo.Titles.OrderBy(x => x.StartTime).ThenBy(x => x.ID).ToList();
-                    }
-                    proc.CopyFrom(processRunInfo);
-
-                    if (proc.HasExited)
-                    {
-                        await OnProcessExited(proc);
-                        //continue;
-                    }
+                    ApplyProcess(process, proc, now);
+                    process.TimeUpdated = now;
+                    
+                    if (process.HasExited)
+                        await OnProcessExited(process);
                     else
-                        await StoreProcess(proc);
+                        await StoreProcess(process);
                 }
-                resList.Add(proc);
+                resList.Add(process);
             }
 
 
@@ -159,9 +236,24 @@ namespace ProcessPoller
                 // Continue or Exit
                 try
                 {
+                    now = DateTime.UtcNow;
                     var proc = Process.GetProcessById(process.ProcessID);
-                    //process.ProcessInfo = ProcessRunInfo.FromProcess(proc); // update data
-                    ApplyProcess(process, proc, now);
+                    //var proc = processes.ContainsKey(process.ProcessID)
+                    //    ? processes[process.ProcessID]
+                    //    : null;
+                    //var proc = (process as ProcessRunInfo)?.GetProcess();
+                    if (proc != null)
+                    {
+                        //process.ProcessInfo = ProcessRunInfo.FromProcess(proc); // update data
+                        ApplyProcess(process, proc, now);
+                    }
+                    else
+                    {
+                        // process is not found (has exited)
+                        process.HasExited = true;
+                        if (!process.ExitTime.HasValue)
+                            process.ExitTime = now;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -175,16 +267,30 @@ namespace ProcessPoller
                 if (process.HasExited)
                 {
                     await OnProcessExited(process);
-                    //continue;
                 }
                 else
                     await StoreProcess(process);
                 resList.Add(process);
             }
 
-
+            
             //_preList = resList;
             _preList = resList.Where(x => !x.HasExited).ToList();
+            Log($"Total of '{_preList.Count}' processes running");
+
+            var exited = resList.Where(x => x.HasExited).ToList();
+            Log($"Total of '{exited.Count}' process exited during interval");
+            foreach (var process in exited)
+            {
+                try
+                {
+                    process.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    
+                }
+            }
         }
 
         public async Task OnStopping(PollingContext context)
@@ -263,13 +369,15 @@ namespace ProcessPoller
                     : Environment.MachineName;
 
                 var proc = new ProcessLib.Models.Process();
-                proc.CopyFrom(process);
+                CopyFrom(process, proc);
                 proc.MachineName = machineName;
                 if (proc.TimeAdded == DateTime.MinValue)
                     proc.TimeAdded = now;
-                proc.TimeUpdated = now;
+                if (proc.TimeUpdated == DateTime.MinValue)
+                    proc.TimeUpdated = now;
                 proc = await _manager.UpdateProcess(proc);
-                process.CopyFrom(proc);
+                process.Titles = null;
+                CopyFrom(proc, process);
 
                 //var connectionString = ConfigurationManager.ConnectionStrings["MyLifeDatabase"].ConnectionString;
                 //var cn = new OdbcConnection(connectionString);
@@ -347,7 +455,7 @@ namespace ProcessPoller
             var result = await _client.For<ProcessLib.Models.Process>()
                 //.Top(5)
                 .Expand(x => x.Titles)
-                .Filter(x => x.MachineName == machineName)
+                .Filter(x => x.MachineName == machineName && !x.HasExited)
                 .FindEntriesAsync();
             return result;
 
@@ -430,7 +538,65 @@ namespace ProcessPoller
         }
 
 
-        public static void ApplyProcess(ProcessLib.Interfaces.IProcess process, Process proc, DateTime dateTime)
+        public static void CopyFrom(ProcessLib.Interfaces.IProcess process, ProcessLib.Interfaces.IProcess target)
+        {
+            if (process == null)
+                return;
+            target.ID = process.ID;
+            target.ProcessID = process.ProcessID;
+            target.ProcessName = process.ProcessName;
+            target.MachineName = process.MachineName;
+            target.ModuleName = process.ModuleName;
+            target.FileName = process.FileName;
+            target.HasExited = process.HasExited;
+            target.ExitCode = process.ExitCode;
+            target.StartTime = process.StartTime;
+            target.ExitTime = process.ExitTime;
+            target.TimeAdded = process.TimeAdded;
+            target.TimeUpdated = process.TimeUpdated;
+
+            target.Titles = target.Titles ?? new List<ProcessLib.Models.ProcessTitle>();
+            if (process.Titles != null)
+            {
+                //var list = new List<ProcessTitle>();
+                //var typed = process.Titles.Where(x => x is ProcessTitle).Cast<ProcessTitle>();
+                //list.AddRange(typed);
+
+                //var nontyped = process.Titles.Where(x => !(x is ProcessTitle)).ToList();
+                //nontyped.ForEach(x =>
+                //{
+                //    var t = new ProcessTitle();
+                //    t.CopyFrom(x);
+                //    list.Add(t);
+                //});
+                //Titles = list;
+
+                //foreach (var processTitle in process.Titles)
+                //{
+                //    if (processTitle.ID == 0 || target.Titles.All(y => y.ID != processTitle.ID))
+                //    {
+                //        var t = target.Titles.ToList();
+                //        target.Titles = new List<ProcessLib.Models.ProcessTitle>(target.Titles.Count + 4);
+                //        t.ForEach(target.Titles.Add);
+                //        target.Titles.Add(processTitle);
+                //    }
+                //    else
+                //    {
+                        
+                //    }
+                //}
+
+                foreach (var processTitle in process.Titles)
+                {
+                    if (!target.Titles.Contains(processTitle))
+                        target.Titles.Add(processTitle);
+                }
+            }
+            target.Titles = target.Titles.OrderBy(x => x.StartTime).ThenBy(x => x.ID).ToList();
+        }
+
+
+        public static void ApplyProcess(ProcessLib.Interfaces.IProcess process, Process proc, DateTime now)
         {
             if (process == null)
                 return;
@@ -439,11 +605,16 @@ namespace ProcessPoller
             var p = new ProcessLib.Models.Process();
             try
             {
-                var now = DateTime.UtcNow;
-                
+                CopyFrom(process, p);
+
+                var machineName = proc.MachineName != "."
+                    ? proc.MachineName
+                    : Environment.MachineName;
+
+                p.ID = process.ID;
                 p.ProcessID = proc.Id;
                 p.ProcessName = proc.ProcessName;
-                p.MachineName = proc.MachineName;
+                p.MachineName = machineName;
                 p.TimeAdded = process.TimeAdded;
                 p.TimeUpdated = now;
                 if (p.HasExited)
@@ -451,33 +622,48 @@ namespace ProcessPoller
                     p.ExitCode = proc.ExitCode;
                     p.ExitTime = proc.ExitTime;
                 }
-                //else
-                //    p.ExitTime = now;
-                
+                else
+                    p.ExitTime = now;
+
                 //process.MainWindowTitle = proc.MainWindowTitle;
-                if (!string.IsNullOrWhiteSpace(proc.MainWindowTitle))
+                p.Titles = p.Titles ?? new List<ProcessLib.Models.ProcessTitle>();
+                var prevTitle = p.Titles.OrderByDescending(x => x.StartTime).FirstOrDefault();
+                if (prevTitle == null || prevTitle.ProcessID == p.ID)
                 {
-                    p.Titles = p.Titles ?? new List<ProcessLib.Models.ProcessTitle>();
-                    var prevTitle = p.Titles.OrderByDescending(x => x.StartTime).FirstOrDefault();
                     if (prevTitle == null || prevTitle.Title != proc.MainWindowTitle)
                     {
-                        if (prevTitle != null)
+                        if (prevTitle != null && !prevTitle.EndTime.HasValue)
                             prevTitle.EndTime = now;
-
-                        var title = new ProcessLib.Models.ProcessTitle
+                        if (!string.IsNullOrWhiteSpace(proc.MainWindowTitle))
                         {
-                            StartTime = now,
-                            EndTime = null,
-                            Title = proc.MainWindowTitle,
-                            ProcessID = p.ID,
-                        };
-                        p.Titles.Add(title);
+                            var title = new ProcessLib.Models.ProcessTitle
+                            {
+                                StartTime = now,
+                                EndTime = null,
+                                Title = proc.MainWindowTitle,
+                                ProcessID = p.ID,
+                            };
+                            p.Titles.Add(title);
+                            p.Titles = p.Titles.OrderBy(x => x.StartTime).ThenBy(x => x.ID).ToList();
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+                    else
+                    {
+
                     }
                 }
 
                 try
                 {
-                    p.StartTime = proc.StartTime;
+                    p.StartTime = proc.StartTime.ToUniversalTime();
+                }
+                catch (Win32Exception ex)
+                {
+                    //throw;
                 }
                 catch (Exception ex)
                 {
@@ -527,7 +713,7 @@ namespace ProcessPoller
             finally
             {
                 if (process != null && p != null)
-                    process.CopyFrom(p);
+                    CopyFrom(p, process);
             }
         }
 
@@ -546,9 +732,9 @@ namespace ProcessPoller
             if (!start.HasValue)
                 diff = TimeSpan.Zero;
             else if (end.HasValue)
-                diff = end.Value.Subtract(start.Value);
+                diff = end.Value.ToUniversalTime().Subtract(start.Value.ToUniversalTime());
             else
-                diff = DateTime.UtcNow.Subtract(start.Value);
+                diff = DateTime.UtcNow.Subtract(start.Value.ToUniversalTime());
             return diff;
         }
 

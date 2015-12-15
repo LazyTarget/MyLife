@@ -4,7 +4,7 @@ using ProcessLib.Models;
 
 namespace ProcessLib.Interfaces
 {
-    public interface IProcess
+    public interface IProcess : IDisposable
     {
         long ID { get; set; }
         int ProcessID { get; set; }
@@ -21,7 +21,5 @@ namespace ProcessLib.Interfaces
         DateTime TimeUpdated { get; set; }
         //TimeSpan Duration { get; }
         IList<ProcessTitle> Titles { get; set; }
-
-        void CopyFrom(IProcess process);
     }
 }

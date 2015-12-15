@@ -1,96 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Management;
 
 namespace ProcessPoller
 {
-    public class ProcessRunInfo //: ProcessLib.Interfaces.IProcess //IProcessRunInfo
+    public class ProcessRunInfo : ProcessLib.Interfaces.IProcess //IProcessRunInfo
     {
         private Process _process;
+        private DateTime? _startTime;
         private DateTime? _exitTime;
         private int? _exitCode;
+        private bool? _hasExited;
 
+
+        public ProcessRunInfo(Process proc)
+        {
+            _process = proc;
+        }
 
         
-        public long ID { get; }
-        public int ProcessID { get; private set; }
-        public string ProcessName { get; private set; }
-        public string MachineName { get; private set; }
-        public string ModuleName { get; private set; }
-        public string FileName { get; private set; }
-        public string MainWindowTitle { get; private set; }
+        public long ID { get; set; }
+        public int ProcessID { get; set; }
+        public string ProcessName { get; set; }
+        public string MachineName { get; set; }
+        public string ModuleName { get; set; }
+        public string FileName { get; set; }
+        //public string MainWindowTitle { get; set; }
+
         public bool HasExited
         {
-            get { return _process != null && _process.HasExited; }
+            get
+            {
+                bool result = true;
+                if (_hasExited.HasValue)
+                    result = _hasExited.Value;
+                try
+                {
+                    if (_process != null)
+                        result = _process.HasExited;
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return result;
+            }
+            set { _hasExited = value; }
         }
+
         public int? ExitCode
         {
             get
             {
+                int? result = null;
+                if (_exitCode.HasValue)
+                    result = _exitCode.Value;
                 try
                 {
-                    if (HasExited)
-                        return _process.ExitCode;
+                    if (_process != null && _process.HasExited)
+                        result = _process.ExitCode;
                 }
                 catch (Exception ex)
                 {
                     
                 }
-                if (_exitCode.HasValue)
-                    return _exitCode.Value;
-                return null;
+                return result;
             }
             set { _exitCode = value; }
         }
 
-        public DateTime StartTime { get; private set; }
+        public DateTime? StartTime
+        {
+            get
+            {
+                DateTime? result = null;
+                if (_startTime.HasValue)
+                    result = _startTime.Value;
+                try
+                {
+                    if (_process != null)
+                        result = _process.StartTime;
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return result;
+            }
+            set { _startTime = value; }
+        }
 
         public DateTime? ExitTime
         {
             get
             {
+                DateTime? result = null;
+                if (_exitTime.HasValue)
+                    result = _exitTime.Value;
                 try
                 {
-                    if (_exitTime.HasValue)
-                        return _exitTime.Value;
-                    if (HasExited && _process != null)
-                        return _process.ExitTime;
-                    return null;
+                    if (_process != null && _process.HasExited)
+                        result = _process.ExitTime;
                 }
                 catch (Exception ex)
                 {
-                    
+
                 }
-                return null;
+                return result;
             }
             set { _exitTime = value; }
         }
 
-        public TimeSpan TotalProcessorTime { get; private set; }
-        public TimeSpan UserProcessorTime { get; private set; }
-        public TimeSpan PrivilegedProcessorTime { get; private set; }
-        public IList<ProcessLib.Interfaces.IProcessTitle> Titles { get; set; }
+        public DateTime TimeAdded { get; set; }
+        public DateTime TimeUpdated { get; set; }
 
-
-        public TimeSpan Duration
-        {
-            get
-            {
-                TimeSpan diff;
-                //if (HasExited)
-                if (ExitTime.HasValue)
-                    diff = ExitTime.Value.Subtract(StartTime);
-                else
-                    diff = DateTime.Now.Subtract(StartTime);
-                return diff;
-            }
-        }
-
-
+        public IList<ProcessLib.Models.ProcessTitle> Titles { get; set; }
+        
 
         public Process GetProcess()
         {
@@ -99,62 +125,17 @@ namespace ProcessPoller
             return _process;
         }
 
-        public override string ToString()
+        //public override string ToString()
+        //{
+        //    return string.Format("#{0} {1}", ProcessID, ProcessName);
+        //}
+
+        public void Dispose()
         {
-            return string.Format("#{0} {1}", ProcessID, ProcessName);
-        }
-
-
-
-        public void ApplyFromProcess(Process proc)
-        {
-            try
+            if (_process != null)
             {
-                _process = proc;
-                ProcessID = proc.Id;
-                ProcessName = proc.ProcessName;
-                MachineName = proc.MachineName;
-                if (HasExited)
-                {
-                    ExitCode = proc.ExitCode;
-                    ExitTime = proc.ExitTime;
-                }
-                else
-                    ExitTime = DateTime.Now;
-                StartTime = proc.StartTime;
-                TotalProcessorTime = proc.TotalProcessorTime;
-                UserProcessorTime = proc.UserProcessorTime;
-                PrivilegedProcessorTime = proc.PrivilegedProcessorTime;
-
-
-                try
-                {
-                    MainWindowTitle = proc.MainWindowTitle;
-                    ModuleName = proc.MainModule.ModuleName;
-                    FileName = proc.MainModule.FileName;
-                }
-                catch (Win32Exception ex)
-                {
-                    var wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + proc.Id;
-                    using (var searcher = new ManagementObjectSearcher(wmiQueryString))
-                    using (var results = searcher.Get())
-                    {
-                        var mo = results.Cast<ManagementObject>().FirstOrDefault();
-                        if (mo != null)
-                        {
-                            FileName = mo["ExecutablePath"].ToString();
-                            ModuleName = Path.GetFileName(FileName);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
-            }
-            catch (Exception ex)
-            {
-                //throw;
+                _process.Dispose();
+                _process = null;
             }
         }
     }
