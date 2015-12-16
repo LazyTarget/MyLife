@@ -180,7 +180,7 @@ namespace PollingEngine
             
             //contexts.Add(new PollingContext(new SteamPoller.SteamPoller2(),     TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.SteamPoller2")))));
             //contexts.Add(new PollingContext(new XbmcPoller.XbmcPoller(),        TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.XbmcPoller")))));
-            contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(),  TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.ProcessPoller")))));
+            //contexts.Add(new PollingContext(new ProcessPoller.ProcessPoller(),  TimeSpan.FromSeconds(Convert.ToInt32(ConfigurationManager.AppSettings.Get("Program.ProcessPoller")))));
 
 
             manager.Load(contexts);

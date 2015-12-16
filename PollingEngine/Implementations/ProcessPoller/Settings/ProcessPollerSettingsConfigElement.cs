@@ -16,8 +16,8 @@ namespace ProcessPoller
 
         public ProcessPollerSettingsConfigElement()
         {
-            var def = new ProcessPollerSettings();
-            ProcessFilter = def.ProcessFilter;
+            //var def = new ProcessPollerSettings();
+            //ProcessFilter = def.ProcessFilter;
         }
 
 
