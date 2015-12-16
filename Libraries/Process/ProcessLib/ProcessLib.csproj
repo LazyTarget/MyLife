@@ -41,6 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,16 +51,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\ProcessDataContext.cs" />
+    <Compile Include="Interfaces\IProcessMonitor.cs" />
+    <Compile Include="Interfaces\IProcessRepository.cs" />
+    <Compile Include="Interfaces\IProcessRetreiver.cs" />
     <Compile Include="Interfaces\IProcessTitle.cs" />
     <Compile Include="Interfaces\IProcess.cs" />
+    <Compile Include="Models\ProcessRunInfo.cs" />
+    <Compile Include="FilteredProcessRetriever.cs" />
+    <Compile Include="ProcessRetriever.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ProcessTitle.cs" />
     <Compile Include="Models\Process.cs" />
+    <Compile Include="ProcessMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\SharedLib\SharedLib.csproj">
+      <Project>{9E2D95E7-B905-49A5-BFE3-B3DC4D511011}</Project>
+      <Name>SharedLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

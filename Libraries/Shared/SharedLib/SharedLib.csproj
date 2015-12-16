@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DisposableLock.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Extensions\DataExtensions.cs" />
     <Compile Include="Extensions\DateExtensions.cs" />

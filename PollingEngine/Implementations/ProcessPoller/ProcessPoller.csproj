@@ -102,6 +102,10 @@
     <Compile Include="ProcessPoller.cs" />
     <Compile Include="Models\ProcessRunInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\IProcessPollerSettings.cs" />
+    <Compile Include="Settings\ProcessPollerSettings.cs" />
+    <Compile Include="Settings\ProcessPollerConfigSection.cs" />
+    <Compile Include="Settings\ProcessPollerSettingsConfigElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Libraries\Process\ProcessLib\ProcessLib.csproj">

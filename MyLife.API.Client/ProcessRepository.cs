@@ -1,18 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Simple.OData.Client;
 
 namespace MyLife.API.Client
 {
-    public class ProcessManager
+    public class ProcessRepository : ProcessLib.Interfaces.IProcessRepository
     {
         private readonly IODataClient _client;
 
-        public ProcessManager(IODataClient odataClient)
+        public ProcessRepository(IODataClient odataClient)
         {
             _client = odataClient;
+        }
+
+
+        public async Task<IEnumerable<ProcessLib.Models.Process>> GetProcesses(Expression<Func<ProcessLib.Models.Process, bool>> filter)
+        {
+            var result = await _client.For<ProcessLib.Models.Process>()
+                .Expand(x => x.Titles)
+                .Filter(filter)
+                .FindEntriesAsync();
+            return result;
         }
 
 
