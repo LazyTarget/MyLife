@@ -90,30 +90,8 @@ namespace MyLife.API.Server.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var temp = processTitle.ID <= 0
-                ? db.ProcessTitles
-                    .OrderByDescending(x => x.StartTime)
-                    .FirstOrDefault(x => x.ProcessID == processTitle.ProcessID && x.Title == processTitle.Title)
-                : null;
-            if (temp != null)
-            {
-                //var delta = new Delta<ProcessTitle>();
-                //delta.Patch(processTitle);
-                //return Put(temp.ID, delta);
-
-                temp.StartTime = processTitle.StartTime;
-                temp.EndTime = processTitle.EndTime;
-                temp.Title = processTitle.Title;
-                temp.ProcessID = processTitle.ProcessID;
-                processTitle = temp;
-
-                //return BadRequest("Invalid id");
-            }
-            else
-            {
-                db.ProcessTitles.Add(processTitle);
-            }
+            
+            db.ProcessTitles.Add(processTitle);
 
             try
             {

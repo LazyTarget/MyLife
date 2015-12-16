@@ -40,7 +40,7 @@ namespace MyLife.API.Client
                     process = await task;
                 }
 
-            
+                
                 var newTitles = new List<ProcessLib.Models.ProcessTitle>();
                 for (var i = 0; titles != null && i < titles.Count; i++)
                 {

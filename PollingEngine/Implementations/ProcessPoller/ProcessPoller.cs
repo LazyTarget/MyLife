@@ -210,6 +210,21 @@ namespace ProcessPoller
                     }
                     else
                     {
+                        try
+                        {
+                            proc.EnableRaisingEvents = true;
+                            proc.Exited += delegate(object sender, EventArgs args)
+                            {
+                                var task = OnProcessExited(process);
+                                task.Wait(TimeSpan.FromSeconds(30));
+                                process.ExitCode = process.ExitCode;    // enforces that ExitCode should be written to the local variable and not the 'Process-proxy'
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            proc.EnableRaisingEvents = false;
+                        }
+
                         await OnProcessStarted(process);
                     }
                 }
@@ -234,10 +249,11 @@ namespace ProcessPoller
                     continue;
 
                 // Continue or Exit
+                Process proc;
                 try
                 {
                     now = DateTime.UtcNow;
-                    var proc = Process.GetProcessById(process.ProcessID);
+                    proc = Process.GetProcessById(process.ProcessID);
                     //var proc = processes.ContainsKey(process.ProcessID)
                     //    ? processes[process.ProcessID]
                     //    : null;
@@ -261,10 +277,16 @@ namespace ProcessPoller
                     process.HasExited = true;
                     if (!process.ExitTime.HasValue)
                         process.ExitTime = now;
+
+                    proc = (process as ProcessRunInfo)?.GetProcess();
                 }
 
-
-                if (process.HasExited)
+                if (proc != null && proc.EnableRaisingEvents)
+                {
+                    // do nothing as Exited should handle OnProcessExited
+                    ApplyProcess(process, proc, now);
+                }
+                else if (process.HasExited)
                 {
                     await OnProcessExited(process);
                 }
@@ -589,7 +611,10 @@ namespace ProcessPoller
                 foreach (var processTitle in process.Titles)
                 {
                     if (!target.Titles.Contains(processTitle))
+                    {
+                        target.Titles = new List<ProcessLib.Models.ProcessTitle>(target.Titles);
                         target.Titles.Add(processTitle);
+                    }
                 }
             }
             target.Titles = target.Titles.OrderBy(x => x.StartTime).ThenBy(x => x.ID).ToList();
