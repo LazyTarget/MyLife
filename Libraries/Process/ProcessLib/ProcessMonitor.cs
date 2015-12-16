@@ -15,6 +15,7 @@ namespace ProcessLib
     public class ProcessMonitor : IProcessMonitor
     {
         private List<IProcess> _preList = new List<IProcess>();
+        private readonly IDictionary<long, bool> _exitedAttached = new Dictionary<long, bool>();
         private readonly IProcessRetriever _processRetriever;
         private readonly IProcessRepository _processRepository;
         private readonly DisposableLock _actionLock = new DisposableLock();
@@ -142,22 +143,6 @@ namespace ProcessLib
                     }
                     else
                     {
-                        try
-                        {
-                            proc.EnableRaisingEvents = true;
-                            proc.Exited += delegate(object sender, EventArgs args)
-                            {
-                                var task = OnProcessExited(process);
-                                task.Wait(TimeSpan.FromSeconds(30));
-                                process.ExitCode = process.ExitCode;    // enforces that ExitCode should be written to the local variable and not the 'Process-proxy' (when ProcessRunInfo)
-                            };
-                        }
-                        catch (Exception ex)
-                        {
-                            Log("Error attaching Process.Exited event. Error: " + ex.Message);
-                            proc.EnableRaisingEvents = false;
-                        }
-
                         await OnProcessStarted(process);
                     }
                 }
@@ -176,6 +161,50 @@ namespace ProcessLib
                         await OnProcessUpdate(process);
                     }
                 }
+
+
+                bool attached;
+                attached = _exitedAttached.TryGetValue(process.ID, out attached) && attached;
+                if (!proc.HasExited && !proc.EnableRaisingEvents && !attached)
+                {
+                    try
+                    {
+                        EventHandler onExited = null;
+                        onExited = delegate (object sender, EventArgs args)
+                        {
+                            try
+                            {
+                                Log($"Process.Exited(..) :: #{process.ProcessID} {process.ProcessName}");
+                                // Un-attach event handler
+                                proc.EnableRaisingEvents = false;
+                                if (onExited != null)
+                                    proc.Exited -= onExited;
+                                var r = _exitedAttached.Remove(process.ID);
+                                attached = false;
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"Issue when detaching listener to Process.Exited, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
+                            }
+
+                            var task = OnProcessExited(process);
+                            task.Wait(TimeSpan.FromSeconds(30));
+                            process.ExitCode = process.ExitCode;
+                            // enforces that ExitCode should be written to the local variable and not the 'Process-proxy' (when ProcessRunInfo)
+                        };
+
+                        proc.Exited += onExited;
+                        proc.EnableRaisingEvents = attached = true;
+                        _exitedAttached[process.ID] = attached;
+                        Log($"Attached listener to Process.Exited, #{process.ProcessID} {process.ProcessName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("Error attaching Process.Exited event. Error: " + ex.Message);
+                        proc.EnableRaisingEvents = false;
+                    }
+                }
+
                 resList.Add(process);
             }
 
@@ -195,7 +224,28 @@ namespace ProcessLib
                     proc = _processRetriever.GetProcessById(process.ProcessID);
                     if (proc != null)
                     {
-                        ApplyProcess(process, proc, now);
+                        if (proc.ProcessName == process.ProcessName)
+                        {
+                            if (process.StartTime.HasValue)
+                            {
+                                // Round to nearest millisecond
+                                var procStartTime = proc.StartTime.ToUniversalTime();
+                                procStartTime = procStartTime.AddTicks(-(procStartTime.Ticks % TimeSpan.TicksPerSecond));
+                                var processStartTime = process.StartTime.Value;
+                                processStartTime = processStartTime.AddTicks(-(processStartTime.Ticks%TimeSpan.TicksPerSecond));
+
+                                if (procStartTime == processStartTime)
+                                    ApplyProcess(process, proc, now);
+                                else
+                                    hasExited = true;
+                            }
+                            else
+                            {
+                                
+                            }
+                        }
+                        else
+                            hasExited = true;
                     }
                     else
                         hasExited = true;
