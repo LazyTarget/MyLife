@@ -163,11 +163,12 @@ namespace ProcessLib
                 }
 
 
-                bool attached;
-                attached = _exitedAttached.TryGetValue(process.ID, out attached) && attached;
-                if (!proc.HasExited && !proc.EnableRaisingEvents && !attached)
+
+                try
                 {
-                    try
+                    bool attached;
+                    attached = _exitedAttached.TryGetValue(process.ID, out attached) && attached;
+                    if (!process.HasExited && !proc.EnableRaisingEvents && !attached)
                     {
                         EventHandler onExited = null;
                         onExited = delegate (object sender, EventArgs args)
@@ -198,11 +199,11 @@ namespace ProcessLib
                         _exitedAttached[process.ID] = attached;
                         Log($"Attached listener to Process.Exited, #{process.ProcessID} {process.ProcessName}");
                     }
-                    catch (Exception ex)
-                    {
-                        Log("Error attaching Process.Exited event. Error: " + ex.Message);
-                        proc.EnableRaisingEvents = false;
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error attaching Process.Exited event, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
+                    proc.EnableRaisingEvents = false;
                 }
 
                 resList.Add(process);
