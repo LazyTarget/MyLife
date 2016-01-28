@@ -61,6 +61,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\FiddlerPoller\FiddlerPoller.csproj">
+      <Project>{9a800978-80db-4c7e-be1b-48b1cef980c6}</Project>
+      <Name>FiddlerPoller</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Implementations\ProcessPoller\ProcessPoller.csproj">
       <Project>{b5f898d5-729e-4f69-ad10-7ed4317dbd65}</Project>
       <Name>ProcessPoller</Name>
