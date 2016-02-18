@@ -4,12 +4,16 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using PollingEngine.Core;
 
 namespace PollingEngine
 {
     class Program
     {
+        private static AutoResetEvent _onStateChanged = new AutoResetEvent(false);
+
+
         static void Main(string[] args)
         {
             // todo: create as winservice
@@ -48,6 +52,13 @@ namespace PollingEngine
             manager.Start();
             Console.WriteLine("Programs started");
 
+            ServiceLoop(manager, contexts);
+            Console.WriteLine("Exiting application...");
+        }
+
+
+        private static void ServiceLoop(ProgramManager manager, List<PollingContext> contexts)
+        {
             string input;
             while (true)
             {
@@ -67,11 +78,11 @@ namespace PollingEngine
                 else
                 {
                     var parts = (input ?? "").Trim().Split(' ');
-                    if (parts.Length >= 3)
+                    if (parts.Length >= 1)
                     {
                         var verb = parts[0];
-                        var subject = parts[1];
-                        var value = parts[2];
+                        var subject = parts.Length > 1 ? parts[1] : null;
+                        var value = parts.Length > 2 ? parts[2] : null;
 
 
                         if (verb == "start")
@@ -82,7 +93,7 @@ namespace PollingEngine
                                 if (ctx != null)
                                     ctx.State = State.Starting;
                                 else
-                                    Console.WriteLine("Context '{0}' not found", value);
+                                    Console.WriteLine("Program '{0}' not found", value);
                             }
                         }
                         else if (verb == "stop")
@@ -90,11 +101,34 @@ namespace PollingEngine
                             if (subject == "program")
                             {
                                 var ctx = contexts.FirstOrDefault(x => x.Program.GetType().Name == value);
-                                if (ctx != null)
-                                    ctx.State = State.Stopping;
-                                else
+                                if (ctx == null)
                                     Console.WriteLine("Context '{0}' not found", value);
+                                else if (ctx.State == State.Running ||
+                                         ctx.State == State.Starting)
+                                {
+                                    ctx.State = State.Stopping;
+                                }
+                                else
+                                    Console.WriteLine("Invalid action, program is already stopped. Current: '{0}'", ctx.State);
                             }
+                            else if (subject == "all")
+                            {
+                                contexts.ForEach(x =>
+                                {
+                                    if (x.State == State.Running ||
+                                        x.State == State.Starting)
+                                    {
+                                        x.State = State.Stopping;
+                                    }
+                                });
+                            }
+                        }
+                        else if (verb == "shutdown")
+                        {
+                            manager.Exit(false);
+
+                            input = verb;
+                            break;
                         }
                         else if (verb == "get")
                         {
@@ -145,12 +179,47 @@ namespace PollingEngine
                 }
             }
 
-            if (input != "exit")
+            if (input == "shutdown")
+            {
+                while (true)
+                {
+                    var allStopped = !contexts.Any() ||
+                                     contexts.All(x => x.State != State.Running &&
+                                                       x.State != State.Starting &&
+                                                       x.State != State.Stopping);
+                    if (allStopped)
+                    {
+                        Console.WriteLine("All programs stopped");
+                        manager.Exit(true);
+
+                        // initiate shutdown counter
+                        string f = "shutdown";
+                        string a = ConfigurationManager.AppSettings.Get("ShutdownArgs") ?? "-s -t 30";
+                        var proc = Process.Start(f, a);
+                        break;
+                    }
+                    _onStateChanged.WaitOne();
+                }
+
+                var exitApp = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("KillSelfOnShutdown") ?? true.ToString());
+                if (!exitApp)
+                {
+                    ServiceLoop(manager, contexts);
+                }
+                else
+                {
+                    //// close self after 5 sec
+                    //Console.WriteLine("Sleeping for 5 seconds");
+                    //Thread.Sleep(TimeSpan.FromSeconds(5));
+                }
+            }
+            else if (input != "exit")
             {
                 Console.WriteLine("Program will exit after [enter]");
                 Console.ReadLine();
             }
         }
+
 
         internal static ProgramManager InitProgramManager(out List<PollingContext> contexts)
         {
@@ -175,6 +244,7 @@ namespace PollingEngine
                 var prog = Activator.CreateInstance(type);
                 var pollingProgram = (IPollingProgram) prog;
                 var pollingContext = new PollingContext(pollingProgram, poller.Interval);
+                pollingContext.OnStateChanged += PollingContext_OnStateChanged;
                 contexts.Add(pollingContext);
             }
             
@@ -186,6 +256,13 @@ namespace PollingEngine
             manager.Load(contexts);
             return manager;
         }
+
+        private static void PollingContext_OnStateChanged(object sender, EventArgs args)
+        {
+            _onStateChanged.Set();
+        }
+
+
 
         private static void CurrentDomain_OnFirstChanceException(object sender, FirstChanceExceptionEventArgs args)
         {

@@ -109,7 +109,7 @@ namespace ProcessLib
         
         protected virtual async Task DoWork()
         {
-            Log("Polling processes");
+            Log("\t::Polling processes::");
             var now = GetNow();
             var processes = _processRetriever.GetProcesses().ToDictionary(x => x.Id, x => x);
 
@@ -203,13 +203,15 @@ namespace ProcessLib
                 catch (Win32Exception ex)
                 {
                     if (ex.Message != "Access is denied")
-                        Log($"Error attaching Process.Exited event, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
+                    {
+                        //Log($"Error attaching Process.Exited event, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
+                    }
                     proc.EnableRaisingEvents = false;
                     _exitedAttached[process.ID] = false;
                 }
                 catch (Exception ex)
                 {
-                    Log($"Error attaching Process.Exited event, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
+                    //Log($"Error attaching Process.Exited event, #{process.ProcessID} {process.ProcessName}. Error: {ex.Message}");
                     proc.EnableRaisingEvents = false;
                     _exitedAttached[process.ID] = false;
                 }
