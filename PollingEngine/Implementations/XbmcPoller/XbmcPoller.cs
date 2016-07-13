@@ -474,6 +474,24 @@ namespace XbmcPoller
         {
             IKodiClient client = null;
             string version = null;
+
+
+
+            if (string.IsNullOrWhiteSpace(version))
+            {
+                try
+                {
+                    client = new Kodi16JarvisClient(Settings);
+                    version = await client.GetVersion();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error getting version using '{client?.GetType()}'");
+                    version = null;
+                }
+            }
+
+
             if (string.IsNullOrWhiteSpace(version))
             {
                 try
@@ -488,7 +506,7 @@ namespace XbmcPoller
                 }
             }
 
-
+            
             if (string.IsNullOrWhiteSpace(version))
             {
                 // Kodi is not running
