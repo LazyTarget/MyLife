@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\IKodiClient.cs" />
     <Compile Include="Models\CrSessionVideo.cs" />
     <Compile Include="Models\VideoItemInfo.cs" />
     <Compile Include="JsonExtensions.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Settings\XbmcPollerSettingsConfigElement.cs" />
     <Compile Include="Settings\XbmcPollerSettings.cs" />
     <Compile Include="Models\WatchSessionInfo.cs" />
+    <Compile Include="Clients\Kodi14HelixClient.cs" />
     <Compile Include="XbmcPoller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -69,6 +71,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

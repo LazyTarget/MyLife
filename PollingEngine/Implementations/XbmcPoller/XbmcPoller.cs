@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PollingEngine.Core;
 
 namespace XbmcPoller
@@ -18,20 +11,27 @@ namespace XbmcPoller
     public class XbmcPoller : IPollingProgram
     {
         private TimeSpan _timeSinceDiff;
-        private HttpClient _client;
         //private readonly Dictionary<DateTime, VideoItemInfo> _data = new Dictionary<DateTime, VideoItemInfo>();
         private WatchSessionInfo _sessionInfo;
         private IXbmcPollerSettings _settings;
+        private IKodiClient _client;
 
         public XbmcPoller()
         {
             _settings = XbmcPollerSettingsConfigElement.LoadFromConfig();
         }
 
+        public XbmcPoller(IXbmcPollerSettings settings)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            _settings = settings;
+        }
+
         public IXbmcPollerSettings Settings
         {
             get { return _settings; }
-            set
+            private set
             {
                 if (value == null)
                     throw new ArgumentNullException("value");
@@ -42,13 +42,7 @@ namespace XbmcPoller
 
         public async Task OnStarting(PollingContext context)
         {
-            var handler = new HttpClientHandler()
-            {
-                Credentials = new NetworkCredential(_settings.ApiUsername, _settings.ApiPassword),
-            };
-            _client = new HttpClient(handler);
-            _client.BaseAddress = new Uri(_settings.ApiBaseUrl);
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            
         }
 
 
@@ -209,7 +203,10 @@ namespace XbmcPoller
             bool pingOk;
             try
             {
-                pingOk = await PingXbmc();
+                //pingOk = await PingXbmc();
+
+                _client = await InitKodiClient();
+                pingOk = _client != null;
             }
             catch (Exception ex)
             {
@@ -276,7 +273,7 @@ namespace XbmcPoller
             VideoItemInfo videoItemInfo = null;
             try
             {
-                videoItemInfo = await GetItemInfo();
+                videoItemInfo = await _client?.GetItemInfo();
             }
             catch (Exception ex)
             {
@@ -456,47 +453,6 @@ namespace XbmcPoller
         }
 
 
-        private async Task CloseSession()
-        {
-            var time = DateTime.UtcNow;
-            if (_sessionInfo == null)
-                return;
-
-            // Close active videos
-            for (var i = 0; i < _sessionInfo.Videos.Count; i++)
-            {
-                var sessionVideo = _sessionInfo.Videos[i];
-                if (sessionVideo == _sessionInfo.ActiveVideo)
-                    continue;
-                if (sessionVideo.Active)
-                    sessionVideo.EndTime = time;        // correct?
-                sessionVideo.Active = false;
-
-                var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
-                if (_settings.MinVideoLength > TimeSpan.Zero &&
-                    duration < _settings.MinVideoLength)
-                {
-                    await DeleteSessionVideo(sessionVideo);
-                    if (_sessionInfo.Videos.Remove(sessionVideo))
-                        i--;
-                }
-                else
-                    await StoreSessionVideo(sessionVideo);        // todo: optimize?
-            }
-
-            // Close session
-            if (_sessionInfo.Active)
-                _sessionInfo.EndTime = time;
-            _sessionInfo.Active = false;
-            if (!_sessionInfo.Videos.Any())
-                await DeleteSessionInfo(_sessionInfo);
-            else
-                await StoreSessionInfo(_sessionInfo);
-            _sessionInfo = null;
-        }
-
-
-
         public async Task OnStopping(PollingContext context)
         {
             await CloseSession();
@@ -514,124 +470,36 @@ namespace XbmcPoller
         }
 
 
-        private async Task<bool> PingXbmc()
+        private async Task<IKodiClient> InitKodiClient()
         {
-            try
+            IKodiClient client = null;
+            string version = null;
+            if (string.IsNullOrWhiteSpace(version))
             {
-                var uri = "";
-                var obj = new Dictionary<string, object>
+                try
                 {
-                    { "jsonrpc", "2.0" },
-                    { "method", "Player.GetActivePlayers" },
-                };
-
-                var json = JsonConvert.SerializeObject(obj);
-                var request = new HttpRequestMessage(HttpMethod.Post, uri);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await _client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-
-                var responseJson = await response.Content.ReadAsStringAsync();
-                var responseData = JsonConvert.DeserializeObject<JObject>(responseJson);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                return false;
-            }
-        }
-
-
-        private async Task<VideoItemInfo> GetItemInfo()
-        {
-            var uri = "";
-            var obj = new Dictionary<string, object>
-            {
-                { "jsonrpc", "2.0" },
-                { "method", "Player.GetItem" },
-                //{ "params", new Dictionary<string, object>
-                //    {
-                //        { "playerid", "1", },
-                //        { "properties", "\"title\",\"season\",\"episode\",\"plot\",\"runtime\",\"showtitle\",\"thumbnail\""},
-                //    }
-                //},
-                { "id", 1}, 
-                { "params", JsonConvert.DeserializeObject<JObject>("{\"playerid\":1,\"properties\":[\"title\",\"season\",\"episode\",\"plot\",\"runtime\",\"showtitle\",\"thumbnail\"]}") },
-            };
-            
-            var json = JsonConvert.SerializeObject(obj);
-            var request = new HttpRequestMessage(HttpMethod.Post, uri);
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var responseJson = await response.Content.ReadAsStringAsync();
-            var responseData = JsonConvert.DeserializeObject<JObject>(responseJson);
-            
-            VideoItemInfo videoItemInfo = null;
-            var error = responseData.SelectTokenOrDefault<JObject>("error");
-            var errorMessage = error.GetPropertyValue<string>("message");
-            if (!string.IsNullOrEmpty(errorMessage))
-            {
-                Console.WriteLine("Error getting item info, error: " + errorMessage);
-            }
-            else
-            {
-                var itemObj = responseData.SelectTokenOrDefault<JObject>("result.item");
-                if (itemObj != null)
+                    client = new Kodi14HelixClient(Settings);
+                    version = await client.GetVersion();
+                }
+                catch (Exception ex)
                 {
-                    videoItemInfo = itemObj.ToObject<VideoItemInfo>();
-                    var runtime = itemObj.GetPropertyValue<int>("runtime");
-                    videoItemInfo.Runtime = TimeSpan.FromSeconds(runtime);
+                    Debug.WriteLine($"Error getting version using '{client?.GetType()}'");
+                    version = null;
                 }
             }
-            return videoItemInfo;
-        }
-        
-        private async Task GetPlaybackInfo()
-        {
-            var uri = "";
-            var obj = new Dictionary<string, object>
-            {
-                { "jsonrpc", "2.0" },
-                { "method", "Player.GetProperties" },
-                { "id", 1}, 
-                { "params", JsonConvert.DeserializeObject<JObject>("{\"playerid\":1,\"properties\":[\"playlistid\",\"speed\",\"position\",\"totaltime\",\"time\"]}") },
-            };
-            
-            var json = JsonConvert.SerializeObject(obj);
-            var request = new HttpRequestMessage(HttpMethod.Post, uri);
-            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
 
-            var responseJson = await response.Content.ReadAsStringAsync();
-            var responseData = JsonConvert.DeserializeObject<JObject>(responseJson);
-            
-            var error = responseData.SelectTokenOrDefault<JObject>("error");
-            var errorMessage = error.GetPropertyValue<string>("message");
-            if (!string.IsNullOrEmpty(errorMessage))
+            if (string.IsNullOrWhiteSpace(version))
             {
-                Console.WriteLine("Error getting payback info, error: " + errorMessage);
+                // Kodi is not running
+                client = null;
             }
-            else
-            {
-                var itemObj = responseData.SelectTokenOrDefault<JObject>("result");
-                if (itemObj != null)
-                {
-                    var speed = itemObj.GetPropertyValue<int>("speed");
-                    var paused = speed == 0;
-                }
-            }
+            return client;
         }
 
 
 
-        public async Task StoreSessionInfo(WatchSessionInfo session)
+        private async Task StoreSessionInfo(WatchSessionInfo session)
         {
             try
             {
@@ -692,7 +560,7 @@ namespace XbmcPoller
             }
         }
 
-        public async Task DeleteSessionVideo(CrSessionVideo sessionVideo)
+        private async Task DeleteSessionVideo(CrSessionVideo sessionVideo)
         {
             try
             {
@@ -721,7 +589,7 @@ namespace XbmcPoller
             }
         }
 
-        public async Task DeleteSessionInfo(WatchSessionInfo session)
+        private async Task DeleteSessionInfo(WatchSessionInfo session)
         {
             try
             {
@@ -760,7 +628,7 @@ namespace XbmcPoller
         }
 
 
-        public async Task<WatchSessionInfo> GetLastSession()
+        private async Task<WatchSessionInfo> GetLastSession()
         {
             try
             {
@@ -833,7 +701,7 @@ namespace XbmcPoller
         }
 
 
-        public async Task<VideoItemInfo> GetVideo(long videoID)
+        private async Task<VideoItemInfo> GetVideo(long videoID)
         {
             try
             {
@@ -883,7 +751,7 @@ namespace XbmcPoller
         }
 
 
-        public async Task StoreSessionVideo(CrSessionVideo sessionVideo)
+        private async Task StoreSessionVideo(CrSessionVideo sessionVideo)
         {
             try
             {
@@ -998,7 +866,47 @@ namespace XbmcPoller
 
 
 
-        public async Task CloseActiveVideos()
+        private async Task CloseSession()
+        {
+            var time = DateTime.UtcNow;
+            if (_sessionInfo == null)
+                return;
+
+            // Close active videos
+            for (var i = 0; i < _sessionInfo.Videos.Count; i++)
+            {
+                var sessionVideo = _sessionInfo.Videos[i];
+                if (sessionVideo == _sessionInfo.ActiveVideo)
+                    continue;
+                if (sessionVideo.Active)
+                    sessionVideo.EndTime = time;        // correct?
+                sessionVideo.Active = false;
+
+                var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
+                if (_settings.MinVideoLength > TimeSpan.Zero &&
+                    duration < _settings.MinVideoLength)
+                {
+                    await DeleteSessionVideo(sessionVideo);
+                    if (_sessionInfo.Videos.Remove(sessionVideo))
+                        i--;
+                }
+                else
+                    await StoreSessionVideo(sessionVideo);        // todo: optimize?
+            }
+
+            // Close session
+            if (_sessionInfo.Active)
+                _sessionInfo.EndTime = time;
+            _sessionInfo.Active = false;
+            if (!_sessionInfo.Videos.Any())
+                await DeleteSessionInfo(_sessionInfo);
+            else
+                await StoreSessionInfo(_sessionInfo);
+            _sessionInfo = null;
+        }
+        
+
+        private async Task CloseActiveVideos()
         {
             try
             {
@@ -1028,7 +936,7 @@ namespace XbmcPoller
         }
 
 
-        public async Task CloseActiveSessions()
+        private async Task CloseActiveSessions()
         {
             try
             {
