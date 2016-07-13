@@ -15,6 +15,8 @@ namespace XbmcPoller
         TimeSpan MinVideoLength { get; }
 
         TimeSpan MergeSessionPeriod { get; }
-        
+
+        bool CloseSessionOnStop { get; }
+
     }
 }

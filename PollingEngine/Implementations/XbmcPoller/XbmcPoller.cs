@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
@@ -260,9 +261,18 @@ namespace XbmcPoller
                 // Xbmc has been closed
                 if (_sessionInfo != null)
                 {
-                    await CloseSession();
+                    await CloseSession(_sessionInfo, updateEndTime: true);
+                    _sessionInfo = null;
 
                     Console.WriteLine("Kodi session closed");
+                }
+                else
+                {
+                    var lastSession = await GetLastSession();
+                    if (lastSession != null)
+                    {
+                        await CloseSession(lastSession, updateEndTime: false);
+                    }
                 }
                 return;
             }
@@ -455,7 +465,19 @@ namespace XbmcPoller
 
         public async Task OnStopping(PollingContext context)
         {
-            await CloseSession();
+            var sessionInfo = _sessionInfo;
+            if (sessionInfo != null)
+            {
+                //  Might be incorrect to Close, as one could continue watching either way, 
+                //    and if the session doesn't meet the minimum margin then that view history is purged
+                //  Correct to close, as it is better to asume that the person isn't watching anymore than telling he is still watching
+
+                if (Settings.CloseSessionOnStop)
+                {
+                    await CloseSession(sessionInfo, updateEndTime: true);
+                    _sessionInfo = null;
+                }
+            }
 
             // move to timed purge?
             await CloseActiveVideos();
@@ -678,9 +700,11 @@ namespace XbmcPoller
                                     sessionVideo.StartTime = record2.GetDateTime(cStartTime2);
                                     sessionVideo.EndTime = record2.GetDateTime(cEndTime2);
                                     sessionVideo.ID = record2.GetInt64(cCrSessionVideoID);
-                                    session.Videos.Add(sessionVideo);
-                                    session.ActiveVideo = sessionVideo;
                                     sessionVideo.Video = await GetVideo(sessionVideo.ViewedVideoID);
+
+                                    session.ActiveVideo = sessionVideo;
+                                    session.Videos = session.Videos ?? new List<CrSessionVideo>();
+                                    session.Videos.Add(sessionVideo);
                                 }
                             }
                         }
@@ -866,43 +890,47 @@ namespace XbmcPoller
 
 
 
-        private async Task CloseSession()
+        private async Task CloseSession(WatchSessionInfo sessionInfo, bool updateEndTime)
         {
             var time = DateTime.UtcNow;
-            if (_sessionInfo == null)
+            if (sessionInfo == null)
                 return;
 
             // Close active videos
-            for (var i = 0; i < _sessionInfo.Videos.Count; i++)
+            if (sessionInfo.Videos != null)
             {
-                var sessionVideo = _sessionInfo.Videos[i];
-                if (sessionVideo == _sessionInfo.ActiveVideo)
-                    continue;
-                if (sessionVideo.Active)
-                    sessionVideo.EndTime = time;        // correct?
-                sessionVideo.Active = false;
-
-                var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
-                if (_settings.MinVideoLength > TimeSpan.Zero &&
-                    duration < _settings.MinVideoLength)
+                for (var i = 0; i < sessionInfo.Videos.Count; i++)
                 {
-                    await DeleteSessionVideo(sessionVideo);
-                    if (_sessionInfo.Videos.Remove(sessionVideo))
-                        i--;
+                    var sessionVideo = sessionInfo.Videos[i];
+                    if (sessionVideo == null)
+                        continue;
+                    if (sessionVideo == sessionInfo.ActiveVideo)
+                        continue;
+                    if (sessionVideo.Active && updateEndTime)
+                        sessionVideo.EndTime = time;        // correct?
+                    sessionVideo.Active = false;
+
+                    var duration = sessionVideo.EndTime.Subtract(sessionVideo.StartTime);
+                    if (_settings.MinVideoLength > TimeSpan.Zero &&
+                        duration < _settings.MinVideoLength)
+                    {
+                        await DeleteSessionVideo(sessionVideo);
+                        if (sessionInfo.Videos.Remove(sessionVideo))
+                            i--;
+                    }
+                    else
+                        await StoreSessionVideo(sessionVideo);        // todo: optimize?
                 }
-                else
-                    await StoreSessionVideo(sessionVideo);        // todo: optimize?
             }
 
             // Close session
-            if (_sessionInfo.Active)
-                _sessionInfo.EndTime = time;
-            _sessionInfo.Active = false;
-            if (!_sessionInfo.Videos.Any())
-                await DeleteSessionInfo(_sessionInfo);
+            if (sessionInfo.Active && updateEndTime)
+                sessionInfo.EndTime = time;
+            sessionInfo.Active = false;
+            if (sessionInfo.Videos != null && !sessionInfo.Videos.Any())
+                await DeleteSessionInfo(sessionInfo);
             else
-                await StoreSessionInfo(_sessionInfo);
-            _sessionInfo = null;
+                await StoreSessionInfo(sessionInfo);
         }
         
 

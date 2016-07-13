@@ -56,5 +56,12 @@ namespace XbmcPoller
             get { return (TimeSpan)this["MergeSessionPeriod"]; }
             set { this["MergeSessionPeriod"] = value; }
         }
+
+        [ConfigurationProperty("CloseSessionOnStop", DefaultValue = true)]
+        public bool CloseSessionOnStop
+        {
+            get { return (bool)this["CloseSessionOnStop"]; }
+            set { this["CloseSessionOnStop"] = value; }
+        }
     }
 }
