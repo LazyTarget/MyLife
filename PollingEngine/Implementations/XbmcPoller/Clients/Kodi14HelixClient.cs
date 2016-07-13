@@ -32,8 +32,9 @@ namespace XbmcPoller
             {
                 Credentials = new NetworkCredential(_settings.ApiUsername, _settings.ApiPassword),
             };
+            var uri = new Uri(_settings.ApiBaseUrl);
             _client = new HttpClient(handler);
-            _client.BaseAddress = new Uri(_settings.ApiBaseUrl);
+            _client.BaseAddress = uri;
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
         
@@ -128,7 +129,7 @@ namespace XbmcPoller
             var responseJson = await response.Content.ReadAsStringAsync();
             var responseData = JsonConvert.DeserializeObject<JObject>(responseJson);
             
-            VideoItemInfo videoItemInfo = null;
+            VideoItemInfo result = null;
             var error = responseData.SelectTokenOrDefault<JObject>("error");
             var errorMessage = error.GetPropertyValue<string>("message");
             if (!string.IsNullOrEmpty(errorMessage))
@@ -140,12 +141,23 @@ namespace XbmcPoller
                 var itemObj = responseData.SelectTokenOrDefault<JObject>("result.item");
                 if (itemObj != null)
                 {
-                    videoItemInfo = itemObj.ToObject<VideoItemInfo>();
+                    var videoItemInfo =
+                        result = itemObj.ToObject<VideoItemInfo>();
                     var runtime = itemObj.GetPropertyValue<int>("runtime");
                     videoItemInfo.Runtime = TimeSpan.FromSeconds(runtime);
+
+                    if (videoItemInfo.Type == "unknown")
+                    {
+                        //result = null;
+                    }
+                    if (string.IsNullOrWhiteSpace(videoItemInfo.Label) &&
+                        string.IsNullOrWhiteSpace(videoItemInfo.Title))
+                    {
+                        result = null;
+                    }
                 }
             }
-            return videoItemInfo;
+            return result;
         }
 
         
